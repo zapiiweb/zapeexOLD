@@ -12,6 +12,11 @@ class WhatsappAccount extends Model
 
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'baileys_connected' => 'boolean',
+        'baileys_connected_at' => 'datetime',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);

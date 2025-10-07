@@ -104,6 +104,12 @@ Route::middleware('auth')->name('user.')->group(function () {
                 Route::get('connect/{id}', 'whatsappAccountConnect')->name('connect');
                 Route::get('setting/{id}', 'whatsappAccountSetting')->name('setting');
                 Route::post('setting/{id}', 'whatsappAccountSettingConfirm')->name('setting.confirm');
+
+                // Baileys routes
+                Route::post('baileys/start/{id}', 'baileysStartSession')->name('baileys.start');
+                Route::get('baileys/qr/{id}', 'baileysGetQR')->name('baileys.qr');
+                Route::get('baileys/status/{id}', 'baileysCheckStatus')->name('baileys.status');
+                Route::post('baileys/disconnect/{id}', 'baileysDisconnect')->name('baileys.disconnect');
             });
 
             // Whatsapp
