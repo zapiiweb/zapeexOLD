@@ -8,6 +8,7 @@ class VerifyCsrfToken extends Middleware
 {
     protected $except = [
         'webhook',
+        'webhook/*',
         'pusher/auth/*'
     ];
 }
