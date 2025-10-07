@@ -59,6 +59,17 @@ Preferred communication style: Simple, everyday language.
   - SendGrid API integration
   - Mailjet API integration
 
+### WhatsApp Messaging Integration
+- **Meta WhatsApp Business API**: Official API for business messaging with templates, media, and webhooks
+- **Baileys (@whiskeysockets/baileys)**: Direct WhatsApp Web connection for automated QR code authentication
+  - Runs as separate Node.js service on port 3001
+  - REST API for session management, QR generation, and message sending
+  - Webhook system for receiving incoming messages
+  - Automatic session persistence with multi-file auth state
+  - Supports text, images, documents, and video messages
+- **Automatic Switching**: System automatically selects Baileys when QR connected, falls back to Meta API otherwise
+- **Unified Message Flow**: Both integrations use the same database schema and message processing logic
+
 ### File Processing & Generation
 - **Intervention Image**: Image manipulation and processing
 - **PhpSpreadsheet**: Excel/CSV file generation and parsing
