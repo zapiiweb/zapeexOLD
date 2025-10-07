@@ -5,6 +5,7 @@ const { useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion } = r
 const P = require('pino');
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios');
 
 const app = express();
 app.use(cors());
@@ -12,10 +13,12 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
 const AUTH_DIR = path.join(__dirname, 'auth_sessions');
+const WEBHOOK_URL = process.env.WEBHOOK_URL || null;
 
 // Store active sessions
 const sessions = new Map();
 const qrCodes = new Map();
+const sessionWebhooks = new Map();
 
 // Create auth directory if it doesn't exist
 if (!fs.existsSync(AUTH_DIR)) {
@@ -80,6 +83,55 @@ async function createSession(sessionId) {
             }
         });
 
+        // Handle incoming messages
+        sock.ev.on('messages.upsert', async ({ messages, type }) => {
+            if (type !== 'notify') return;
+
+            for (const msg of messages) {
+                if (!msg.message || msg.key.fromMe) continue;
+
+                const webhookUrl = sessionWebhooks.get(sessionId);
+                if (!webhookUrl) continue;
+
+                try {
+                    const messageData = {
+                        sessionId,
+                        messageId: msg.key.id,
+                        from: msg.key.remoteJid.replace('@s.whatsapp.net', ''),
+                        timestamp: msg.messageTimestamp,
+                        message: msg.message.conversation || 
+                                msg.message.extendedTextMessage?.text || 
+                                '',
+                        messageType: 'text',
+                        pushName: msg.pushName || ''
+                    };
+
+                    // Handle media messages
+                    if (msg.message.imageMessage) {
+                        messageData.messageType = 'image';
+                        messageData.caption = msg.message.imageMessage.caption || '';
+                        messageData.mimetype = msg.message.imageMessage.mimetype;
+                    } else if (msg.message.documentMessage) {
+                        messageData.messageType = 'document';
+                        messageData.caption = msg.message.documentMessage.caption || '';
+                        messageData.fileName = msg.message.documentMessage.fileName;
+                        messageData.mimetype = msg.message.documentMessage.mimetype;
+                    } else if (msg.message.videoMessage) {
+                        messageData.messageType = 'video';
+                        messageData.caption = msg.message.videoMessage.caption || '';
+                        messageData.mimetype = msg.message.videoMessage.mimetype;
+                    }
+
+                    await axios.post(webhookUrl, messageData).catch(err => {
+                        console.error(`Webhook error for session ${sessionId}:`, err.message);
+                    });
+
+                } catch (error) {
+                    console.error(`Error processing message for session ${sessionId}:`, error);
+                }
+            }
+        });
+
         sessions.set(sessionId, sock);
         return { success: true, message: 'Session created successfully' };
 
@@ -132,7 +184,7 @@ async function deleteSession(sessionId) {
 /**
  * Send message
  */
-async function sendMessage(sessionId, to, message) {
+async function sendMessage(sessionId, to, message, options = {}) {
     const sock = sessions.get(sessionId);
     
     if (!sock || !sock.user) {
@@ -145,8 +197,42 @@ async function sendMessage(sessionId, to, message) {
         jid = `${to}@s.whatsapp.net`;
     }
 
-    await sock.sendMessage(jid, { text: message });
-    return { success: true, message: 'Message sent' };
+    let content = { text: message };
+    
+    // Handle media
+    if (options.mediaType && options.mediaUrl) {
+        const { downloadMediaMessage } = require('@whiskeysockets/baileys');
+        
+        switch(options.mediaType) {
+            case 'image':
+                content = {
+                    image: { url: options.mediaUrl },
+                    caption: message || options.caption || ''
+                };
+                break;
+            case 'document':
+                content = {
+                    document: { url: options.mediaUrl },
+                    mimetype: options.mimeType || 'application/pdf',
+                    fileName: options.fileName || 'document.pdf',
+                    caption: message || options.caption || ''
+                };
+                break;
+            case 'video':
+                content = {
+                    video: { url: options.mediaUrl },
+                    caption: message || options.caption || ''
+                };
+                break;
+        }
+    }
+
+    const result = await sock.sendMessage(jid, content);
+    return { 
+        success: true, 
+        message: 'Message sent',
+        messageId: result.key.id
+    };
 }
 
 // API Routes
@@ -201,18 +287,43 @@ app.delete('/session/:sessionId', async (req, res) => {
  * POST /message/send - Send message
  */
 app.post('/message/send', async (req, res) => {
-    const { sessionId, to, message } = req.body;
+    const { sessionId, to, message, mediaType, mediaUrl, mimeType, fileName, caption } = req.body;
     
-    if (!sessionId || !to || !message) {
-        return res.status(400).json({ error: 'sessionId, to, and message are required' });
+    if (!sessionId || !to) {
+        return res.status(400).json({ error: 'sessionId and to are required' });
+    }
+
+    if (!message && !mediaType) {
+        return res.status(400).json({ error: 'Either message or mediaType is required' });
     }
 
     try {
-        const result = await sendMessage(sessionId, to, message);
+        const options = {
+            mediaType,
+            mediaUrl,
+            mimeType,
+            fileName,
+            caption
+        };
+        const result = await sendMessage(sessionId, to, message, options);
         res.json(result);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
+});
+
+/**
+ * POST /webhook/set - Set webhook URL for session
+ */
+app.post('/webhook/set', (req, res) => {
+    const { sessionId, webhookUrl } = req.body;
+    
+    if (!sessionId || !webhookUrl) {
+        return res.status(400).json({ error: 'sessionId and webhookUrl are required' });
+    }
+
+    sessionWebhooks.set(sessionId, webhookUrl);
+    res.json({ success: true, message: 'Webhook URL set successfully' });
 });
 
 /**
