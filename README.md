@@ -12,8 +12,7 @@ All server requirements are stated bellow
 The following server requirements outline the essential specifications for setting up and running the system efficiently. Meeting these requirements will ensure smooth operation, enhance performance, and support seamless functionality across all features. Please verify your server configuration aligns with these standards prior to installation.
 
 
-PHP Version 8.3 or 8.3+
-MySQL Version 8.0+ or MariaDB version 10.6+
+PHP Version 8.4 or 8.4+
 BCMath PHP Extension
 Ctype PHP Extension
 cURL PHP Extension
