@@ -140,20 +140,33 @@ class BaileysService
     /**
      * Send message
      */
-    public function sendMessage(string $sessionId, string $to, string $message): array
+    public function sendMessage(string $sessionId, string $to, string $message, array $options = []): array
     {
         try {
+            $payload = [
+                'sessionId' => $sessionId,
+                'to' => $to,
+                'message' => $message,
+            ];
+
+            // Add media options if present
+            if (isset($options['mediaType'])) {
+                $payload['mediaType'] = $options['mediaType'];
+                $payload['mediaUrl'] = $options['mediaUrl'] ?? null;
+                $payload['mimeType'] = $options['mimeType'] ?? null;
+                $payload['fileName'] = $options['fileName'] ?? null;
+                $payload['caption'] = $options['caption'] ?? null;
+            }
+
             $response = Http::timeout($this->timeout)
-                ->post("{$this->baseUrl}/message/send", [
-                    'sessionId' => $sessionId,
-                    'to' => $to,
-                    'message' => $message,
-                ]);
+                ->post("{$this->baseUrl}/message/send", $payload);
 
             if ($response->successful()) {
+                $data = $response->json();
                 return [
                     'success' => true,
                     'message' => 'Message sent successfully',
+                    'messageId' => $data['messageId'] ?? null,
                 ];
             }
 
@@ -166,6 +179,38 @@ class BaileysService
             return [
                 'success' => false,
                 'message' => 'Failed to send message: ' . $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * Set webhook URL for session
+     */
+    public function setWebhook(string $sessionId, string $webhookUrl): array
+    {
+        try {
+            $response = Http::timeout($this->timeout)
+                ->post("{$this->baseUrl}/webhook/set", [
+                    'sessionId' => $sessionId,
+                    'webhookUrl' => $webhookUrl,
+                ]);
+
+            if ($response->successful()) {
+                return [
+                    'success' => true,
+                    'message' => 'Webhook configured successfully',
+                ];
+            }
+
+            return [
+                'success' => false,
+                'message' => 'Failed to set webhook',
+            ];
+        } catch (\Exception $e) {
+            Log::error('Baileys setWebhook error: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Failed to set webhook: ' . $e->getMessage(),
             ];
         }
     }
