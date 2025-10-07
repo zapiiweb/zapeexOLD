@@ -4,6 +4,7 @@ namespace App\Lib\WhatsApp;
 
 use App\Constants\Status;
 use App\Lib\CurlRequest;
+use App\Services\BaileysService;
 use Exception;
 use Illuminate\Support\Facades\Http;
 
@@ -12,6 +13,11 @@ class WhatsAppLib
 
     public function messageSend($request, $toNumber, $whatsappAccount)
     {
+        // Check if Baileys is connected and use it instead of Meta API
+        if ($whatsappAccount->baileys_connected && $whatsappAccount->baileys_session_id) {
+            return $this->messageSendViaBaileys($request, $toNumber, $whatsappAccount);
+        }
+
         $phoneNumberId    = $whatsappAccount->phone_number_id;
         $accessToken      = $whatsappAccount->access_token;
 
@@ -333,6 +339,96 @@ class WhatsAppLib
         } catch (Exception $ex) {
             throw new Exception($ex->getMessage());
         }
+    }
+
+    /**
+     * Send message via Baileys
+     */
+    private function messageSendViaBaileys($request, $toNumber, $whatsappAccount)
+    {
+        $baileysService = new BaileysService();
+        
+        $message = $request->message ?? '';
+        $options = [];
+        
+        // Handle media uploads
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $mediaPath = $this->storeMediaFile($file, $whatsappAccount->user_id);
+            $mediaUrl = asset('assets/images/conversation/' . $mediaPath);
+            
+            $options['mediaType'] = 'image';
+            $options['mediaUrl'] = $mediaUrl;
+            $options['caption'] = $message;
+            $options['mimeType'] = $file->getMimeType();
+        } elseif ($request->hasFile('document')) {
+            $file = $request->file('document');
+            $mediaPath = $this->storeMediaFile($file, $whatsappAccount->user_id);
+            $mediaUrl = asset('assets/images/conversation/' . $mediaPath);
+            
+            $options['mediaType'] = 'document';
+            $options['mediaUrl'] = $mediaUrl;
+            $options['caption'] = $message;
+            $options['mimeType'] = $file->getMimeType();
+            $options['fileName'] = $file->getClientOriginalName();
+        } elseif ($request->hasFile('video')) {
+            $file = $request->file('video');
+            $mediaPath = $this->storeMediaFile($file, $whatsappAccount->user_id);
+            $mediaUrl = asset('assets/images/conversation/' . $mediaPath);
+            
+            $options['mediaType'] = 'video';
+            $options['mediaUrl'] = $mediaUrl;
+            $options['caption'] = $message;
+            $options['mimeType'] = $file->getMimeType();
+        }
+        
+        // Send message via Baileys
+        $result = $baileysService->sendMessage(
+            $whatsappAccount->baileys_session_id,
+            $toNumber,
+            $message,
+            $options
+        );
+        
+        if (!$result['success']) {
+            throw new Exception($result['message']);
+        }
+        
+        // Return format compatible with Meta API response
+        return [
+            'whatsAppMessage' => [[
+                'id' => $result['messageId'] ?? 'baileys_' . time(),
+            ]],
+            'mediaId'         => null,
+            'mediaUrl'        => $options['mediaUrl'] ?? null,
+            'mediaPath'       => $mediaPath ?? null,
+            'mediaCaption'    => $options['caption'] ?? null,
+            'mediaFileName'   => $options['fileName'] ?? null,
+            'messageType'     => $options['mediaType'] ?? 'text',
+            'mimeType'        => $options['mimeType'] ?? null,
+            'mediaType'       => $options['mediaType'] ?? null
+        ];
+    }
+    
+    /**
+     * Store media file locally
+     */
+    private function storeMediaFile($file, $userId)
+    {
+        $fileExtension = $file->getClientOriginalExtension();
+        $fileName = uniqid() . '.' . $fileExtension;
+        
+        $parentFolder = getFilePath('conversation');
+        $subFolder = "{$userId}/" . date('Y/m/d');
+        $folderPath = $parentFolder . "/" . $subFolder;
+        
+        if (!file_exists($folderPath)) {
+            mkdir($folderPath, 0755, true);
+        }
+        
+        $file->move($folderPath, $fileName);
+        
+        return $subFolder . "/" . $fileName;
     }
 
     public function  submitTemplate($businessAccountId, $accessToken, $templateData = [])

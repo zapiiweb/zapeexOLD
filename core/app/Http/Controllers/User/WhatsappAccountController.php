@@ -56,6 +56,10 @@ class WhatsappAccountController extends Controller
             return apiResponse('error', 'error', [$result['message']]);
         }
 
+        // Configure webhook
+        $webhookUrl = route('webhook.baileys');
+        $this->baileysService->setWebhook($whatsappAccount->baileys_session_id, $webhookUrl);
+
         return apiResponse('success', 'success', ['Session started successfully']);
     }
 

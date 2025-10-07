@@ -23,6 +23,7 @@ Route::controller('TicketController')->prefix('ticket')->name('ticket.')->group(
 Route::controller('WebhookController')->group(function () {
     Route::get('/webhook', 'webhookConnect')->name('webhook');
     Route::post('/webhook', 'webhookResponse');
+    Route::post('/webhook/baileys', 'baileysWebhook')->name('webhook.baileys');
 });
 
 Route::controller('SiteController')->group(function () {

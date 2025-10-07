@@ -271,4 +271,130 @@ class WebhookController extends Controller
 
         return $conversation;
     }
+
+    /**
+     * Handle Baileys webhook for incoming messages
+     */
+    public function baileysWebhook(Request $request)
+    {
+        try {
+            $sessionId = $request->input('sessionId');
+            $messageId = $request->input('messageId');
+            $from = $request->input('from');
+            $messageText = $request->input('message');
+            $messageType = $request->input('messageType', 'text');
+            $pushName = $request->input('pushName');
+            $caption = $request->input('caption');
+            $fileName = $request->input('fileName');
+            $mimetype = $request->input('mimetype');
+
+            // Find WhatsApp account by session ID
+            $whatsappAccount = WhatsappAccount::where('baileys_session_id', $sessionId)->first();
+
+            if (!$whatsappAccount) {
+                return response()->json(['error' => 'Account not found'], 404);
+            }
+
+            $user = User::active()->find($whatsappAccount->user_id);
+
+            if (!$user) {
+                return response()->json(['error' => 'User not found'], 404);
+            }
+
+            // Parse phone number using libphonenumber (same as Meta webhook)
+            $phoneUtil = PhoneNumberUtil::getInstance();
+            $parseNumber = $phoneUtil->parse('+' . $from, '');
+            $countryCode = $parseNumber->getCountryCode();
+            $nationalNumber = $parseNumber->getNationalNumber();
+            $newContact = false;
+
+            // Find or create contact with correct schema
+            $contact = Contact::where('mobile_code', $countryCode)
+                ->where('mobile', $nationalNumber)
+                ->where('user_id', $user->id)
+                ->with('conversation')
+                ->first();
+
+            if (!$contact) {
+                $newContact = true;
+                $contact = new Contact();
+                $contact->firstname = $pushName ?? $from;
+                $contact->mobile_code = $countryCode;
+                $contact->mobile = $nationalNumber;
+                $contact->user_id = $user->id;
+                $contact->save();
+            }
+
+            // Find or create conversation
+            $conversation = Conversation::where('contact_id', $contact->id)
+                ->where('user_id', $user->id)
+                ->where('whatsapp_account_id', $whatsappAccount->id)
+                ->first();
+
+            if (!$conversation) {
+                $newContact = true;
+                $conversation = $this->createConversation($contact, $whatsappAccount);
+            }
+
+            // Check if message already exists
+            $messageExists = Message::where('whatsapp_message_id', $messageId)->exists();
+
+            if (!$messageExists) {
+                // Store message
+                $message = new Message();
+                $message->user_id = $user->id;
+                $message->whatsapp_account_id = $whatsappAccount->id;
+                $message->whatsapp_message_id = $messageId;
+                $message->conversation_id = $conversation->id;
+                $message->type = Status::MESSAGE_RECEIVED;
+                $message->message = $messageType === 'text' ? $messageText : ($caption ?? '');
+                $message->message_type = $this->getIntMessageType($messageType);
+                $message->media_caption = $caption;
+                $message->media_filename = $fileName;
+                $message->mime_type = $mimetype;
+                $message->media_type = $messageType !== 'text' ? $messageType : null;
+                $message->ordering = Carbon::now();
+                $message->save();
+
+                // Update conversation
+                $conversation->last_message_at = Carbon::now();
+                $conversation->save();
+
+                // Render views for broadcast
+                $html = view('Template::user.inbox.single_message', compact('message'))->render();
+                $lastConversationMessageHtml = view("Template::user.inbox.conversation_last_message", compact('message'))->render();
+
+                // Broadcast event
+                event(new ReceiveMessage($whatsappAccount->id, [
+                    'html' => $html,
+                    'message' => $message,
+                    'newMessage' => true,
+                    'newContact' => $newContact,
+                    'lastMessageHtml' => $lastConversationMessageHtml,
+                    'unseenMessage' => $conversation->unseenMessages()->count() < 10 ? $conversation->unseenMessages()->count() : '9+',
+                    'lastMessageAt' => showDateTime(Carbon::now()),
+                    'conversationId' => $conversation->id,
+                    'mediaPath' => getFilePath('conversation')
+                ]));
+            }
+
+            // Handle chatbot response
+            $this->chatbotResponse($whatsappAccount, $user, $contact, $conversation, $messageText);
+
+            // Handle welcome message for first message
+            $messagesInConversation = Message::where('conversation_id', $conversation->id)
+                ->where('type', Status::MESSAGE_RECEIVED)
+                ->count();
+
+            if ($messagesInConversation == 1) {
+                $this->sendWelcomeMessage($whatsappAccount, $user, $contact, $conversation);
+            }
+
+            return response()->json(['success' => true]);
+
+        } catch (Exception $e) {
+            \Log::error('Baileys webhook error: ' . $e->getMessage());
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 }
