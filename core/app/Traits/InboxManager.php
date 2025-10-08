@@ -286,7 +286,15 @@ trait InboxManager
                 return apiResponse("not_found", "error", ["The whatsapp account is not found"]);
             }
 
+            \Log::info('INBOX: Sending message', [
+                'conversation_id' => $conversation->id,
+                'mobile' => $conversation->contact->mobileNumber,
+                'has_file' => $request->hasFile('document') || $request->hasFile('image') || $request->hasFile('video')
+            ]);
+
             $messageSend = (new WhatsAppLib())->messageSend($request, $conversation->contact->mobileNumber, $whatsappAccount);
+
+            \Log::info('INBOX: Message sent response', ['messageSend' => $messageSend]);
 
             extract($messageSend);
 
@@ -307,7 +315,20 @@ trait InboxManager
             $message->media_type          = $mediaType;
             $message->status              = Status::MESSAGE_SENT;
             $message->ordering            = Carbon::now();
+            
+            \Log::info('INBOX: Saving message to database', [
+                'message_data' => [
+                    'user_id' => $message->user_id,
+                    'conversation_id' => $message->conversation_id,
+                    'whatsapp_message_id' => $message->whatsapp_message_id,
+                    'media_filename' => $message->media_filename,
+                    'media_path' => $message->media_path
+                ]
+            ]);
+            
             $message->save();
+            
+            \Log::info('INBOX: Message saved successfully', ['message_id' => $message->id]);
 
             $conversation->last_message_at = Carbon::now();
             $conversation->save();
@@ -326,6 +347,12 @@ trait InboxManager
                 'message' => $message
             ]);
         } catch (Exception $ex) {
+            \Log::error('INBOX: Exception occurred in sendMessage', [
+                'message' => $ex->getMessage(),
+                'file' => $ex->getFile(),
+                'line' => $ex->getLine(),
+                'trace' => $ex->getTraceAsString()
+            ]);
             $notify[] =  $ex->getMessage() ?? "Something went to wrong";
             return apiResponse("exception", "error", $notify);
         }

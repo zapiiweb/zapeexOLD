@@ -387,6 +387,12 @@ class WhatsAppLib
         }
         
         // Send message via Baileys
+        \Log::info('BAILEYS REQUEST', [
+            'session' => $whatsappAccount->baileys_session_id,
+            'to' => $toNumber,
+            'options' => $options
+        ]);
+        
         $result = $baileysService->sendMessage(
             $whatsappAccount->baileys_session_id,
             $toNumber,
@@ -394,7 +400,10 @@ class WhatsAppLib
             $options
         );
         
+        \Log::info('BAILEYS RESPONSE', ['result' => $result]);
+        
         if (!$result['success']) {
+            \Log::error('BAILEYS SEND FAILED', ['error' => $result['message']]);
             throw new Exception($result['message']);
         }
         
