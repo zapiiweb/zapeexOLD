@@ -201,7 +201,7 @@ class WhatsAppLib
 
     public function uploadMedia($mediaUrl, $file, $accessToken)
     {
-        $filePath = $file->getRealPath();
+        $filePath = $file->getPathname();
         $fileName = $file->getClientOriginalName();
 
         $postData = [
