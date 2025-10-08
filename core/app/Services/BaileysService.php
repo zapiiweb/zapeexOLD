@@ -158,7 +158,10 @@ class BaileysService
                 $payload['caption'] = $options['caption'] ?? null;
             }
 
-            $response = Http::timeout($this->timeout)
+            // Use longer timeout for media messages (download + upload takes time)
+            $timeout = isset($options['mediaType']) ? 120 : $this->timeout;
+            
+            $response = Http::timeout($timeout)
                 ->post("{$this->baseUrl}/message/send", $payload);
 
             if ($response->successful()) {

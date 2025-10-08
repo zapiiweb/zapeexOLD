@@ -47,6 +47,7 @@
                     data: formData,
                     processData: false,
                     contentType: false,
+                    timeout: 120000,
                     beforeSend: function() {
                         $submitBtn.attr('disabled', true).addClass('disabled');
                         $submitBtn.html(
@@ -67,6 +68,13 @@
                             clearImagePreview();
                         } else {
                             notify('error', response.message || "@lang('Something went to wrong')");
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        if (status === 'timeout') {
+                            notify('error', "@lang('Request timeout. The file may still be sent, please check WhatsApp.')");
+                        } else {
+                            notify('error', "@lang('Failed to send message. Please try again.')");
                         }
                     },
                     complete: function() {
