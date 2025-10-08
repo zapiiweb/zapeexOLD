@@ -201,8 +201,16 @@ class WhatsAppLib
 
     public function uploadMedia($mediaUrl, $file, $accessToken)
     {
-        $filePath = $file->getPathname();
         $fileName = $file->getClientOriginalName();
+        
+        // Create a temporary copy of the file to ensure it's available during upload
+        $tempDir = sys_get_temp_dir();
+        $tempFilePath = $tempDir . '/' . uniqid('whatsapp_upload_') . '_' . $fileName;
+        
+        // Copy uploaded file to temporary location
+        if (!copy($file->getPathname(), $tempFilePath)) {
+            throw new Exception("Failed to prepare file for upload");
+        }
 
         $postData = [
             'messaging_product' => 'whatsapp',
@@ -212,29 +220,36 @@ class WhatsAppLib
             "Authorization: Bearer {$accessToken}",
         ];
 
-        $response = CurlRequest::curlFileUpload(
-            $mediaUrl,
-            $postData,
-            'file',
-            $filePath,
-            $fileName,
-            $headers
-        );
+        try {
+            $response = CurlRequest::curlFileUpload(
+                $mediaUrl,
+                $postData,
+                'file',
+                $tempFilePath,
+                $fileName,
+                $headers
+            );
 
-        $data = json_decode($response, true);
+            $data = json_decode($response, true);
 
-        if (!is_array($data) || isset($data['error']) || !isset($data['id'])) {
-            $errorMessage = "Failed to upload media";
-            if (isset($data['error']['error_user_msg'])) {
-                $errorMessage = $data['error']['error_user_msg'];
+            if (!is_array($data) || isset($data['error']) || !isset($data['id'])) {
+                $errorMessage = "Failed to upload media";
+                if (isset($data['error']['error_user_msg'])) {
+                    $errorMessage = $data['error']['error_user_msg'];
+                }
+                if (isset($data['error']['message'])) {
+                    $errorMessage = $data['error']['message'];
+                }
+                throw new Exception($errorMessage);
             }
-            if ($data['error']['message']) {
-                $errorMessage = $data['error']['message'];
+
+            return $data;
+        } finally {
+            // Clean up temporary file
+            if (file_exists($tempFilePath)) {
+                @unlink($tempFilePath);
             }
-            throw new Exception($errorMessage);
         }
-
-        return $data;
     }
 
     function getSessionId($appId, array $fileData, $accessToken)
