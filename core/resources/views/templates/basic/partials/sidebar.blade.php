@@ -3,6 +3,9 @@
         <span class="sidebar-menu__close d-lg-none d-block">
             <i class="fas fa-times"></i>
         </span>
+        <a href="javascript:void(0)" class="sidebar-collapse-btn d-none d-lg-flex" title="Colapsar Menu">
+            <i class="fas fa-chevron-left"></i>
+        </a>
         <div class="sidebar-logo">
             <a href="{{ route('user.home') }}" class="sidebar-logo__link">
                 <img src="{{ siteLogo('dark') }}" alt="logo">
