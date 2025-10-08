@@ -67,6 +67,8 @@
                             'docx' => 'document_doc_preview.png',
                             'xls' => 'document_xls_preview.png',
                             'xlsx' => 'document_xls_preview.png',
+                            'ppt' => 'document_ppt_preview.png',
+                            'pptx' => 'document_ppt_preview.png',
                         ];
                         
                         $icon = $iconMap[$extension] ?? 'document_preview.png';
