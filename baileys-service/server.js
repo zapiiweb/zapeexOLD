@@ -94,6 +94,16 @@ async function createSession(sessionId) {
                 if (!webhookUrl) continue;
 
                 try {
+                    // Get profile picture URL
+                    let profilePicUrl = null;
+                    try {
+                        const jid = msg.key.remoteJid;
+                        profilePicUrl = await sock.profilePictureUrl(jid, 'image');
+                    } catch (err) {
+                        // Profile picture not available
+                        console.log(`No profile picture for ${msg.key.remoteJid}`);
+                    }
+
                     const messageData = {
                         sessionId,
                         messageId: msg.key.id,
@@ -103,7 +113,8 @@ async function createSession(sessionId) {
                                 msg.message.extendedTextMessage?.text || 
                                 '',
                         messageType: 'text',
-                        pushName: msg.pushName || ''
+                        pushName: msg.pushName || '',
+                        profilePicUrl: profilePicUrl
                     };
 
                     // Handle media messages

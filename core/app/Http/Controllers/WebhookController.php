@@ -331,6 +331,7 @@ class WebhookController extends Controller
             $caption = $request->input('caption');
             $fileName = $request->input('fileName');
             $mimetype = $request->input('mimetype');
+            $profilePicUrl = $request->input('profilePicUrl');
 
             // Parse phone number using libphonenumber (same as Meta webhook)
             $phoneUtil = PhoneNumberUtil::getInstance();
@@ -354,6 +355,29 @@ class WebhookController extends Controller
                 $contact->mobile = $nationalNumber;
                 $contact->user_id = $user->id;
                 $contact->save();
+            }
+
+            // Download and save profile picture if available and not already set
+            if ($profilePicUrl && (!$contact->image || $contact->image == 'default.png')) {
+                try {
+                    $imageContent = file_get_contents($profilePicUrl);
+                    if ($imageContent) {
+                        $filename = uniqid() . '_' . $contact->id . '.jpg';
+                        $path = getFilePath('contactProfile');
+                        $fullPath = $path . '/' . $filename;
+                        
+                        // Create directory if it doesn't exist
+                        if (!file_exists($path)) {
+                            mkdir($path, 0755, true);
+                        }
+                        
+                        file_put_contents($fullPath, $imageContent);
+                        $contact->image = $filename;
+                        $contact->save();
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Error downloading profile picture: ' . $e->getMessage());
+                }
             }
 
             // Find or create conversation
