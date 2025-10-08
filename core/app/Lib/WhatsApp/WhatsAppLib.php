@@ -408,10 +408,12 @@ class WhatsAppLib
         }
         
         // Return format compatible with Meta API response
+        // For async mode, we get jobId instead of messageId
         return [
             'whatsAppMessage' => [[
-                'id' => $result['messageId'] ?? 'baileys_' . time(),
+                'id' => $result['jobId'] ?? 'baileys_' . time(),  // Will be updated via webhook
             ]],
+            'jobId'           => $result['jobId'] ?? null,  // For async tracking
             'mediaId'         => null,
             'mediaUrl'        => $options['mediaUrl'] ?? null,
             'mediaPath'       => $mediaPath ?? null,

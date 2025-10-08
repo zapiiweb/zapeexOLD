@@ -138,15 +138,19 @@ class BaileysService
     }
 
     /**
-     * Send message
+     * Send message (ASYNC - returns immediately with job_id)
      */
     public function sendMessage(string $sessionId, string $to, string $message, array $options = []): array
     {
         try {
+            // Build callback URL for Baileys to notify when sending completes
+            $callbackUrl = url('/webhook/baileys');
+            
             $payload = [
                 'sessionId' => $sessionId,
                 'to' => $to,
                 'message' => $message,
+                'callbackUrl' => $callbackUrl,
             ];
 
             // Add media options if present
@@ -158,19 +162,18 @@ class BaileysService
                 $payload['caption'] = $options['caption'] ?? null;
             }
 
-            // Use longer timeout for media messages (download + upload takes time)
-            // Documents and videos can take up to 5 minutes to upload to WhatsApp
-            $timeout = isset($options['mediaType']) ? 300 : $this->timeout;
-            
-            $response = Http::timeout($timeout)
+            // Short timeout (10s) - Baileys responds immediately with job_id
+            // Actual sending happens in background
+            $response = Http::timeout(10)
                 ->post("{$this->baseUrl}/message/send", $payload);
 
             if ($response->successful()) {
                 $data = $response->json();
                 return [
                     'success' => true,
-                    'message' => 'Message sent successfully',
-                    'messageId' => $data['messageId'] ?? null,
+                    'message' => 'Message is being sent in background',
+                    'jobId' => $data['jobId'] ?? null,
+                    'status' => $data['status'] ?? 'processing',
                 ];
             }
 

@@ -302,6 +302,7 @@ trait InboxManager
             $message->user_id             = $user->id;
             $message->whatsapp_account_id = $whatsappAccount->id;
             $message->whatsapp_message_id = $whatsAppMessage[0]['id'];
+            $message->job_id              = $jobId ?? null;  // For async Baileys tracking
             $message->conversation_id     = $conversation->id;
             $message->type                = Status::MESSAGE_SENT;
             $message->message             = $request->message;
@@ -313,7 +314,8 @@ trait InboxManager
             $message->media_path          = $mediaPath;
             $message->mime_type           = $mimeType;
             $message->media_type          = $mediaType;
-            $message->status              = Status::MESSAGE_SENT;
+            // For Baileys async, start with PENDING status, webhook will update to SENT
+            $message->status              = isset($jobId) ? Status::PENDING : Status::MESSAGE_SENT;
             $message->ordering            = Carbon::now();
             
             \Log::info('INBOX: Saving message to database', [

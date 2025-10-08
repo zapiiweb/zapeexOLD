@@ -19,6 +19,7 @@ const WEBHOOK_URL = process.env.WEBHOOK_URL || null;
 const sessions = new Map();
 const qrCodes = new Map();
 const sessionWebhooks = new Map();
+const messageJobs = new Map(); // Track async message sending jobs
 
 // Create auth directory if it doesn't exist
 if (!fs.existsSync(AUTH_DIR)) {
@@ -340,10 +341,10 @@ app.delete('/session/:sessionId', async (req, res) => {
 });
 
 /**
- * POST /message/send - Send message
+ * POST /message/send - Send message (ASYNC with webhook callback)
  */
 app.post('/message/send', async (req, res) => {
-    const { sessionId, to, message, mediaType, mediaUrl, mimeType, fileName, caption } = req.body;
+    const { sessionId, to, message, mediaType, mediaUrl, mimeType, fileName, caption, callbackUrl } = req.body;
     
     if (!sessionId || !to) {
         return res.status(400).json({ error: 'sessionId and to are required' });
@@ -353,19 +354,90 @@ app.post('/message/send', async (req, res) => {
         return res.status(400).json({ error: 'Either message or mediaType is required' });
     }
 
-    try {
-        const options = {
-            mediaType,
-            mediaUrl,
-            mimeType,
-            fileName,
-            caption
-        };
-        const result = await sendMessage(sessionId, to, message, options);
-        res.json(result);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+    // Generate unique job ID
+    const jobId = `job_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    
+    // Store job status
+    messageJobs.set(jobId, {
+        status: 'processing',
+        sessionId,
+        to,
+        createdAt: new Date().toISOString()
+    });
+
+    // Respond immediately with 202 Accepted
+    res.status(202).json({ 
+        success: true,
+        jobId,
+        status: 'processing',
+        message: 'Message is being sent in background'
+    });
+
+    // Process message sending in background
+    setImmediate(async () => {
+        try {
+            const options = {
+                mediaType,
+                mediaUrl,
+                mimeType,
+                fileName,
+                caption
+            };
+            
+            console.log(`[Job ${jobId}] Starting background message send...`);
+            const result = await sendMessage(sessionId, to, message, options);
+            
+            // Update job status
+            messageJobs.set(jobId, {
+                status: 'completed',
+                messageId: result.messageId,
+                completedAt: new Date().toISOString()
+            });
+            
+            console.log(`[Job ${jobId}] Message sent successfully: ${result.messageId}`);
+            
+            // Call webhook if provided
+            if (callbackUrl) {
+                try {
+                    await axios.post(callbackUrl, {
+                        jobId,
+                        status: 'sent',
+                        messageId: result.messageId,
+                        sessionId,
+                        to
+                    });
+                    console.log(`[Job ${jobId}] Webhook callback sent to ${callbackUrl}`);
+                } catch (webhookError) {
+                    console.error(`[Job ${jobId}] Webhook callback failed:`, webhookError.message);
+                }
+            }
+            
+        } catch (error) {
+            console.error(`[Job ${jobId}] Message send failed:`, error.message);
+            
+            // Update job status
+            messageJobs.set(jobId, {
+                status: 'failed',
+                error: error.message,
+                failedAt: new Date().toISOString()
+            });
+            
+            // Call webhook with failure
+            if (callbackUrl) {
+                try {
+                    await axios.post(callbackUrl, {
+                        jobId,
+                        status: 'failed',
+                        error: error.message,
+                        sessionId,
+                        to
+                    });
+                } catch (webhookError) {
+                    console.error(`[Job ${jobId}] Webhook failure callback failed:`, webhookError.message);
+                }
+            }
+        }
+    });
 });
 
 /**

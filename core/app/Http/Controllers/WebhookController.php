@@ -273,7 +273,7 @@ class WebhookController extends Controller
     }
 
     /**
-     * Handle Baileys webhook for incoming messages
+     * Handle Baileys webhook for incoming messages and send confirmations
      */
     public function baileysWebhook(Request $request)
     {
@@ -281,6 +281,47 @@ class WebhookController extends Controller
             $type = $request->input('type');
             $sessionId = $request->input('sessionId');
             $messageId = $request->input('messageId');
+            $jobId = $request->input('jobId');
+            $status = $request->input('status');
+
+            // Handle async send confirmation (from background job)
+            if ($jobId && $status) {
+                \Log::info("Baileys webhook: Job confirmation", [
+                    'jobId' => $jobId,
+                    'status' => $status,
+                    'messageId' => $messageId
+                ]);
+
+                // Find message by job_id
+                $message = Message::where('job_id', $jobId)->first();
+
+                if ($message) {
+                    // Update message status based on result
+                    $message->status = $status === 'sent' ? Status::SENT : Status::FAILED;
+                    if ($messageId) {
+                        $message->whatsapp_message_id = $messageId;
+                    }
+                    $message->save();
+
+                    // Broadcast update via Pusher
+                    $html = view('Template::user.inbox.single_message', compact('message'))->render();
+                    
+                    event(new ReceiveMessage($message->whatsapp_account_id, [
+                        'html'           => $html,
+                        'messageId'      => $message->id,
+                        'message'        => $message,
+                        'statusHtml'     => $message->statusBadge,
+                        'newMessage'     => true,
+                        'mediaPath'      => getFilePath('conversation'),
+                        'conversationId' => $message->conversation_id,
+                        'unseenMessage'  => $message->conversation->unseenMessages()->count() < 10 ? $message->conversation->unseenMessages()->count() : '9+',
+                    ]));
+
+                    return response()->json(['success' => true]);
+                }
+
+                return response()->json(['error' => 'Message not found'], 404);
+            }
 
             // Find WhatsApp account by session ID
             $whatsappAccount = WhatsappAccount::where('baileys_session_id', $sessionId)->first();

@@ -47,7 +47,7 @@
                     data: formData,
                     processData: false,
                     contentType: false,
-                    timeout: 300000,
+                    timeout: 15000,
                     beforeSend: function() {
                         $submitBtn.attr('disabled', true).addClass('disabled');
                         $submitBtn.html(
@@ -55,7 +55,7 @@
                         
                         // Show notification for file uploads
                         if (formData.has('document') || formData.has('video') || formData.has('image')) {
-                            notify('info', "@lang('Uploading and sending file. Large files may take up to 5 minutes...')");
+                            notify('info', "@lang('File is being uploaded and sent. Status will update automatically...')");
                         }
                     },
                     success: function(response) {
