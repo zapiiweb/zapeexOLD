@@ -203,14 +203,17 @@ class WhatsAppLib
     {
         $fileName = $file->getClientOriginalName();
         
-        // Create a temporary copy of the file to ensure it's available during upload
-        $tempDir = sys_get_temp_dir();
-        $tempFilePath = $tempDir . '/' . uniqid('whatsapp_upload_') . '_' . $fileName;
-        
-        // Copy uploaded file to temporary location
-        if (!copy($file->getPathname(), $tempFilePath)) {
-            throw new Exception("Failed to prepare file for upload");
+        // Store file in a temporary directory using Laravel's move method
+        $tempDir = storage_path('app/temp');
+        if (!file_exists($tempDir)) {
+            mkdir($tempDir, 0755, true);
         }
+        
+        $tempFileName = uniqid('whatsapp_upload_') . '_' . $fileName;
+        $tempFilePath = $tempDir . '/' . $tempFileName;
+        
+        // Move the uploaded file to ensure it persists
+        $file->move($tempDir, $tempFileName);
 
         $postData = [
             'messaging_product' => 'whatsapp',
