@@ -938,24 +938,12 @@ button .spinner-border {
 }
 
 /* Adjust main content when sidebar is collapsed */
-.dashboard-container {
-    transition: margin-left 0.3s ease;
+.dashboard__right {
+    transition: padding-left 0.3s ease;
 }
 
-body.sidebar-collapsed .dashboard-container {
-    margin-left: 80px;
-}
-
-/* Adjust dashboard body as well */
-.dashboard-body {
-    transition: all 0.3s ease;
-}
-
-/* Adjust any full-width containers */
-body.sidebar-collapsed .dashboard-body,
-body.sidebar-collapsed .dashboard-container > *,
-body.sidebar-collapsed .container-fluid {
-    transition: all 0.3s ease;
+body.sidebar-collapsed .dashboard__right {
+    padding-left: 80px;
 }
 
 @media (max-width: 991px) {
@@ -963,8 +951,8 @@ body.sidebar-collapsed .container-fluid {
         display: none;
     }
 
-    body.sidebar-collapsed .dashboard-container {
-        margin-left: 0;
+    body.sidebar-collapsed .dashboard__right {
+        padding-left: 0;
     }
 }
 /* ==================== Sidebar Collapse Styles End ==================== */
