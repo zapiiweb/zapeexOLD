@@ -356,7 +356,7 @@ class WhatsAppLib
             $file = $request->file('image');
             $mimeType = $file->getMimeType();
             $mediaPath = $this->storeMediaFile($file, $whatsappAccount->user_id);
-            $mediaUrl = asset('assets/images/conversation/' . $mediaPath);
+            $mediaUrl = asset(getFilePath('conversation') . '/' . $mediaPath);
             
             $options['mediaType'] = 'image';
             $options['mediaUrl'] = $mediaUrl;
@@ -367,7 +367,7 @@ class WhatsAppLib
             $mimeType = $file->getMimeType();
             $fileName = $file->getClientOriginalName();
             $mediaPath = $this->storeMediaFile($file, $whatsappAccount->user_id);
-            $mediaUrl = asset('assets/images/conversation/' . $mediaPath);
+            $mediaUrl = asset(getFilePath('conversation') . '/' . $mediaPath);
             
             $options['mediaType'] = 'document';
             $options['mediaUrl'] = $mediaUrl;
@@ -378,7 +378,7 @@ class WhatsAppLib
             $file = $request->file('video');
             $mimeType = $file->getMimeType();
             $mediaPath = $this->storeMediaFile($file, $whatsappAccount->user_id);
-            $mediaUrl = asset('assets/images/conversation/' . $mediaPath);
+            $mediaUrl = asset(getFilePath('conversation') . '/' . $mediaPath);
             
             $options['mediaType'] = 'video';
             $options['mediaUrl'] = $mediaUrl;

@@ -233,54 +233,62 @@ async function deleteSession(sessionId) {
  * Send message
  */
 async function sendMessage(sessionId, to, message, options = {}) {
-    const sock = sessions.get(sessionId);
-    
-    if (!sock || !sock.user) {
-        throw new Error('Session not connected');
-    }
-
-    // Ensure proper JID format
-    let jid = to;
-    if (!to.includes('@')) {
-        jid = `${to}@s.whatsapp.net`;
-    }
-
-    let content = { text: message };
-    
-    // Handle media
-    if (options.mediaType && options.mediaUrl) {
-        const { downloadMediaMessage } = require('@whiskeysockets/baileys');
+    try {
+        const sock = sessions.get(sessionId);
         
-        switch(options.mediaType) {
-            case 'image':
-                content = {
-                    image: { url: options.mediaUrl },
-                    caption: message || options.caption || ''
-                };
-                break;
-            case 'document':
-                content = {
-                    document: { url: options.mediaUrl },
-                    mimetype: options.mimeType || 'application/pdf',
-                    fileName: options.fileName || 'document.pdf',
-                    caption: message || options.caption || ''
-                };
-                break;
-            case 'video':
-                content = {
-                    video: { url: options.mediaUrl },
-                    caption: message || options.caption || ''
-                };
-                break;
+        if (!sock || !sock.user) {
+            throw new Error('Session not connected');
         }
-    }
 
-    const result = await sock.sendMessage(jid, content);
-    return { 
-        success: true, 
-        message: 'Message sent',
-        messageId: result.key.id
-    };
+        // Ensure proper JID format
+        let jid = to;
+        if (!to.includes('@')) {
+            jid = `${to}@s.whatsapp.net`;
+        }
+
+        let content = { text: message };
+        
+        // Handle media
+        if (options.mediaType && options.mediaUrl) {
+            console.log(`Sending ${options.mediaType} from URL: ${options.mediaUrl}`);
+            
+            switch(options.mediaType) {
+                case 'image':
+                    content = {
+                        image: { url: options.mediaUrl },
+                        caption: message || options.caption || ''
+                    };
+                    break;
+                case 'document':
+                    content = {
+                        document: { url: options.mediaUrl },
+                        mimetype: options.mimeType || 'application/pdf',
+                        fileName: options.fileName || 'document.pdf',
+                        caption: message || options.caption || ''
+                    };
+                    break;
+                case 'video':
+                    content = {
+                        video: { url: options.mediaUrl },
+                        caption: message || options.caption || ''
+                    };
+                    break;
+            }
+        }
+
+        console.log(`Sending message to ${jid}...`);
+        const result = await sock.sendMessage(jid, content);
+        console.log(`Message sent successfully: ${result.key.id}`);
+        
+        return { 
+            success: true, 
+            message: 'Message sent',
+            messageId: result.key.id
+        };
+    } catch (error) {
+        console.error(`Error sending message: ${error.message}`);
+        throw error;
+    }
 }
 
 // API Routes
