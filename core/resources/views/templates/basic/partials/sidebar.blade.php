@@ -8,7 +8,8 @@
         </a>
         <div class="sidebar-logo">
             <a href="{{ route('user.home') }}" class="sidebar-logo__link">
-                <img src="{{ siteLogo('dark') }}" alt="logo">
+                <img src="{{ siteLogo('dark') }}" alt="logo" class="logo-expanded">
+                <img src="{{ getImage('assets/images/logo_icon/favicon.png') }}" alt="logo" class="logo-collapsed">
             </a>
         </div>
         <ul class="sidebar-menu-list">
