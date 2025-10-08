@@ -354,32 +354,36 @@ class WhatsAppLib
         // Handle media uploads
         if ($request->hasFile('image')) {
             $file = $request->file('image');
+            $mimeType = $file->getMimeType();
             $mediaPath = $this->storeMediaFile($file, $whatsappAccount->user_id);
             $mediaUrl = asset('assets/images/conversation/' . $mediaPath);
             
             $options['mediaType'] = 'image';
             $options['mediaUrl'] = $mediaUrl;
             $options['caption'] = $message;
-            $options['mimeType'] = $file->getMimeType();
+            $options['mimeType'] = $mimeType;
         } elseif ($request->hasFile('document')) {
             $file = $request->file('document');
+            $mimeType = $file->getMimeType();
+            $fileName = $file->getClientOriginalName();
             $mediaPath = $this->storeMediaFile($file, $whatsappAccount->user_id);
             $mediaUrl = asset('assets/images/conversation/' . $mediaPath);
             
             $options['mediaType'] = 'document';
             $options['mediaUrl'] = $mediaUrl;
             $options['caption'] = $message;
-            $options['mimeType'] = $file->getMimeType();
-            $options['fileName'] = $file->getClientOriginalName();
+            $options['mimeType'] = $mimeType;
+            $options['fileName'] = $fileName;
         } elseif ($request->hasFile('video')) {
             $file = $request->file('video');
+            $mimeType = $file->getMimeType();
             $mediaPath = $this->storeMediaFile($file, $whatsappAccount->user_id);
             $mediaUrl = asset('assets/images/conversation/' . $mediaPath);
             
             $options['mediaType'] = 'video';
             $options['mediaUrl'] = $mediaUrl;
             $options['caption'] = $message;
-            $options['mimeType'] = $file->getMimeType();
+            $options['mimeType'] = $mimeType;
         }
         
         // Send message via Baileys
