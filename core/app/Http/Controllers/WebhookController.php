@@ -278,15 +278,9 @@ class WebhookController extends Controller
     public function baileysWebhook(Request $request)
     {
         try {
+            $type = $request->input('type');
             $sessionId = $request->input('sessionId');
             $messageId = $request->input('messageId');
-            $from = $request->input('from');
-            $messageText = $request->input('message');
-            $messageType = $request->input('messageType', 'text');
-            $pushName = $request->input('pushName');
-            $caption = $request->input('caption');
-            $fileName = $request->input('fileName');
-            $mimetype = $request->input('mimetype');
 
             // Find WhatsApp account by session ID
             $whatsappAccount = WhatsappAccount::where('baileys_session_id', $sessionId)->first();
@@ -300,6 +294,43 @@ class WebhookController extends Controller
             if (!$user) {
                 return response()->json(['error' => 'User not found'], 404);
             }
+
+            // Handle status updates
+            if ($type === 'status_update') {
+                $status = $request->input('status');
+                
+                $message = Message::where('whatsapp_message_id', $messageId)->first();
+                
+                if ($message) {
+                    $message->status = $status;
+                    $message->save();
+
+                    // Broadcast status update via Pusher
+                    $html = view('Template::user.inbox.single_message', compact('message'))->render();
+                    
+                    event(new ReceiveMessage($whatsappAccount->id, [
+                        'html'           => $html,
+                        'messageId'      => $message->id,
+                        'message'        => $message,
+                        'statusHtml'     => $message->statusBadge,
+                        'newMessage'     => false,
+                        'mediaPath'      => getFilePath('conversation'),
+                        'conversationId' => $message->conversation_id,
+                        'unseenMessage'  => $message->conversation->unseenMessages()->count() < 10 ? $message->conversation->unseenMessages()->count() : '9+',
+                    ]));
+                }
+
+                return response()->json(['success' => true]);
+            }
+
+            // Handle incoming messages
+            $from = $request->input('from');
+            $messageText = $request->input('message');
+            $messageType = $request->input('messageType', 'text');
+            $pushName = $request->input('pushName');
+            $caption = $request->input('caption');
+            $fileName = $request->input('fileName');
+            $mimetype = $request->input('mimetype');
 
             // Parse phone number using libphonenumber (same as Meta webhook)
             $phoneUtil = PhoneNumberUtil::getInstance();

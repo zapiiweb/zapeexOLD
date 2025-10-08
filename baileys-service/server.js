@@ -132,6 +132,43 @@ async function createSession(sessionId) {
             }
         });
 
+        // Handle message status updates (delivered, read, failed)
+        sock.ev.on('messages.update', async (updates) => {
+            const webhookUrl = sessionWebhooks.get(sessionId);
+            if (!webhookUrl) return;
+
+            for (const update of updates) {
+                try {
+                    const statusData = {
+                        type: 'status_update',
+                        sessionId,
+                        messageId: update.key.id,
+                        status: null
+                    };
+
+                    // Map Baileys status to system status
+                    // 1=send, 2=delivered, 3=read, 9=failed
+                    if (update.update.status === 3) {
+                        statusData.status = 2; // delivered
+                    } else if (update.update.status === 4) {
+                        statusData.status = 3; // read
+                    } else if (update.update.status === 5) {
+                        statusData.status = 9; // failed
+                    }
+
+                    // Only send webhook if status is mapped
+                    if (statusData.status) {
+                        await axios.post(webhookUrl, statusData).catch(err => {
+                            console.error(`Status webhook error for session ${sessionId}:`, err.message);
+                        });
+                    }
+
+                } catch (error) {
+                    console.error(`Error processing status update for session ${sessionId}:`, error);
+                }
+            }
+        });
+
         sessions.set(sessionId, sock);
         return { success: true, message: 'Session created successfully' };
 
