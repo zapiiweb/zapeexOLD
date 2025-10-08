@@ -205,7 +205,7 @@
     // Poll for QR code
     function pollForQRCode() {
         let attempts = 0;
-        const maxAttempts = 30;
+        const maxAttempts = 60;
 
         const interval = setInterval(function() {
             attempts++;
