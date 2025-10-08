@@ -1,1 +1,0 @@
-<?php $timezone = "America/Sao_Paulo" ?>
