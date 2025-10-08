@@ -29,26 +29,46 @@
              @else
                  <p class="message-text">{!! nl2br($messageText) !!}</p>
              @endif
-             @if (@$message->media_id)
+             @if (@$message->media_id || @$message->media_path)
                  @if (@$message->message_type == Status::IMAGE_TYPE_MESSAGE)
-                     <a href="{{ route('user.inbox.media.download', $message->media_id) }}">
-                         <img class="message-image" src="{{ getImage(getFilePath('conversation') . '/' . @$message->media_path) }}" alt="image">
-                     </a>
+                     @if (@$message->media_id)
+                         <a href="{{ route('user.inbox.media.download', $message->media_id) }}">
+                             <img class="message-image" src="{{ getImage(getFilePath('conversation') . '/' . @$message->media_path) }}" alt="image">
+                         </a>
+                     @else
+                         <a href="{{ asset(getFilePath('conversation') . '/' . @$message->media_path) }}" target="_blank">
+                             <img class="message-image" src="{{ getImage(getFilePath('conversation') . '/' . @$message->media_path) }}" alt="image">
+                         </a>
+                     @endif
                  @endif
                  @if (@$message->message_type == Status::VIDEO_TYPE_MESSAGE)
                      <div class="text-dark d-flex align-items-center justify-content-between">
-                         <a href="{{ route('user.inbox.media.download', $message->media_id) }}"
-                             class="text--primary download-document">
-                             <img class="message-image" src="{{ asset('assets/images/video_preview.png') }}" alt="image">
-                         </a>
+                         @if (@$message->media_id)
+                             <a href="{{ route('user.inbox.media.download', $message->media_id) }}"
+                                 class="text--primary download-document">
+                                 <img class="message-image" src="{{ asset('assets/images/video_preview.png') }}" alt="image">
+                             </a>
+                         @else
+                             <a href="{{ asset(getFilePath('conversation') . '/' . @$message->media_path) }}"
+                                 class="text--primary download-document" target="_blank">
+                                 <img class="message-image" src="{{ asset('assets/images/video_preview.png') }}" alt="image">
+                             </a>
+                         @endif
                      </div>
                  @endif
                  @if (@$message->message_type == Status::DOCUMENT_TYPE_MESSAGE)
                      <div class="text-dark d-flex justify-content-between flex-column">
-                         <a href="{{ route('user.inbox.media.download', $message->media_id) }}"
-                             class="text--primary download-document">
-                             <img class="message-image" src="{{ asset('assets/images/document_preview.png') }}" alt="image">
-                        </a>
+                         @if (@$message->media_id)
+                             <a href="{{ route('user.inbox.media.download', $message->media_id) }}"
+                                 class="text--primary download-document">
+                                 <img class="message-image" src="{{ asset('assets/images/document_preview.png') }}" alt="image">
+                            </a>
+                         @else
+                             <a href="{{ asset(getFilePath('conversation') . '/' . @$message->media_path) }}"
+                                 class="text--primary download-document" target="_blank" download>
+                                 <img class="message-image" src="{{ asset('assets/images/document_preview.png') }}" alt="image">
+                            </a>
+                         @endif
                         {{ @$message->media_filename ?? 'Document' }}
                      </div>
                  @endif
