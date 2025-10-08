@@ -47,11 +47,16 @@
                     data: formData,
                     processData: false,
                     contentType: false,
-                    timeout: 120000,
+                    timeout: 180000,
                     beforeSend: function() {
                         $submitBtn.attr('disabled', true).addClass('disabled');
                         $submitBtn.html(
                             `<div class="spinner-border text--base" role="status"></div>`);
+                        
+                        // Show notification for file uploads
+                        if (formData.has('document') || formData.has('video') || formData.has('image')) {
+                            notify('info', "@lang('Uploading and sending file. Large files may take up to 3 minutes...')");
+                        }
                     },
                     success: function(response) {
                         if (response.status == 'success') {
