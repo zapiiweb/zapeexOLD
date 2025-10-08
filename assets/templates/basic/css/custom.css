@@ -841,7 +841,7 @@ button .spinner-border {
 .sidebar-collapse-btn {
     position: absolute;
     top: 20px;
-    right: -15px;
+    right: 10px;
     width: 30px;
     height: 30px;
     background: hsl(var(--base));

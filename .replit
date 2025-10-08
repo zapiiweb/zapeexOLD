@@ -54,6 +54,10 @@ exposeLocalhost = true
 localPort = 5000
 externalPort = 80
 
+[[ports]]
+localPort = 41999
+externalPort = 3000
+
 [deployment]
 deploymentTarget = "vm"
 run = ["php", "-S", "0.0.0.0:5000"]
