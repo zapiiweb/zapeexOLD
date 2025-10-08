@@ -314,8 +314,8 @@ trait InboxManager
             $message->media_path          = $mediaPath;
             $message->mime_type           = $mimeType;
             $message->media_type          = $mediaType;
-            // For Baileys async, start with PENDING status, webhook will update to SENT
-            $message->status              = isset($jobId) ? Status::PENDING : Status::MESSAGE_SENT;
+            // For Baileys async, start with SENT status (webhook will update delivery status later)
+            $message->status              = Status::SENT;
             $message->ordering            = Carbon::now();
             
             \Log::info('INBOX: Saving message to database', [
