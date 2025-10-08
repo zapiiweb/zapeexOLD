@@ -342,6 +342,25 @@ class WhatsAppLib
     }
 
     /**
+     * Get MIME type safely with fallback methods
+     */
+    private function getSafeMimeType($file)
+    {
+        try {
+            // Try Laravel's getMimeType() first
+            return $file->getMimeType();
+        } catch (\Exception $e) {
+            // Fallback to PHP's mime_content_type
+            try {
+                return mime_content_type($file->getPathname());
+            } catch (\Exception $e) {
+                // Fallback to client MIME type
+                return $file->getClientMimeType() ?? 'application/octet-stream';
+            }
+        }
+    }
+
+    /**
      * Send message via Baileys
      */
     private function messageSendViaBaileys($request, $toNumber, $whatsappAccount)
@@ -354,7 +373,7 @@ class WhatsAppLib
         // Handle media uploads
         if ($request->hasFile('image')) {
             $file = $request->file('image');
-            $mimeType = $file->getMimeType();
+            $mimeType = $this->getSafeMimeType($file);
             $mediaPath = $this->storeMediaFile($file, $whatsappAccount->user_id);
             $mediaUrl = asset(getFilePath('conversation') . '/' . $mediaPath);
             
@@ -364,7 +383,7 @@ class WhatsAppLib
             $options['mimeType'] = $mimeType;
         } elseif ($request->hasFile('document')) {
             $file = $request->file('document');
-            $mimeType = $file->getMimeType();
+            $mimeType = $this->getSafeMimeType($file);
             $fileName = $file->getClientOriginalName();
             $mediaPath = $this->storeMediaFile($file, $whatsappAccount->user_id);
             $mediaUrl = asset(getFilePath('conversation') . '/' . $mediaPath);
@@ -376,7 +395,7 @@ class WhatsAppLib
             $options['fileName'] = $fileName;
         } elseif ($request->hasFile('video')) {
             $file = $request->file('video');
-            $mimeType = $file->getMimeType();
+            $mimeType = $this->getSafeMimeType($file);
             $mediaPath = $this->storeMediaFile($file, $whatsappAccount->user_id);
             $mediaUrl = asset(getFilePath('conversation') . '/' . $mediaPath);
             
