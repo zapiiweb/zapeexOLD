@@ -159,8 +159,8 @@ class BaileysService
             }
 
             // Use longer timeout for media messages (download + upload takes time)
-            // Documents and videos can take 3-4 minutes to upload to WhatsApp
-            $timeout = isset($options['mediaType']) ? 240 : $this->timeout;
+            // Documents and videos can take up to 5 minutes to upload to WhatsApp
+            $timeout = isset($options['mediaType']) ? 300 : $this->timeout;
             
             $response = Http::timeout($timeout)
                 ->post("{$this->baseUrl}/message/send", $payload);

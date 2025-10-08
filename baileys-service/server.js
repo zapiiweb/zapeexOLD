@@ -393,11 +393,15 @@ app.get('/health', (req, res) => {
     });
 });
 
-// Start server
-app.listen(PORT, '127.0.0.1', () => {
+// Start server with increased timeout for large file uploads
+const server = app.listen(PORT, '127.0.0.1', () => {
     console.log(`Baileys WhatsApp Service running on http://127.0.0.1:${PORT}`);
     console.log(`Active sessions will be stored in: ${AUTH_DIR}`);
 });
+
+// Increase server timeout to 5 minutes for large media uploads
+server.timeout = 300000; // 5 minutes
+server.keepAliveTimeout = 305000; // 5 minutes + 5 seconds
 
 // Graceful shutdown
 process.on('SIGINT', async () => {

@@ -47,7 +47,7 @@
                     data: formData,
                     processData: false,
                     contentType: false,
-                    timeout: 240000,
+                    timeout: 300000,
                     beforeSend: function() {
                         $submitBtn.attr('disabled', true).addClass('disabled');
                         $submitBtn.html(
@@ -55,7 +55,7 @@
                         
                         // Show notification for file uploads
                         if (formData.has('document') || formData.has('video') || formData.has('image')) {
-                            notify('info', "@lang('Uploading and sending file. Large files may take up to 4 minutes...')");
+                            notify('info', "@lang('Uploading and sending file. Large files may take up to 5 minutes...')");
                         }
                     },
                     success: function(response) {
@@ -77,11 +77,7 @@
                     },
                     error: function(xhr, status, error) {
                         if (status === 'timeout') {
-                            notify('warning', "@lang('Request timeout. Checking if message was sent...')");
-                            // Reload messages after timeout - message may have been sent successfully
-                            setTimeout(function() {
-                                window.fetchConversationMessages(window.conversation_id);
-                            }, 2000);
+                            notify('warning', "@lang('Request timeout. The file may still be sent. Please refresh the page to check.')");
                         } else {
                             notify('error', "@lang('Failed to send message. Please try again.')");
                         }
