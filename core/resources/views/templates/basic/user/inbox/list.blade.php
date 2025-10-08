@@ -53,8 +53,12 @@
                         $submitBtn.html(
                             `<div class="spinner-border text--base" role="status"></div>`);
                         
-                        // Show notification for file uploads
-                        if (formData.has('document') || formData.has('video') || formData.has('image')) {
+                        // Show notification only for actual file uploads (not text messages)
+                        const hasFile = (formData.get('document') && formData.get('document').size > 0) || 
+                                       (formData.get('video') && formData.get('video').size > 0) || 
+                                       (formData.get('image') && formData.get('image').size > 0);
+                        
+                        if (hasFile) {
                             notify('info', "@lang('File is being uploaded and sent. Status will update automatically...')");
                         }
                     },
