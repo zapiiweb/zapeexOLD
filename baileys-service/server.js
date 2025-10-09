@@ -240,13 +240,14 @@ async function createSession(sessionId) {
                     };
 
                     // Map Baileys status to system status
-                    // 1=send, 2=delivered, 3=read, 9=failed
-                    if (update.update.status === 3) {
+                    // Baileys: 1=sent, 2=delivered, 3=read, 4=played
+                    // System: 1=sent, 2=delivered, 3=read, 9=failed
+                    if (update.update.status === 1) {
+                        statusData.status = 1; // sent
+                    } else if (update.update.status === 2) {
                         statusData.status = 2; // delivered
-                    } else if (update.update.status === 4) {
-                        statusData.status = 3; // read
-                    } else if (update.update.status === 5) {
-                        statusData.status = 9; // failed
+                    } else if (update.update.status === 3 || update.update.status === 4) {
+                        statusData.status = 3; // read (includes played for media)
                     }
 
                     // Only send webhook if status is mapped
