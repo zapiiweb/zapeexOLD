@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const makeWASocket = require('@whiskeysockets/baileys').default;
-const { useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
+const { useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion, downloadMediaMessage } = require('@whiskeysockets/baileys');
 const P = require('pino');
 const fs = require('fs');
 const path = require('path');
@@ -13,6 +13,7 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
 const AUTH_DIR = path.join(__dirname, 'auth_sessions');
+const MEDIA_DIR = path.join(__dirname, '..', 'assets', 'images', 'conversation');
 const WEBHOOK_URL = process.env.WEBHOOK_URL || null;
 
 // Store active sessions
@@ -21,9 +22,12 @@ const qrCodes = new Map();
 const sessionWebhooks = new Map();
 const messageJobs = new Map(); // Track async message sending jobs
 
-// Create auth directory if it doesn't exist
+// Create directories if they don't exist
 if (!fs.existsSync(AUTH_DIR)) {
     fs.mkdirSync(AUTH_DIR, { recursive: true });
+}
+if (!fs.existsSync(MEDIA_DIR)) {
+    fs.mkdirSync(MEDIA_DIR, { recursive: true });
 }
 
 // Logger configuration
@@ -118,20 +122,75 @@ async function createSession(sessionId) {
                         profilePicUrl: profilePicUrl
                     };
 
+                    // MIME type to extension mapping
+                    const mimeToExt = {
+                        'video/quicktime': 'mov',
+                        'video/x-msvideo': 'avi',
+                        'video/mp4': 'mp4',
+                        'image/jpeg': 'jpg',
+                        'image/jpg': 'jpg',
+                        'image/png': 'png',
+                        'image/gif': 'gif',
+                        'application/pdf': 'pdf',
+                        'application/msword': 'doc',
+                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+                        'application/vnd.ms-excel': 'xls',
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
+                        'application/vnd.ms-powerpoint': 'ppt',
+                        'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'pptx',
+                        'application/zip': 'zip',
+                        'application/x-rar-compressed': 'rar'
+                    };
+
                     // Handle media messages
                     if (msg.message.imageMessage) {
                         messageData.messageType = 'image';
                         messageData.caption = msg.message.imageMessage.caption || '';
                         messageData.mimetype = msg.message.imageMessage.mimetype;
+                        
+                        try {
+                            const buffer = await downloadMediaMessage(msg, 'buffer', {});
+                            const extension = mimeToExt[msg.message.imageMessage.mimetype] || msg.message.imageMessage.mimetype.split('/')[1] || 'jpg';
+                            const fileName = `${Date.now()}_${msg.key.id}.${extension}`;
+                            const filePath = path.join(MEDIA_DIR, fileName);
+                            fs.writeFileSync(filePath, buffer);
+                            messageData.fileName = fileName;
+                            console.log(`Image saved: ${fileName}`);
+                        } catch (err) {
+                            console.error('Error downloading image:', err);
+                        }
                     } else if (msg.message.documentMessage) {
                         messageData.messageType = 'document';
                         messageData.caption = msg.message.documentMessage.caption || '';
                         messageData.fileName = msg.message.documentMessage.fileName;
                         messageData.mimetype = msg.message.documentMessage.mimetype;
+                        
+                        try {
+                            const buffer = await downloadMediaMessage(msg, 'buffer', {});
+                            const fileName = msg.message.documentMessage.fileName || `${Date.now()}_document`;
+                            const filePath = path.join(MEDIA_DIR, fileName);
+                            fs.writeFileSync(filePath, buffer);
+                            messageData.fileName = fileName;
+                            console.log(`Document saved: ${fileName}`);
+                        } catch (err) {
+                            console.error('Error downloading document:', err);
+                        }
                     } else if (msg.message.videoMessage) {
                         messageData.messageType = 'video';
                         messageData.caption = msg.message.videoMessage.caption || '';
                         messageData.mimetype = msg.message.videoMessage.mimetype;
+                        
+                        try {
+                            const buffer = await downloadMediaMessage(msg, 'buffer', {});
+                            const extension = mimeToExt[msg.message.videoMessage.mimetype] || msg.message.videoMessage.mimetype.split('/')[1] || 'mp4';
+                            const fileName = `${Date.now()}_${msg.key.id}.${extension}`;
+                            const filePath = path.join(MEDIA_DIR, fileName);
+                            fs.writeFileSync(filePath, buffer);
+                            messageData.fileName = fileName;
+                            console.log(`Video saved: ${fileName}`);
+                        } catch (err) {
+                            console.error('Error downloading video:', err);
+                        }
                     }
 
                     await axios.post(webhookUrl, messageData).catch(err => {
