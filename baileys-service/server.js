@@ -232,8 +232,6 @@ async function createSession(sessionId) {
 
             for (const update of updates) {
                 try {
-                    console.log(`[Status Update] Message ID: ${update.key.id}, Baileys Status: ${update.update.status}`);
-                    
                     const statusData = {
                         type: 'status_update',
                         sessionId,
@@ -246,23 +244,17 @@ async function createSession(sessionId) {
                     // System: 1=sent, 2=delivered, 3=read, 9=failed
                     if (update.update.status === 1) {
                         statusData.status = 1; // sent
-                        console.log(`[Status Update] Mapped to: SENT (1)`);
                     } else if (update.update.status === 2) {
                         statusData.status = 2; // delivered
-                        console.log(`[Status Update] Mapped to: DELIVERED (2)`);
                     } else if (update.update.status === 3 || update.update.status === 4) {
                         statusData.status = 3; // read (includes played for media)
-                        console.log(`[Status Update] Mapped to: READ/PLAYED (3)`);
                     }
 
                     // Only send webhook if status is mapped
                     if (statusData.status) {
-                        console.log(`[Status Update] Sending webhook for message ${update.key.id} with status ${statusData.status}`);
                         await axios.post(webhookUrl, statusData).catch(err => {
                             console.error(`Status webhook error for session ${sessionId}:`, err.message);
                         });
-                    } else {
-                        console.log(`[Status Update] Status ${update.update.status} not mapped, skipping webhook`);
                     }
 
                 } catch (error) {
