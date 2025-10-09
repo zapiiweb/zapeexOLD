@@ -42,16 +42,34 @@
                     @endif
                 @endif
                 @if (@$message->message_type == Status::VIDEO_TYPE_MESSAGE)
-                    <div class="text-dark d-flex align-items-center justify-content-between">
+                    @php
+                        $videoFilename = @$message->media_filename ?? @$message->media_path ?? '';
+                        $videoExtension = strtolower(pathinfo($videoFilename, PATHINFO_EXTENSION));
+                        
+                        $videoMimeTypes = [
+                            'mp4' => 'video/mp4',
+                            'mov' => 'video/quicktime',
+                            'avi' => 'video/x-msvideo',
+                        ];
+                        
+                        $videoMimeType = $videoMimeTypes[$videoExtension] ?? 'video/mp4';
+                    @endphp
+                    <div class="message-video-container">
                         @if (@$message->media_id)
-                            <a href="{{ route('user.inbox.media.download', $message->media_id) }}"
-                                class="text--primary download-document">
-                                <img class="message-image" src="{{ asset('assets/images/document_video_preview.png') }}" alt="image">
+                            <video class="message-video" controls preload="metadata">
+                                <source src="{{ route('user.inbox.media.stream', $message->media_id) }}" type="{{ $videoMimeType }}">
+                                Seu navegador não suporta reprodução de vídeo.
+                            </video>
+                            <a href="{{ route('user.inbox.media.download', $message->media_id) }}" class="btn btn--sm btn--base mt-2" download>
+                                <i class="las la-download"></i> Download
                             </a>
                         @else
-                            <a href="{{ asset(getFilePath('conversation') . '/' . @$message->media_path) }}"
-                                class="text--primary download-document" target="_blank">
-                                <img class="message-image" src="{{ asset('assets/images/document_video_preview.png') }}" alt="image">
+                            <video class="message-video" controls preload="metadata">
+                                <source src="{{ asset(getFilePath('conversation') . '/' . @$message->media_path) }}" type="{{ $videoMimeType }}">
+                                Seu navegador não suporta reprodução de vídeo.
+                            </video>
+                            <a href="{{ asset(getFilePath('conversation') . '/' . @$message->media_path) }}" class="btn btn--sm btn--base mt-2" download>
+                                <i class="las la-download"></i> Download
                             </a>
                         @endif
                     </div>

@@ -411,6 +411,53 @@ trait InboxManager
         ][$messageType];
     }
 
+    public function streamMedia($mediaId)
+    {
+        $user = getParentUser();
+
+        $message = Message::where('media_id', $mediaId)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$message) {
+            return apiResponse("message_not_found", "error", ["Message not found"]);
+        }
+
+        $accessToken = $user->currentWhatsapp()->access_token;
+
+        try {
+            if ($message->message_type == Status::VIDEO_TYPE_MESSAGE || $message->message_type == Status::IMAGE_TYPE_MESSAGE) {
+                $filePath = getFilePath('conversation') . "/" . $message->media_path;
+
+                if ($message->media_path && File::exists($filePath)) {
+                    return response()->file($filePath);
+                } else {
+                    return responseManager('exception', "Failed to load the media");
+                }
+            }
+
+            $mediaUrl = (new WhatsAppLib())
+                ->getMediaUrl($mediaId, $accessToken)['url'];
+
+            $response = Http::withHeaders([
+                'Authorization' => "Bearer {$accessToken}",
+            ])->get($mediaUrl);
+
+            if ($response->failed()) {
+                return responseManager('exception', "Failed to load the media");
+            }
+
+            $fileContent = $response->body();
+            $mimeType = $response->header('Content-Type');
+
+            return response($fileContent, 200)
+                ->header('Content-Type', $mimeType)
+                ->header('Content-Disposition', 'inline');
+        } catch (Exception $ex) {
+            return responseManager('exception', $ex->getMessage());
+        }
+    }
+
     public function downloadMedia($mediaId)
     {
         $user = getParentUser();

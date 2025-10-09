@@ -132,6 +132,7 @@ Route::middleware('auth')->name('user.')->group(function () {
                     Route::post('chat/message/resend', 'resendMessage')->name('message.resend')->middleware('agent.permission:send message');
                     Route::get('chat/message/status/{conversationId}', 'updateMessageStatus')->name('message.status');
                     Route::get('media/download/{mediaId}', 'downloadMedia')->name('media.download');
+                    Route::get('media/stream/{mediaId}', 'streamMedia')->name('media.stream');
                 });
             });
 

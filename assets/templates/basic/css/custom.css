@@ -969,3 +969,31 @@ body.sidebar-collapsed .dashboard__right {
     }
 }
 /* ==================== Sidebar Collapse Styles End ==================== */
+
+/* ==================== Video Message Styles ==================== */
+.message-video-container {
+    margin-top: 10px;
+    border-radius: 8px;
+    overflow: hidden;
+    max-width: 100%;
+}
+
+.message-video {
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    border-radius: 8px;
+    background-color: #000;
+    display: block;
+}
+
+.message-video:focus {
+    outline: none;
+}
+
+@media (max-width: 576px) {
+    .message-video {
+        max-width: 100%;
+    }
+}
+/* ==================== Video Message Styles End ==================== */
