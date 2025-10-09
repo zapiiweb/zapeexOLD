@@ -264,11 +264,12 @@ trait InboxManager
     public function sendMessage(Request $request)
     {
         $request->validate([
-            'message'         => 'required_without_all:image,document,video',
+            'message'         => 'required_without_all:image,document,video,audio',
             'conversation_id' => 'required',
             'image'           => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
             'document'        => ['nullable', 'file', 'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar', 'max:102400'],
             'video'           => ['nullable', 'file', 'mimes:mp4,mov,avi', 'max:16384'],
+            'audio'           => ['nullable', 'file', 'mimes:aac,mp3,m4a,wav', 'max:16384'],
         ], [
             'conversation_id.required'     => 'Please select a conversation to send message.',
             'message.required_without_all' => 'The message field is required',
@@ -289,7 +290,7 @@ trait InboxManager
             \Log::info('INBOX: Sending message', [
                 'conversation_id' => $conversation->id,
                 'mobile' => $conversation->contact->mobileNumber,
-                'has_file' => $request->hasFile('document') || $request->hasFile('image') || $request->hasFile('video')
+                'has_file' => $request->hasFile('document') || $request->hasFile('image') || $request->hasFile('video') || $request->hasFile('audio')
             ]);
 
             $messageSend = (new WhatsAppLib())->messageSend($request, $conversation->contact->mobileNumber, $whatsappAccount);

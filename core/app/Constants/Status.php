@@ -82,6 +82,7 @@ class Status
     const IMAGE_TYPE_MESSAGE = 2;
     const VIDEO_TYPE_MESSAGE = 3;
     const DOCUMENT_TYPE_MESSAGE = 4;
+    const AUDIO_TYPE_MESSAGE = 5;
 
     const SENT = 1;
     const DELIVERED = 2;

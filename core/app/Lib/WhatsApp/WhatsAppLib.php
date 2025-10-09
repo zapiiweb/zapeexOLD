@@ -76,6 +76,16 @@ class WhatsAppLib
             ];
             $mediaType     = 'video';
             $mimeType      = mime_content_type($file->getPathname());
+        } else if ($request->hasFile('audio')) {
+            $file          = $request->file('audio');
+            $mediaUpload   = $this->uploadMedia($mediaLink, $file, $accessToken);
+            $mediaId       = $mediaUpload['id'];
+            $data['type']  = 'audio';
+            $data['audio'] = [
+                'id' => $mediaId
+            ];
+            $mediaType     = 'audio';
+            $mimeType      = mime_content_type($file->getPathname());
         } else {
             $data['type'] = 'text';
             $data['text'] = [
@@ -383,6 +393,15 @@ class WhatsAppLib
             $options['mediaType'] = 'video';
             $options['mediaUrl'] = $mediaUrl;
             $options['caption'] = $message;
+            $options['mimeType'] = $mimeType;
+        } elseif ($request->hasFile('audio')) {
+            $file = $request->file('audio');
+            $mimeType = $file->getMimeType();
+            $mediaPath = $this->storeMediaFile($file, $whatsappAccount->user_id);
+            $mediaUrl = asset(getFilePath('conversation') . '/' . $mediaPath);
+            
+            $options['mediaType'] = 'audio';
+            $options['mediaUrl'] = $mediaUrl;
             $options['mimeType'] = $mimeType;
         }
         
