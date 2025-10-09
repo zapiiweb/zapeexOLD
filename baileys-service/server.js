@@ -13,7 +13,7 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
 const AUTH_DIR = path.join(__dirname, 'auth_sessions');
-const MEDIA_DIR = path.join(__dirname, '..', 'assets', 'images', 'conversation');
+const MEDIA_DIR = path.join(__dirname, '..', 'assets', 'media', 'conversation');
 const WEBHOOK_URL = process.env.WEBHOOK_URL || null;
 
 // Store active sessions
