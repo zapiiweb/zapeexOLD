@@ -74,6 +74,40 @@
                         @endif
                     </div>
                 @endif
+                @if (@$message->message_type == Status::AUDIO_TYPE_MESSAGE)
+                    @php
+                        $audioFilename = @$message->media_filename ?? @$message->media_path ?? '';
+                        $audioExtension = strtolower(pathinfo($audioFilename, PATHINFO_EXTENSION));
+                        
+                        $audioMimeTypes = [
+                            'mp3' => 'audio/mpeg',
+                            'aac' => 'audio/aac',
+                            'm4a' => 'audio/mp4',
+                            'wav' => 'audio/wav',
+                        ];
+                        
+                        $audioMimeType = $audioMimeTypes[$audioExtension] ?? 'audio/mpeg';
+                    @endphp
+                    <div class="message-audio-container">
+                        @if (@$message->media_id)
+                            <audio class="message-audio" controls preload="metadata">
+                                <source src="{{ route('user.inbox.media.stream', $message->media_id) }}" type="{{ $audioMimeType }}">
+                                Seu navegador não suporta reprodução de áudio.
+                            </audio>
+                            <a href="{{ route('user.inbox.media.download', $message->media_id) }}" class="btn btn--sm btn--base mt-2" download>
+                                <i class="las la-download"></i> Download
+                            </a>
+                        @else
+                            <audio class="message-audio" controls preload="metadata">
+                                <source src="{{ asset(getFilePath('conversation') . '/' . @$message->media_path) }}" type="{{ $audioMimeType }}">
+                                Seu navegador não suporta reprodução de áudio.
+                            </audio>
+                            <a href="{{ asset(getFilePath('conversation') . '/' . @$message->media_path) }}" class="btn btn--sm btn--base mt-2" download>
+                                <i class="las la-download"></i> Download
+                            </a>
+                        @endif
+                    </div>
+                @endif
                 @if (@$message->message_type == Status::DOCUMENT_TYPE_MESSAGE)
                     @php
                         $filename = @$message->media_filename ?? '';
