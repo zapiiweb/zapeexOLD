@@ -976,6 +976,13 @@ body.sidebar-collapsed .dashboard__right {
     border-radius: 8px;
     overflow: hidden;
     max-width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+.message-video-container .btn {
+    position: relative;
+    z-index: 1;
 }
 
 .message-video {
@@ -1004,6 +1011,13 @@ body.sidebar-collapsed .dashboard__right {
     border-radius: 8px;
     overflow: hidden;
     max-width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+.message-audio-container .btn {
+    position: relative;
+    z-index: 1;
 }
 
 .message-audio {
