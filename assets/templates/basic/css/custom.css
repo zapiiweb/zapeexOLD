@@ -997,3 +997,31 @@ body.sidebar-collapsed .dashboard__right {
     }
 }
 /* ==================== Video Message Styles End ==================== */
+
+/* ==================== Audio Message Styles ==================== */
+.message-audio-container {
+    margin-top: 10px;
+    border-radius: 8px;
+    overflow: hidden;
+    max-width: 100%;
+}
+
+.message-audio {
+    width: 100%;
+    max-width: 350px;
+    height: 40px;
+    border-radius: 8px;
+    background: var(--bs-body-bg);
+    display: block;
+}
+
+.message-audio:focus {
+    outline: none;
+}
+
+@media (max-width: 576px) {
+    .message-audio {
+        max-width: 100%;
+    }
+}
+/* ==================== Audio Message Styles End ==================== */
