@@ -268,7 +268,7 @@ trait InboxManager
             'conversation_id' => 'required',
             'image'           => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
             'document'        => ['nullable', 'file', 'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar', 'max:102400'],
-            'video'           => ['nullable', 'file', 'mimes:mp4', 'max:16384'],
+            'video'           => ['nullable', 'file', 'mimes:mp4,mov,avi', 'max:16384'],
         ], [
             'conversation_id.required'     => 'Please select a conversation to send message.',
             'message.required_without_all' => 'The message field is required',

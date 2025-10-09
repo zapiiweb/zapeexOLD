@@ -46,12 +46,12 @@
                         @if (@$message->media_id)
                             <a href="{{ route('user.inbox.media.download', $message->media_id) }}"
                                 class="text--primary download-document">
-                                <img class="message-image" src="{{ asset('assets/images/video_preview.png') }}" alt="image">
+                                <img class="message-image" src="{{ asset('assets/images/document_video_preview.png') }}" alt="image">
                             </a>
                         @else
                             <a href="{{ asset(getFilePath('conversation') . '/' . @$message->media_path) }}"
                                 class="text--primary download-document" target="_blank">
-                                <img class="message-image" src="{{ asset('assets/images/video_preview.png') }}" alt="image">
+                                <img class="message-image" src="{{ asset('assets/images/document_video_preview.png') }}" alt="image">
                             </a>
                         @endif
                     </div>
