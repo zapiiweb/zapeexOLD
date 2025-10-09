@@ -11,11 +11,11 @@ use Illuminate\Support\Facades\Http;
 class WhatsAppLib
 {
 
-    public function messageSend($request, $toNumber, $whatsappAccount)
+    public function messageSend($request, $toNumber, $whatsappAccount, $conversationId = null)
     {
         // Check if Baileys is connected and use it instead of Meta API
         if ($whatsappAccount->baileys_connected && $whatsappAccount->baileys_session_id) {
-            return $this->messageSendViaBaileys($request, $toNumber, $whatsappAccount);
+            return $this->messageSendViaBaileys($request, $toNumber, $whatsappAccount, $conversationId);
         }
 
         $phoneNumberId    = $whatsappAccount->phone_number_id;
@@ -100,7 +100,7 @@ class WhatsAppLib
             }
 
             if ($mediaId && $mediaUrl && $request->hasFile('image')) {
-                $mediaPath = $this->storedMediaToLocal($mediaUrl, $mediaId, $accessToken, $whatsappAccount->user_id);
+                $mediaPath = $this->storedMediaToLocal($mediaUrl, $mediaId, $accessToken, $conversationId ?? $whatsappAccount->user_id);
             }
 
             $response = Http::withHeaders([
@@ -317,7 +317,7 @@ class WhatsAppLib
         return "https://graph.facebook.com/v22.0/";
     }
 
-    public function storedMediaToLocal($mediaUrl, $mediaId, $accessToken, $userId)
+    public function storedMediaToLocal($mediaUrl, $mediaId, $accessToken, $conversationId)
     {
         try {
             $response = Http::withHeaders([
@@ -335,7 +335,7 @@ class WhatsAppLib
             $fileName      = "{$mediaId}.{$fileExtension}";
 
             $parentFolder = getFilePath('conversation');
-            $subFolder    = "{$userId}/" . date('Y/m/d');
+            $subFolder    = "{$conversationId}/" . date('Y/m/d');
             $folderPath   = $parentFolder . "/" . $subFolder;
             $filePath     = $folderPath . "/" . $fileName;
 
@@ -354,7 +354,7 @@ class WhatsAppLib
     /**
      * Send message via Baileys
      */
-    private function messageSendViaBaileys($request, $toNumber, $whatsappAccount)
+    private function messageSendViaBaileys($request, $toNumber, $whatsappAccount, $conversationId = null)
     {
         $baileysService = new BaileysService();
         
@@ -365,7 +365,7 @@ class WhatsAppLib
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $mimeType = $file->getMimeType();
-            $mediaPath = $this->storeMediaFile($file, $whatsappAccount->user_id);
+            $mediaPath = $this->storeMediaFile($file, $conversationId ?? $whatsappAccount->user_id);
             $mediaUrl = asset(getFilePath('conversation') . '/' . $mediaPath);
             
             $options['mediaType'] = 'image';
@@ -376,7 +376,7 @@ class WhatsAppLib
             $file = $request->file('document');
             $mimeType = $file->getMimeType();
             $fileName = $file->getClientOriginalName();
-            $mediaPath = $this->storeMediaFile($file, $whatsappAccount->user_id);
+            $mediaPath = $this->storeMediaFile($file, $conversationId ?? $whatsappAccount->user_id);
             $mediaUrl = asset(getFilePath('conversation') . '/' . $mediaPath);
             
             $options['mediaType'] = 'document';
@@ -387,7 +387,7 @@ class WhatsAppLib
         } elseif ($request->hasFile('video')) {
             $file = $request->file('video');
             $mimeType = $file->getMimeType();
-            $mediaPath = $this->storeMediaFile($file, $whatsappAccount->user_id);
+            $mediaPath = $this->storeMediaFile($file, $conversationId ?? $whatsappAccount->user_id);
             $mediaUrl = asset(getFilePath('conversation') . '/' . $mediaPath);
             
             $options['mediaType'] = 'video';
@@ -397,7 +397,7 @@ class WhatsAppLib
         } elseif ($request->hasFile('audio')) {
             $file = $request->file('audio');
             $mimeType = $file->getMimeType();
-            $mediaPath = $this->storeMediaFile($file, $whatsappAccount->user_id);
+            $mediaPath = $this->storeMediaFile($file, $conversationId ?? $whatsappAccount->user_id);
             $mediaUrl = asset(getFilePath('conversation') . '/' . $mediaPath);
             
             $options['mediaType'] = 'audio';
@@ -447,13 +447,13 @@ class WhatsAppLib
     /**
      * Store media file locally
      */
-    private function storeMediaFile($file, $userId)
+    private function storeMediaFile($file, $conversationId)
     {
         $fileExtension = $file->getClientOriginalExtension();
         $fileName = uniqid() . '.' . $fileExtension;
         
         $parentFolder = getFilePath('conversation');
-        $subFolder = "{$userId}/" . date('Y/m/d');
+        $subFolder = "{$conversationId}/" . date('Y/m/d');
         $folderPath = $parentFolder . "/" . $subFolder;
         
         if (!file_exists($folderPath)) {
