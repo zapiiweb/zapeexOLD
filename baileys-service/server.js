@@ -127,6 +127,13 @@ async function createSession(sessionId) {
                         'video/quicktime': 'mov',
                         'video/x-msvideo': 'avi',
                         'video/mp4': 'mp4',
+                        'audio/aac': 'aac',
+                        'audio/mpeg': 'mp3',
+                        'audio/mp4': 'm4a',
+                        'audio/x-m4a': 'm4a',
+                        'audio/wav': 'wav',
+                        'audio/x-wav': 'wav',
+                        'audio/ogg': 'ogg',
                         'image/jpeg': 'jpg',
                         'image/jpg': 'jpg',
                         'image/png': 'png',
@@ -190,6 +197,21 @@ async function createSession(sessionId) {
                             console.log(`Video saved: ${fileName}`);
                         } catch (err) {
                             console.error('Error downloading video:', err);
+                        }
+                    } else if (msg.message.audioMessage) {
+                        messageData.messageType = 'audio';
+                        messageData.mimetype = msg.message.audioMessage.mimetype;
+                        
+                        try {
+                            const buffer = await downloadMediaMessage(msg, 'buffer', {});
+                            const extension = mimeToExt[msg.message.audioMessage.mimetype] || msg.message.audioMessage.mimetype.split('/')[1] || 'mp3';
+                            const fileName = `${Date.now()}_${msg.key.id}.${extension}`;
+                            const filePath = path.join(MEDIA_DIR, fileName);
+                            fs.writeFileSync(filePath, buffer);
+                            messageData.fileName = fileName;
+                            console.log(`Audio saved: ${fileName}`);
+                        } catch (err) {
+                            console.error('Error downloading audio:', err);
                         }
                     }
 
@@ -331,6 +353,12 @@ async function sendMessage(sessionId, to, message, options = {}) {
                     content = {
                         video: { url: options.mediaUrl },
                         caption: message || options.caption || ''
+                    };
+                    break;
+                case 'audio':
+                    content = {
+                        audio: { url: options.mediaUrl },
+                        mimetype: options.mimeType || 'audio/mpeg'
                     };
                     break;
             }

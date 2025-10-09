@@ -257,6 +257,7 @@ class WebhookController extends Controller
             "image"    => Status::IMAGE_TYPE_MESSAGE,
             "video"    => Status::VIDEO_TYPE_MESSAGE,
             "document" => Status::DOCUMENT_TYPE_MESSAGE,
+            "audio"    => Status::AUDIO_TYPE_MESSAGE,
         ][$messageType];
     }
 
