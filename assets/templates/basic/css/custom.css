@@ -978,6 +978,10 @@ body.sidebar-collapsed .dashboard__right {
     max-width: 100%;
 }
 
+.message-video-container .btn {
+    z-index: auto;
+}
+
 .message-video {
     width: 100%;
     max-width: 400px;
@@ -1004,6 +1008,10 @@ body.sidebar-collapsed .dashboard__right {
     border-radius: 8px;
     overflow: hidden;
     max-width: 100%;
+}
+
+.message-audio-container .btn {
+    z-index: auto;
 }
 
 .message-audio {
