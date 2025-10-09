@@ -64,11 +64,15 @@ Preferred communication style: Simple, everyday language.
 - **Baileys (@whiskeysockets/baileys)**: Direct WhatsApp Web connection for automated QR code authentication
   - Runs as separate Node.js service on port 3001
   - REST API for session management, QR generation, and message sending
-  - Webhook system for receiving incoming messages
+  - Webhook system for receiving incoming messages and status updates
   - Automatic session persistence with multi-file auth state
-  - Supports text, images, documents, and video messages
+  - Supports text, images, documents, video, and audio messages
+  - Real-time message status updates: sent (1) → delivered (2) → read/played (3/4)
+  - Session files protected via .gitignore (auth_sessions/ directory)
 - **Automatic Switching**: System automatically selects Baileys when QR connected, falls back to Meta API otherwise
 - **Unified Message Flow**: Both integrations use the same database schema and message processing logic
+- **Media Support**: HTML5 players for audio/video with download functionality, document icons for files (PDF, DOC, XLS, etc.)
+- **UI/UX**: Proper z-index layering ensures modals and popups overlay correctly over media players and buttons
 
 ### File Processing & Generation
 - **Intervention Image**: Image manipulation and processing
