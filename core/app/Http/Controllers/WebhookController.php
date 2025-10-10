@@ -212,7 +212,7 @@ class WebhookController extends Controller
                         $mediaUrl = $whatsappLib->getMediaUrl($mediaId, $accessToken);
 
                         if ($mediaUrl) {
-                            $mediaPath           = $whatsappLib->storedMediaToLocal($mediaUrl['url'], $mediaId, $accessToken, $conversation->id);
+                            $mediaPath           = $whatsappLib->storedMediaToLocal($mediaUrl['url'], $mediaId, $accessToken, $user->id);
                             $message->media_url  = $mediaUrl;
                             $message->media_path = $mediaPath;
 

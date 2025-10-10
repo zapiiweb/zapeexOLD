@@ -293,7 +293,7 @@ trait InboxManager
                 'has_file' => $request->hasFile('document') || $request->hasFile('image') || $request->hasFile('video') || $request->hasFile('audio')
             ]);
 
-            $messageSend = (new WhatsAppLib())->messageSend($request, $conversation->contact->mobileNumber, $whatsappAccount, $conversation->id);
+            $messageSend = (new WhatsAppLib())->messageSend($request, $conversation->contact->mobileNumber, $whatsappAccount);
 
             \Log::info('INBOX: Message sent response', ['messageSend' => $messageSend]);
 
