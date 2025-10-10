@@ -427,7 +427,7 @@ trait InboxManager
         $accessToken = $user->currentWhatsapp()->access_token;
 
         try {
-            if ($message->message_type == Status::VIDEO_TYPE_MESSAGE || $message->message_type == Status::IMAGE_TYPE_MESSAGE) {
+            if ($message->message_type == Status::VIDEO_TYPE_MESSAGE || $message->message_type == Status::IMAGE_TYPE_MESSAGE || $message->message_type == Status::AUDIO_TYPE_MESSAGE) {
                 $filePath = getFilePath('conversation') . "/" . $message->media_path;
 
                 if ($message->media_path && File::exists($filePath)) {
@@ -474,7 +474,7 @@ trait InboxManager
         $accessToken = $user->currentWhatsapp()->access_token;
 
         try {
-            if ($message->message_type == Status::IMAGE_TYPE_MESSAGE) {
+            if ($message->message_type == Status::IMAGE_TYPE_MESSAGE || $message->message_type == Status::VIDEO_TYPE_MESSAGE || $message->message_type == Status::AUDIO_TYPE_MESSAGE) {
                 $filePath = getFilePath('conversation') . "/" . $message->media_path;
 
                 if ($message->media_path && File::exists($filePath)) {
