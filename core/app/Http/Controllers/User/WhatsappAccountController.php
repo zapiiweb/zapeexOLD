@@ -49,8 +49,8 @@ class WhatsappAccountController extends Controller
         $whatsappAccount->baileys_phone_number = null;
         $whatsappAccount->save();
 
-        // Start session
-        $result = $this->baileysService->startSession($whatsappAccount->baileys_session_id);
+        // Start session with userId for file organization
+        $result = $this->baileysService->startSession($whatsappAccount->baileys_session_id, $whatsappAccount->user_id);
 
         if (!$result['success']) {
             return apiResponse('error', 'error', [$result['message']]);

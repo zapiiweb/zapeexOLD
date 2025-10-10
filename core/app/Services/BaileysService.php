@@ -19,13 +19,20 @@ class BaileysService
     /**
      * Start a new WhatsApp session
      */
-    public function startSession(string $sessionId): array
+    public function startSession(string $sessionId, ?int $userId = null): array
     {
         try {
+            $payload = [
+                'sessionId' => $sessionId,
+            ];
+            
+            // Include userId for file organization if provided
+            if ($userId) {
+                $payload['userId'] = $userId;
+            }
+            
             $response = Http::timeout($this->timeout)
-                ->post("{$this->baseUrl}/session/start", [
-                    'sessionId' => $sessionId,
-                ]);
+                ->post("{$this->baseUrl}/session/start", $payload);
 
             if ($response->successful()) {
                 return [

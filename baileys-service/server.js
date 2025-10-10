@@ -21,6 +21,7 @@ const sessions = new Map();
 const qrCodes = new Map();
 const sessionWebhooks = new Map();
 const messageJobs = new Map(); // Track async message sending jobs
+const sessionUserIds = new Map(); // Map sessionId to userId for file organization
 
 // Create directories if they don't exist
 if (!fs.existsSync(AUTH_DIR)) {
@@ -34,9 +35,36 @@ if (!fs.existsSync(MEDIA_DIR)) {
 const logger = P({ level: 'silent' });
 
 /**
+ * Save media file with user_id/year/month/day directory structure
+ */
+function saveMediaFile(buffer, fileName, sessionId) {
+    const userId = sessionUserIds.get(sessionId) || 'unknown';
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    
+    // Create subdirectory structure: userId/year/month/day
+    const subDir = path.join(String(userId), String(year), month, day);
+    const fullPath = path.join(MEDIA_DIR, subDir);
+    
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(fullPath)) {
+        fs.mkdirSync(fullPath, { recursive: true });
+    }
+    
+    // Save file
+    const filePath = path.join(fullPath, fileName);
+    fs.writeFileSync(filePath, buffer);
+    
+    // Return relative path from conversation directory
+    return path.join(subDir, fileName).replace(/\\/g, '/'); // Normalize path separators
+}
+
+/**
  * Create or get WhatsApp session
  */
-async function createSession(sessionId) {
+async function createSession(sessionId, userId = null) {
     if (sessions.has(sessionId)) {
         return { success: true, message: 'Session already exists' };
     }
@@ -45,6 +73,22 @@ async function createSession(sessionId) {
         const sessionPath = path.join(AUTH_DIR, sessionId);
         if (!fs.existsSync(sessionPath)) {
             fs.mkdirSync(sessionPath, { recursive: true });
+        }
+        
+        // Persist userId in session directory for reconnections
+        if (userId) {
+            const userIdFile = path.join(sessionPath, 'user_id.txt');
+            fs.writeFileSync(userIdFile, String(userId));
+            sessionUserIds.set(sessionId, userId);
+            console.log(`Persisted userId ${userId} for session ${sessionId}`);
+        } else {
+            // Try to restore userId from persisted file
+            const userIdFile = path.join(sessionPath, 'user_id.txt');
+            if (fs.existsSync(userIdFile)) {
+                const restoredUserId = fs.readFileSync(userIdFile, 'utf8').trim();
+                sessionUserIds.set(sessionId, restoredUserId);
+                console.log(`Restored userId ${restoredUserId} for session ${sessionId}`);
+            }
         }
 
         const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
@@ -159,10 +203,9 @@ async function createSession(sessionId) {
                             const buffer = await downloadMediaMessage(msg, 'buffer', {});
                             const extension = mimeToExt[msg.message.imageMessage.mimetype] || msg.message.imageMessage.mimetype.split('/')[1] || 'jpg';
                             const fileName = `${Date.now()}_${msg.key.id}.${extension}`;
-                            const filePath = path.join(MEDIA_DIR, fileName);
-                            fs.writeFileSync(filePath, buffer);
-                            messageData.fileName = fileName;
-                            console.log(`Image saved: ${fileName}`);
+                            const relativePath = saveMediaFile(buffer, fileName, sessionId);
+                            messageData.fileName = relativePath;
+                            console.log(`Image saved: ${relativePath}`);
                         } catch (err) {
                             console.error('Error downloading image:', err);
                         }
@@ -175,10 +218,9 @@ async function createSession(sessionId) {
                         try {
                             const buffer = await downloadMediaMessage(msg, 'buffer', {});
                             const fileName = msg.message.documentMessage.fileName || `${Date.now()}_document`;
-                            const filePath = path.join(MEDIA_DIR, fileName);
-                            fs.writeFileSync(filePath, buffer);
-                            messageData.fileName = fileName;
-                            console.log(`Document saved: ${fileName}`);
+                            const relativePath = saveMediaFile(buffer, fileName, sessionId);
+                            messageData.fileName = relativePath;
+                            console.log(`Document saved: ${relativePath}`);
                         } catch (err) {
                             console.error('Error downloading document:', err);
                         }
@@ -191,10 +233,9 @@ async function createSession(sessionId) {
                             const buffer = await downloadMediaMessage(msg, 'buffer', {});
                             const extension = mimeToExt[msg.message.videoMessage.mimetype] || msg.message.videoMessage.mimetype.split('/')[1] || 'mp4';
                             const fileName = `${Date.now()}_${msg.key.id}.${extension}`;
-                            const filePath = path.join(MEDIA_DIR, fileName);
-                            fs.writeFileSync(filePath, buffer);
-                            messageData.fileName = fileName;
-                            console.log(`Video saved: ${fileName}`);
+                            const relativePath = saveMediaFile(buffer, fileName, sessionId);
+                            messageData.fileName = relativePath;
+                            console.log(`Video saved: ${relativePath}`);
                         } catch (err) {
                             console.error('Error downloading video:', err);
                         }
@@ -206,10 +247,9 @@ async function createSession(sessionId) {
                             const buffer = await downloadMediaMessage(msg, 'buffer', {});
                             const extension = mimeToExt[msg.message.audioMessage.mimetype] || msg.message.audioMessage.mimetype.split('/')[1] || 'mp3';
                             const fileName = `${Date.now()}_${msg.key.id}.${extension}`;
-                            const filePath = path.join(MEDIA_DIR, fileName);
-                            fs.writeFileSync(filePath, buffer);
-                            messageData.fileName = fileName;
-                            console.log(`Audio saved: ${fileName}`);
+                            const relativePath = saveMediaFile(buffer, fileName, sessionId);
+                            messageData.fileName = relativePath;
+                            console.log(`Audio saved: ${relativePath}`);
                         } catch (err) {
                             console.error('Error downloading audio:', err);
                         }
@@ -386,13 +426,13 @@ async function sendMessage(sessionId, to, message, options = {}) {
  * POST /session/start - Start a new session
  */
 app.post('/session/start', async (req, res) => {
-    const { sessionId } = req.body;
+    const { sessionId, userId } = req.body;
     
     if (!sessionId) {
         return res.status(400).json({ error: 'sessionId is required' });
     }
 
-    const result = await createSession(sessionId);
+    const result = await createSession(sessionId, userId);
     res.json(result);
 });
 

@@ -19,6 +19,7 @@ baileys-service/auth_sessions/
 baileys-service/*.json
 !baileys-service/package.json
 !baileys-service/package-lock.json
+baileys-service/auth_sessions/**/user_id.txt
 
 # IDE
 .idea/

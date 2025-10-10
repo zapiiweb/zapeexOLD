@@ -447,8 +447,8 @@ class WebhookController extends Controller
                 $message->message = $messageType === 'text' ? $messageText : ($caption ?? '');
                 $message->message_type = $this->getIntMessageType($messageType);
                 $message->media_caption = $caption;
-                $message->media_filename = $fileName;
-                $message->media_path = $fileName; // Save path for Baileys media
+                $message->media_filename = $messageType === 'document' ? basename($fileName) : null; // Only basename for documents
+                $message->media_path = $fileName; // Full path with user_id/year/month/day/filename
                 $message->mime_type = $mimetype;
                 $message->media_type = $messageType !== 'text' ? $messageType : null;
                 $message->ordering = Carbon::now();
