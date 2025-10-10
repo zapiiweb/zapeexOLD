@@ -99,7 +99,7 @@ async function createSession(sessionId, userId = null) {
             auth: state,
             logger,
             printQRInTerminal: false,
-            browser: ['OvoWpp', 'Chrome', '1.0.0'],
+            browser: ['Zapeex', 'Chrome', '1.0.0'],
         });
 
         // Handle credentials update

@@ -80,7 +80,7 @@
             <div class="card">
                 <div class="card-header bg--light">
                     <h5 class="mb-0">
-                        <i class="lab la-whatsapp"></i> @lang('WhatsApp Direct Connection (Baileys)')
+                        <i class="lab la-whatsapp"></i> @lang('WhatsApp Direct Connection')
                     </h5>
                     <p class="mb-0 mt-2 text-muted">@lang('Connect your WhatsApp directly by scanning a QR code. No Meta Business Account needed.')</p>
                 </div>
