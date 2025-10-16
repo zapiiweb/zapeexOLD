@@ -36,6 +36,7 @@ trait ContactManager
             $baseQuery->where('is_customer', Status::YES);
         }
 
+        $contactLists = ContactList::where('user_id', $user->id)->orderBy('name')->get();
         $pageTitle = "All " . $this->moduleNameTitle();
         $contacts  = $baseQuery->apiQuery();
         $view      = 'Template::user.' . $this->module . '.index';
@@ -45,6 +46,7 @@ trait ContactManager
             'view'         => $view,
             'contacts'     => $contacts,
             'contactTags'  => $contactTags,
+            'contactLists' => $contactLists,
             'profilePath' => getFilePath('contactProfile')
         ]);
     }
@@ -145,7 +147,6 @@ trait ContactManager
     public function importContact(Request $request)
     {
 
-        
         $validator = Validator::make($request->all(), [
             'file' => ['required', 'file', 'max:2048', "mimes:csv,xlsx"]
         ]);
@@ -154,11 +155,26 @@ trait ContactManager
             return apiResponse('validation_error', 'error', $validator->errors()->all());
         }
 
+        $contactList = null;
+        if ($request->contact_list_id) {
+            $contactList = ContactList::where('user_id', getParentUser()->id)->find($request->contact_list_id);
+
+            if (!$contactList) {
+                return apiResponse('not_found', 'error', ['Contact list not found']);
+            }
+        }
+
+        $references = [];
+
+        if($contactList) {
+            $references['contact_list_id'] = $contactList->id;
+        }
+
         $columnNames = ['firstname', 'lastname', 'mobile_code', 'mobile'];
         $notify = [];
 
         try {
-            $import = importFileReader($request->file, $columnNames, $columnNames);
+            $import = importFileReader($request->file, $columnNames, $columnNames, references: $references);
             $notify[] = $import->notifyMessage();
             $status = "success";
         } catch (Exception $ex) {

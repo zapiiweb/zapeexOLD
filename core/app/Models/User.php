@@ -71,6 +71,11 @@ class User extends Authenticatable
         return $this->belongsTo(PricingPlan::class, 'plan_id');
     }
 
+    public function aiSetting()
+    {
+        return $this->hasOne(AiUserSetting::class,'user_id');
+    }
+
     public function currentWhatsapp()
     {
         return $this->whatsappAccounts()->where('is_default', Status::YES)->first();

@@ -75,9 +75,11 @@
             data-bs-target="#profileModal">
             <i class="la la-pencil"></i> @lang('Edit')
         </button>
-        <a href="{{ route('admin.dashboard') }}" class="btn btn-outline--dark flex-fill">
-            <i class="las la-tachometer-alt"></i> @lang('Dashboard')
-        </a>
+        <x-admin.permission_check permission="view dashboard">
+            <a href="{{ route('admin.dashboard') }}" class="btn btn-outline--dark flex-fill">
+                <i class="las la-tachometer-alt"></i> @lang('Dashboard')
+            </a>
+        </x-admin.permission_check>
     </div>
 @endpush
 
@@ -89,6 +91,7 @@
             border-radius: 50%;
             margin: 0 auto;
         }
+
         .admin-profile-image img {
             margin: 0 auto;
             border-radius: 100%;

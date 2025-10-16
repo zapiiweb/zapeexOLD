@@ -1,10 +1,15 @@
+@php
+    $user = auth()->user();
+    $mobileNumber = $user->hasAgentPermission('view contact mobile') ? $conversation->contact->mobileNumber : showMobileNumber($conversation->contact->mobileNumber);
+    $firstName = $user->hasAgentPermission('view contact name') ? $conversation->contact->firstname : '***';
+    $lastName = $user->hasAgentPermission('view contact name') ? $conversation->contact->lastname : '***';
+@endphp
 <div class="body-right__top-btn">
-    <span class="close-icon-two">
+    <span class="close-icon-two d-md-none">
         <i class="fas fa-times"></i>
     </span>
     <x-permission_check permission="edit contact">
         <a href="{{ route('user.contact.edit', @$conversation->contact->id) }}">
-            <span class="icon"><i class="las la-pen"></i></span>
             @lang('Edit')
         </a>
     </x-permission_check>
@@ -16,8 +21,12 @@
         </div>
         <p class="profile-name mb-0">{{ __(@$conversation->contact->fullName) }}</p>
         <p class="text fs-14">
+            @if($user->hasAgentPermission('view contact mobile'))
             <a href="tel:{{ @$conversation->contact->mobileNumber }}"
                 class="link">+{{ @$conversation->contact->mobileNumber }}</a>
+            @else
+            <span class="link">+{{ @$mobileNumber }}</span>
+            @endif
         </p>
     </div>
     <div class="profile-details__tab">
@@ -40,15 +49,15 @@
 
                     <p class="details-content__text d-flex gap-1 flex-wrap justify-content-between">
                         <span class="title">@lang('First Name') : </span>
-                        <span>{{ __(@$conversation->contact->firstname) }}</span>
+                        <span>{{ __(@$firstName) }}</span>
                     </p>
                     <p class="details-content__text d-flex gap-1 flex-wrap justify-content-between">
                         <span class="title">@lang('Last Name') : </span>
-                        <span>{{ __(@$conversation->contact->lastname) }}</span>
+                        <span>{{ __(@$lastName) }}</span>
                     </p>
                     <p class="details-content__text d-flex gap-1 flex-wrap justify-content-between">
                         <span class="title">@lang('Mobile Number') : </span>
-                        <span>{{ __(@$conversation->contact->mobileNumber) }}</span>
+                        <span>{{ @$mobileNumber }}</span>
                     </p>
                     <p class="details-content__text d-flex gap-1 flex-wrap justify-content-between">
                         <span class="title">@lang('Crated At') : </span>

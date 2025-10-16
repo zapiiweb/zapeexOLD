@@ -63,7 +63,7 @@
                 <li class="pricing-list__item justify-content-between">
                     <span class="d-flex gap-2">
                         <span class="pricing-list__item-icon fs-16">
-                            <i class="las la-robot"></i>
+                            <i class="lab la-rocketchat"></i>
                         </span>
                         @lang('Chatbot Limit')
                     </span>
@@ -108,6 +108,32 @@
                         @lang('Welcome Message Available')
                     </span>
                     @if ($pricingPlan->welcome_message)
+                        <span class="text--success">@lang('Yes')</span>
+                    @else
+                        <span class="text--danger">@lang('No')</span>
+                    @endif
+                </li>
+                <li class="pricing-list__item justify-content-between">
+                    <span class="d-flex gap-2">
+                        <span class="pricing-list__item-icon fs-16">
+                            <i class="las la-robot"></i>
+                        </span>
+                        @lang('AI Assistance')
+                    </span>
+                    @if ($pricingPlan->ai_assistance)
+                        <span class="text--success">@lang('Yes')</span>
+                    @else
+                        <span class="text--danger">@lang('No')</span>
+                    @endif
+                </li>
+                <li class="pricing-list__item justify-content-between">
+                    <span class="d-flex gap-2">
+                        <span class="pricing-list__item-icon fs-16">
+                            <i class="las la-link"></i>
+                        </span>
+                        @lang('CTA URL Message')
+                    </span>
+                    @if ($pricingPlan->cta_url_message)
                         <span class="text--success">@lang('Yes')</span>
                     @else
                         <span class="text--danger">@lang('No')</span>

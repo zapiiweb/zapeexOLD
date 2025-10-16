@@ -13,17 +13,19 @@
                                 <h5 class="user-detail__name mb-1">{{ __($user->fullname) }}</h5>
                                 <p class="user-detail__username">{{ '@' . $user->username }}</p>
                             </div>
-                            <div class="login-user">
-                                <a target="_blank" href="{{ route('admin.users.login', $user->id) }}"
-                                    class="btn btn--primary">
-                                    <i class="fas fa-sign-in-alt me-1"></i>
-                                    @if ($user->parent_id == Status::NO)
-                                        <span>@lang('Login as User')</span>
-                                    @else
-                                        <span>@lang('Login as Agent')</span>
-                                    @endif
-                                </a>
-                            </div>
+                            <x-admin.permission_check permission="login as user">
+                                <div class="login-user">
+                                    <a target="_blank" href="{{ route('admin.users.login', $user->id) }}"
+                                        class="btn btn--primary">
+                                        <i class="fas fa-sign-in-alt me-1"></i>
+                                        @if ($user->parent_id == Status::NO)
+                                            <span>@lang('Login as User')</span>
+                                        @else
+                                            <span>@lang('Login as Agent')</span>
+                                        @endif
+                                    </a>
+                                </div>
+                            </x-admin.permission_check>
                         </div>
                         <div class="row gy-4 align-items-center">
                             <div class="col-md-6">
@@ -207,11 +209,13 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center gap-3">
                         <h5 class="card-title mb-0">@lang('Full Information')</h5>
-                        <div class=" d-none d-md-block">
-                            <button type="submit" class="btn btn--primary fw-500 disabled" disabled>
-                                <i class="fa-regular fa-paper-plane me-1"></i><span>@lang('Update')</span>
-                            </button>
-                        </div>
+                        <x-admin.permission_check permission="update user">
+                            <div class=" d-none d-md-block">
+                                <button type="submit" class="btn btn--primary fw-500 disabled" disabled>
+                                    <i class="fa-regular fa-paper-plane me-1"></i><span>@lang('Update')</span>
+                                </button>
+                            </div>
+                        </x-admin.permission_check>
                     </div>
                     <div class="card-body">
                         <div class="row">
@@ -337,11 +341,13 @@
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center gap-3">
                     <h5 class="card-title mb-0">@lang('Login History')</h5>
-                    <a href="{{ route('admin.report.login.history') }}?user_id={{ $user->id }}"
-                        class="btn btn--primary fw-500 @if (!$loginLogs->count()) disabled @endif">
-                        <span>@lang('View All')</span>
-                        <i class="fas fa-chevron-right"></i>
-                    </a>
+                    <x-admin.permission_check permission="view login history">
+                        <a href="{{ route('admin.report.login.history') }}?user_id={{ $user->id }}"
+                            class="btn btn--primary fw-500 @if (!$loginLogs->count()) disabled @endif">
+                            <span>@lang('View All')</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </x-admin.permission_check>
                 </div>
                 <div class="card-body">
                     <div class="login-history h-100">
@@ -466,34 +472,41 @@
 
 
 @push('breadcrumb-plugins')
-    <div class=" d-flex gap-2  flex-wrap">
-        <button type="button" class=" flex-fill btn  btn--success balance-adjust" data-act="add">
-            <i class="las la-plus me-1"></i>@lang('Balance')
-        </button>
-        <button type="button" class="flex-fill btn  btn--danger balance-adjust" data-act="sub">
-            <i class="las la-minus-circle me-1"></i>@lang('Balance')
-        </button>
-        @if ($user->status == Status::USER_ACTIVE)
-            <button type="button" class="flex-fill btn  btn--warning" data-bs-toggle="modal"
-                data-bs-target="#userStatusModal">
-                <i class="las la-ban me-1"></i>@lang('Ban User')
+    <div class="d-flex gap-2  flex-wrap">
+        <x-admin.permission_check permission="update user balance">
+            <button type="button" class=" flex-fill btn  btn--success balance-adjust" data-act="add">
+                <i class="las la-plus me-1"></i>@lang('Balance')
             </button>
-        @else
-            <button type="button" class="flex-fill btn  btn--info" data-bs-toggle="modal"
-                data-bs-target="#userStatusModal">
-                <i class="las la-ban me-1"></i>@lang('Unban User')
+            <button type="button" class="flex-fill btn  btn--danger balance-adjust" data-act="sub">
+                <i class="las la-minus-circle me-1"></i>@lang('Balance')
             </button>
-        @endif
-        <a href="{{ route('admin.report.notification.history') }}?user_id={{ $user->id }}"
-            class="flex-fill btn  btn--secondary">
-            <i class="las la-bell me-1"></i>@lang('Notifications')
-        </a>
-        @if ($user->kyc_data)
-            <a href="{{ route('admin.users.kyc.details', $user->id) }}" target="_blank"
-                class="flex-fill btn  btn--info">
-                <i class="las la-user-check me-1"></i>@lang('KYC Data')
+        </x-admin.permission_check>
+        <x-admin.permission_check permission="ban user">
+            @if ($user->status == Status::USER_ACTIVE)
+                <button type="button" class="flex-fill btn  btn--warning" data-bs-toggle="modal"
+                    data-bs-target="#userStatusModal">
+                    <i class="las la-ban me-1"></i>@lang('Ban User')
+                </button>
+            @else
+                <button type="button" class="flex-fill btn  btn--info" data-bs-toggle="modal"
+                    data-bs-target="#userStatusModal">
+                    <i class="las la-ban me-1"></i>@lang('Unban User')
+                </button>
+            @endif
+        </x-admin.permission_check>
+        <x-admin.permission_check permission="view user notifications">
+            <a href="{{ route('admin.users.notification.log', $user->id) }}" class="flex-fill btn  btn--secondary">
+                <i class="las la-bell me-1"></i>@lang('Notifications')
             </a>
-        @endif
+        </x-admin.permission_check>
+        <x-admin.permission_check permission="update user">
+            @if ($user->kyc_data)
+                <a href="{{ route('admin.users.kyc.details', $user->id) }}" target="_blank"
+                    class="flex-fill btn  btn--info">
+                    <i class="las la-user-check me-1"></i>@lang('KYC Data')
+                </a>
+            @endif
+        </x-admin.permission_check>
     </div>
 @endpush
 

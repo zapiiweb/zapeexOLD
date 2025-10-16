@@ -78,7 +78,7 @@
         </div>
     @endif
 
-    <div class="row gy-4 justify-content-center">
+    <div class="row gy-4">
         <x-permission_check permission="view wallet">
             <div class="col-xxl-3 col-sm-6">
                 <a href="{{ route('user.transactions') }}" class="dashboard-widget widget-two widget-blue">
@@ -562,7 +562,6 @@
                 </div>
             </div>
         @endif
-
         <x-permission_check permission="view subscription">
             <div class="col-lg-6">
                 <h6>@lang('Latest Contact')</h6>

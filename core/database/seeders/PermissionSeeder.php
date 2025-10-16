@@ -37,7 +37,10 @@ class PermissionSeeder extends Seeder
             ],
             "whatsapp" => [
                 "view inbox",
-                "send message"
+                "send message",
+                "view contact name",
+                "view contact mobile",
+                "view contact profile",
             ],
             "customer" => [
                 "view customer",
@@ -50,6 +53,14 @@ class PermissionSeeder extends Seeder
                 "edit template",
                 "add template",
                 "delete template",
+            ],
+            "cta url" => [
+                "view cta url",
+                "add cta url",
+                "delete cta url",
+            ],
+            "ai assistant" => [
+                "ai assistant settings",
             ],
             "campaign" => [
                 "view campaign",

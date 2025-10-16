@@ -3,13 +3,9 @@
         <span class="sidebar-menu__close d-lg-none d-block">
             <i class="fas fa-times"></i>
         </span>
-        <a href="javascript:void(0)" class="sidebar-collapse-btn d-none d-lg-flex" title="Colapsar Menu">
-            <i class="fas fa-chevron-left"></i>
-        </a>
         <div class="sidebar-logo">
-            <a href="{{ route('user.home') }}" class="sidebar-logo__link">
-                <img src="{{ siteLogo('dark') }}" alt="logo" class="logo-expanded">
-                <img src="{{ getImage('assets/images/logo_icon/favicon.png') }}" alt="logo" class="logo-collapsed">
+            <a href="{{ route('home') }}" class="sidebar-logo__link">
+                <img src="{{ siteLogo('dark') }}" alt="logo">
             </a>
         </div>
         <ul class="sidebar-menu-list">
@@ -89,6 +85,12 @@
                                     <span class="text">@lang('New Template')</span>
                                 </a>
                             </li>
+                            <li class="sidebar-submenu-list__item {{ menuActive('user.template.create.carousel') }}">
+                                <a href="{{ route('user.template.create.carousel') }}"
+                                    class="sidebar-submenu-list__link">
+                                    <span class="text">@lang('Carousel Template')</span>
+                                </a>
+                            </li>
                             <li class="sidebar-submenu-list__item {{ menuActive('user.template.index') }}">
                                 <a href="{{ route('user.template.index') }}" class="sidebar-submenu-list__link">
                                     <span class="text">@lang('All Template')</span>
@@ -150,6 +152,12 @@
                                     </a>
                                 </li>
                             </x-permission_check>
+                            <li class="sidebar-submenu-list__item {{ menuActive('user.automation.ai.assistant') }}">
+                                <a href="{{ route('user.automation.ai.assistant') }}"
+                                    class="sidebar-submenu-list__link">
+                                    <span class="text">@lang('AI Assistant')</span>
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </li>
@@ -202,6 +210,34 @@
                                 <li class="sidebar-submenu-list__item {{ menuActive('user.floater.index') }}">
                                     <a href="{{ route('user.floater.index') }}" class="sidebar-submenu-list__link">
                                         <span class="text">@lang('Manage Floater')</span>
+                                    </a>
+                                </li>
+                            </x-permission_check>
+                        </ul>
+                    </div>
+                </li>
+            </x-permission_check>
+            <x-permission_check :permission="['add cta url', 'view cta url']">
+                <li class="sidebar-menu-list__item has-dropdown {{ menuActive('user.cta-url.*') }}">
+                    <a href="#" class="sidebar-menu-list__link">
+                        <span class="icon">
+                            <i class="fa-solid fa-paperclip"></i>
+                        </span>
+                        <span class="text">@lang('Manage CTA URL')</span>
+                    </a>
+                    <div class="sidebar-submenu">
+                        <ul class="sidebar-submenu-list">
+                            <x-permission_check permission="add cta url">
+                                <li class="sidebar-submenu-list__item {{ menuActive('user.cta-url.create') }}">
+                                    <a href="{{ route('user.cta-url.create') }}" class="sidebar-submenu-list__link">
+                                        <span class="text">@lang('Create URL')</span>
+                                    </a>
+                                </li>
+                            </x-permission_check>
+                            <x-permission_check permission="view cta url">
+                                <li class="sidebar-submenu-list__item {{ menuActive('user.cta-url.index') }}">
+                                    <a href="{{ route('user.cta-url.index') }}" class="sidebar-submenu-list__link">
+                                        <span class="text">@lang('CTA URl List')</span>
                                     </a>
                                 </li>
                             </x-permission_check>

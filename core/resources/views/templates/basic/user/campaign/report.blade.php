@@ -3,6 +3,19 @@
 @section('content')
     <div class="dashboard-container">
         <div class="report-wrapper">
+            <div class="d-flex align-items-center justify-content-end">
+                <form class="select-group filter-form">
+                    <select class="form-select form--control select2" data-minimum-results-for-search="-1" name="export">
+                        <option selected value="">@lang('Export Report')</option>
+                        <option value="minimal">
+                            @lang('Minimal')
+                        </option>
+                        <option value="maximal">
+                            @lang('Maximal')
+                        </option>
+                    </select>
+                </form>
+            </div>
             <div class="report-top">
                 <div class="row gy-4 justify-content-center">
                     <div class="col-xxl-3 col-sm-6">
@@ -98,9 +111,27 @@
                         @endforelse
                     </tbody>
                 </table>
-                 {{ paginateLinks($campaignContacts) }}
+                {{ paginateLinks($campaignContacts) }}
             </div>
         </div>
     </div>
 @endsection
 
+@push('style-lib')
+    <link rel="stylesheet" href="{{ asset('assets/global/css/select2.min.css') }}">
+@endpush
+@push('script-lib')
+    <script src="{{ asset('assets/global/js/select2.min.js') }}"></script>
+@endpush
+
+@push('script')
+    <script>
+        (function($) {
+            "use strict";
+
+            $('.filter-form').find('select').on('change', function() {
+                $('.filter-form').submit();
+            });
+        })(jQuery);
+    </script>
+@endpush

@@ -42,6 +42,7 @@
         (function($) {
             "use strict";
             $(document).on('click', '.confirmationBtn', function() {
+                console.log($(this).data());
                 var modal = $('#confirmationModal');
                 let data = $(this).data();
                 modal.find('.question').text(`${data.question}`);

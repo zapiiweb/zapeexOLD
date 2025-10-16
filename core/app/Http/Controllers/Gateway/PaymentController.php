@@ -12,7 +12,6 @@ use App\Models\GatewayCurrency;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
 
 class PaymentController extends Controller
 {
@@ -48,11 +47,17 @@ class PaymentController extends Controller
             return back()->withNotify($notify);
         }
 
-
         if (session()->has('pricing_plan')) {
+            $coupon      = session()->get('coupon');
             $pricingPlan = session()->get('pricing_plan');
             $url         = urlPath('user.subscription.index', ['tab' => 'current-plan']);
-            $amount      = getPlanPurchasePrice($pricingPlan, $pricingPlan->recurring_type);;
+            $planPrice   = getAmount(getPlanPurchasePrice($pricingPlan, $pricingPlan->recurring_type));
+
+            if($coupon){
+                $amount = applyCouponDiscount($coupon, $planPrice);
+            }else {
+                $amount  = $planPrice;
+            }
         } else {
             $url    = urlPath('user.deposit.history');
             $amount = $request->amount;
@@ -65,6 +70,7 @@ class PaymentController extends Controller
         $data                      = new Deposit();
         $data->user_id             = $user->id;
         $data->plan_id             = $pricingPlan->id ?? 0;
+        $data->coupon_id           = $coupon->id ?? 0;
         $data->plan_recurring_type = $pricingPlan->recurring_type ?? 0;
         $data->method_code         = $gate->method_code;
         $data->method_currency     = strtoupper($gate->currency);
@@ -81,6 +87,7 @@ class PaymentController extends Controller
 
         session()->put('Track', $data->trx);
         session()->put('pricing_plan');
+        session()->forget('coupon');
 
         return to_route('user.deposit.confirm');
     }
@@ -167,7 +174,7 @@ class PaymentController extends Controller
 
             if ($deposit->plan_id) {
                 $plan = @$deposit->pricingPlan;
-                PurchasePlanController::updateUserSubscription($user, $plan, $deposit->plan_recurring_type, Status::GATEWAY_PAYMENT, $deposit->method_code);
+                PurchasePlanController::updateUserSubscription($user, $plan, $deposit->plan_recurring_type, Status::GATEWAY_PAYMENT, $deposit->method_code, $deposit->coupon);
             } else {
                 notify($user, $isManual ? 'DEPOSIT_APPROVE' : 'DEPOSIT_COMPLETE', [
                     'method_name'     => $methodName,

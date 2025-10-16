@@ -118,14 +118,18 @@
                         @if ($deposit->status == Status::PAYMENT_PENDING)
                             <div class="row mt-4">
                                 <div class="col-md-12">
-                                    <button class="btn btn-outline--success   confirmationBtn"
-                                        data-action="{{ route('admin.deposit.approve', $deposit->id) }}"
-                                        data-question="@lang('Are you sure to approve this transaction?')"><i class="las la-check-double"></i>
-                                        @lang('Approve')
-                                    </button>
-                                    <button class="btn btn-outline--danger  " data-bs-toggle="modal"
-                                        data-bs-target="#rejectModal"><i class="las la-ban"></i> @lang('Reject')
-                                    </button>
+                                    <x-admin.permission_check permission="approve deposit">
+                                        <button class="btn btn-outline--success   confirmationBtn"
+                                            data-action="{{ route('admin.deposit.approve', $deposit->id) }}"
+                                            data-question="@lang('Are you sure to approve this transaction?')"><i class="las la-check-double"></i>
+                                            @lang('Approve')
+                                        </button>
+                                    </x-admin.permission_check>
+                                    <x-admin.permission_check permission="reject deposit">
+                                        <button class="btn btn-outline--danger  " data-bs-toggle="modal"
+                                            data-bs-target="#rejectModal"><i class="las la-ban"></i> @lang('Reject')
+                                        </button>
+                                    </x-admin.permission_check>
                                 </div>
                             </div>
                         @endif

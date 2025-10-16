@@ -16,7 +16,10 @@ class RedirectIfAdmin
     public function handle($request, Closure $next, $guard = 'admin')
     {
         if (Auth::guard($guard)->check()) {
-            return to_route('admin.dashboard');
+            if (Auth::guard($guard)->user()->can('view dashboard')) {
+                return to_route('admin.dashboard');
+            }
+            return to_route('admin.profile');
         }
         return $next($request);
     }

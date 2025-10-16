@@ -1,6 +1,12 @@
 @php
     @$pricingPlan = \Session::get('pricing_plan');
-    @$amount = getAmount(getPlanPurchasePrice($pricingPlan, $pricingPlan->recurring_type));
+    @$coupon = \Session::get('coupon');
+    @$planPrice = getAmount(getPlanPurchasePrice($pricingPlan, $pricingPlan->recurring_type));
+    if($coupon){
+        $amount = applyCouponDiscount($coupon, $planPrice);
+    }else{
+        $amount = $planPrice;
+    }
 @endphp
 @extends($activeTemplate . 'layouts.master')
 @section('content')

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\User;
 
+use App\Constants\Status;
 use App\Http\Controllers\Controller;
+use App\Models\AiAssistant;
 use App\Models\Chatbot;
 use App\Models\WelcomeMessage;
 use App\Models\WhatsappAccount;
@@ -16,10 +18,10 @@ class AutomationController extends Controller
         $user             = getParentUser();
         $chatbots         = Chatbot::where('user_id', $user->id)->orderBy('id', 'desc')->paginate(getPaginate());
         $accounts        = WhatsappAccount::where('user_id', $user->id)->get();
-        
-        if($accounts->isEmpty()) {
+
+        if ($accounts->isEmpty()) {
             $view   = 'Template::user.inbox.whatsapp_account_empty';
-        }else{
+        } else {
             $view = 'Template::user.automation.index';
         }
 
@@ -39,10 +41,10 @@ class AutomationController extends Controller
         $welcomeMessages = WelcomeMessage::whereHas('whatsappAccount', function ($q) use ($user) {
             $q->where('user_id', $user->id);
         })->with('whatsappAccount')->get();
-        
-        if($accounts->isEmpty()) {
+
+        if ($accounts->isEmpty()) {
             $view   = 'Template::user.inbox.whatsapp_account_empty';
-        }else{
+        } else {
             $view = 'Template::user.automation.welcome_message';
         }
 
@@ -171,6 +173,56 @@ class AutomationController extends Controller
         $chatBot->delete();
 
         $notify[] = ['success', 'Chatbot deleted successfully'];
+        return back()->withNotify($notify);
+    }
+
+    public function aiAssistant()
+    {
+        $pageTitle = "AI Assistant";
+
+        $activeAiAssistant = AiAssistant::active()->first();
+
+        $user  =  getParentUser();
+
+        $aiSetting = $user->aiSetting;
+
+        if (!$aiSetting) {
+            $aiSetting = createAiSetting($user);
+        }
+
+        return view('Template::user.automation.ai_assistant', compact('pageTitle', 'aiSetting', 'activeAiAssistant'));
+    }
+
+    public function aiAssistantStore(Request $request)
+    {
+
+        $check = AiAssistant::active()->exists();
+
+        if (!$check) {
+            $notify[] = ['error', ' AI Assistant is not active for this platform.'];
+            return back()->withNotify($notify);
+        }
+
+        $request->validate([
+            'max_length'        => 'required|integer|gte:0',
+            'system_prompt'     => 'required|string',
+            'fallback_response' => 'nullable|string',
+        ]);
+
+        $user = getParentUser();
+
+        if (!$user->aiSetting) {
+            createAiSetting($user);
+        }
+
+        $aiSetting                    = $user->aiSetting;
+        $aiSetting->max_length        = $request->max_length;
+        $aiSetting->system_prompt     = $request->system_prompt;
+        $aiSetting->fallback_response = $request->fallback_response;
+        $aiSetting->status            = $request->status ? Status::ENABLE : Status::DISABLE;
+        $aiSetting->save();
+
+        $notify[] = ['success', 'AI Assistant settings updated successfully'];
         return back()->withNotify($notify);
     }
 }

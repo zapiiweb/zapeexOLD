@@ -99,13 +99,17 @@ Route::middleware('auth')->name('user.')->group(function () {
                 Route::get('/', 'whatsappAccounts')->name('index');
                 Route::get('add-account', 'addWhatsappAccount')->name('add');
 
+                Route::post('embedded-signup', 'embeddedSignup')->name('embedded.signup');
+                Route::post('access-token', 'accessToken')->name('access.token');
+                Route::post('pin', 'whatsappPin')->name('whatsapp.pin');
+
                 Route::post('add-account/store', 'storeWhatsappAccount')->name('store')->middleware("has.subscription");
                 Route::get('check/{id}', 'whatsappAccountVerificationCheck')->name('verification.check');
                 Route::get('connect/{id}', 'whatsappAccountConnect')->name('connect');
                 Route::get('setting/{id}', 'whatsappAccountSetting')->name('setting');
                 Route::post('setting/{id}', 'whatsappAccountSettingConfirm')->name('setting.confirm');
-
-                // Baileys routes
+                
+                    // Baileys routes
                 Route::post('baileys/start/{id}', 'baileysStartSession')->name('baileys.start');
                 Route::get('baileys/qr/{id}', 'baileysGetQR')->name('baileys.qr');
                 Route::get('baileys/status/{id}', 'baileysCheckStatus')->name('baileys.status');
@@ -132,10 +136,11 @@ Route::middleware('auth')->name('user.')->group(function () {
                     Route::post('chat/message/resend', 'resendMessage')->name('message.resend')->middleware('agent.permission:send message');
                     Route::get('chat/message/status/{conversationId}', 'updateMessageStatus')->name('message.status');
                     Route::get('media/download/{mediaId}', 'downloadMedia')->name('media.download');
-                    Route::get('media/stream/{mediaId}', 'streamMedia')->name('media.stream');
+
+                    Route::post('generate-message', 'generateAiMessage')->name('generate.message')->middleware('agent.permission:send message');
                 });
             });
-
+            
             // Subscription
             Route::controller('SubscriptionController')->prefix('subscription')->middleware('parent.user')->name('subscription.')->group(function () {
                 Route::get('index', 'index')->name('index');
@@ -166,8 +171,19 @@ Route::middleware('auth')->name('user.')->group(function () {
                 Route::get('script/{id}', 'getScript')->name('script')->middleware('agent.permission:view floater');
             });
 
+            // Cta URL
+            Route::controller('CTAUrlController')->prefix('cta-url')->name('cta-url.')->group(function () {
+                Route::get('index', 'index')->name('index')->middleware('agent.permission:view cta url');
+                Route::get('create', 'create')->name('create')->middleware('agent.permission:add cta url');
+                Route::post('store', 'store')->name('store')->middleware('agent.permission:add cta url');
+                Route::post('delete/{id}', 'delete')->name('delete')->middleware('agent.permission:delete cta url');
+            });
+            
             // Automation
             Route::controller('AutomationController')->prefix('automation')->name('automation.')->group(function () {
+                Route::get('ai-assistant/setting', 'aiAssistant')->name('ai.assistant')->middleware('agent.permission:ai assistant settings');
+                Route::post('ai-assistant/setting/store', 'aiAssistantStore')->name('ai.assistant.store')->middleware('agent.permission:ai assistant settings');
+
                 Route::get('chatbot/index', 'chatbotIndex')->name('chatbot.index')->middleware('agent.permission:view chatbot');
                 Route::get('welcome-message', 'welcomeMessage')->name('welcome.message')->middleware('agent.permission:view welcome message');
                 Route::middleware('has.subscription')->group(function () {
@@ -237,6 +253,8 @@ Route::middleware('auth')->name('user.')->group(function () {
             Route::controller('TemplateController')->prefix('template')->name('template.')->group(function () {
                 Route::get('index', 'index')->name('index')->middleware('agent.permission:view template');
                 Route::get('create', 'createTemplate')->name('create')->middleware('agent.permission:add template');
+                Route::get('create/carousel', 'createCarouselTemplate')->name('create.carousel')->middleware('agent.permission:add template');
+                Route::post('create/carousel', 'storeCarouselTemplate')->name('create.carousel.store')->middleware('agent.permission:add template');
                 Route::middleware('has.subscription')->group(function () {
                     Route::post('store', 'storeTemplate')->name('store')->middleware('agent.permission:add template');
                     Route::get('check/{id}', 'checkTemplateStatus')->name('verification.check');
@@ -255,7 +273,7 @@ Route::middleware('auth')->name('user.')->group(function () {
 
             // Purchase Plan
             Route::controller('PurchasePlanController')->prefix('purchase-plan')->name('purchase.plan.')->group(function () {
-                Route::get('index', 'index')->name('index');
+                Route::post('check-coupon', 'checkCoupon')->name('check.coupon');
                 Route::post('store', 'store')->name('store');
             });
 

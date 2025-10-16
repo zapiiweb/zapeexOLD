@@ -7,6 +7,7 @@
                 <li class="mb-0 text-dark">@lang('The template name must be unique and less than 512 characters. ')</li>
                 <li class="mb-0 text-dark">@lang('You can submit a maximum of 100 templates per hour.')</li>
                 <li class="mb-0 text-dark">@lang('You can add up to 6 Quick Reply buttons, 2 Visit Website buttons, 1 Call to Number button, and 1 Copy Offer Code button per template.')</li>
+                <li class="mb-0 text-dark">@lang('Templates with authentication type can only contain a single button.')</li>
                 <li class="mb-0 text-dark">@lang('Header text can contain a maximum of 1024 characters with 1 variable.')</li>
             </ul>
         </div>
@@ -127,8 +128,8 @@
                             <div class="my-4">
                                 <div class="row justify-content-center">
                                     <div class="col-lg-6">
-                                          <div class="auth-devider text-center">
-                                            <span>  @lang('TEMPLATE BODY')</span>
+                                        <div class="auth-devider text-center">
+                                            <span> @lang('TEMPLATE BODY')</span>
                                         </div>
                                     </div>
                                 </div>
@@ -155,7 +156,7 @@
                             <div class="my-4">
                                 <div class="row justify-content-center">
                                     <div class="col-lg-6">
-                                          <div class="auth-devider text-center">
+                                        <div class="auth-devider text-center">
                                             <span> @lang('TEMPLATE FOOTER')</span>
                                         </div>
                                     </div>
@@ -177,8 +178,8 @@
                             <div class="my-4">
                                 <div class="row justify-content-center">
                                     <div class="col-lg-6">
-                                          <div class="auth-devider text-center">
-                                            <span>  @lang('TEMPLATE BUTTONS')</span>
+                                        <div class="auth-devider text-center">
+                                            <span> @lang('TEMPLATE BUTTONS')</span>
                                         </div>
                                     </div>
                                 </div>
@@ -264,8 +265,8 @@
                 e.preventDefault();
 
                 var formData = new FormData(this);
-                const $submitBtn=$(".submitBtn");
-                const oldHtml=$submitBtn.html();
+                const $submitBtn = $(".submitBtn");
+                const oldHtml = $submitBtn.html();
                 $.ajax({
                     url: "{{ route('user.template.store') }}",
                     type: "POST",
@@ -296,7 +297,6 @@
 
             const generateHtml = {
                 prevButtonHtml: function(btnType, btnText = undefined) {
-
                     let btnIcon = "";
                     if (btnType == 'QUICK_REPLY') {
                         btnIcon = `<i class="las la-undo"></i>`;
@@ -657,7 +657,7 @@
                 $(`input[name="header[text]"]`).val(template.header).trigger('input');
                 $(`textarea[name=template_body]`).val(template.body).trigger('input');
                 $(`input[name=footer]`).val(template.footer).trigger('input');
-                $(`.card-item__thumb img`).attr('src', imageUrl.replace(':imageName', template.name+".png"));
+                $(`.card-item__thumb img`).attr('src', imageUrl.replace(':imageName', template.name + ".png"));
                 regenerateBodyExampleFields(bodyVariableCount);
 
             }).change();
@@ -788,6 +788,5 @@
             height: 2px;
             width: 80px;
         }
-        
     </style>
 @endpush

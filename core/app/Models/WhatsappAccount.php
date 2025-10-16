@@ -39,8 +39,17 @@ class WhatsappAccount extends Model
 
     public function verificationStatusBadge(): Attribute
     {
-        return Attribute::make(
-            get: fn() => $this->code_verification_status == 'APPROVED' ? '<span class="custom--badge badge--success">' . __('Approved') . '</span>' : '<span class="custom--badge badge--danger">' . __('Not Verified') . '</span>',
-        );
+        return new Attribute(function () {
+            $html = '';
+            if ($this->code_verification_status == 'VERIFIED') {
+                $html = '<span class="badge custom--badge badge--success">' . trans('Verified') . '</span>';
+            }elseif ($this->code_verification_status == 'EXPIRED') {
+                $html = '<span class="badge custom--badge badge--warning">' . trans('Expired') . '</span>';   
+            }else {
+                $html = '<span class="badge custom--badge badge--danger">' . trans('Not Verified') . '</span>';
+            }
+            return $html;
+        });
     }
 }
+

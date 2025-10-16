@@ -19,7 +19,7 @@ trait GlobalStatus
         $message       = keyToTitle($column) . ' changed successfully';
 
         $query->save();
-        
+
         if ($isApi) {
             return;
         }

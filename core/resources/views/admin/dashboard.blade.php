@@ -1,19 +1,37 @@
 @extends('admin.layouts.app')
 @section('panel')
-    <x-admin.ui.widget.group.dashboard.users :widget="$widget" />
-    <x-admin.ui.widget.group.dashboard.trx :widget="$widget" />
-    <x-admin.ui.widget.group.dashboard.subscription_amount :widget="$widget" />
-    <x-admin.ui.widget.group.dashboard.users_more :widget="$widget" />
+    <x-admin.permission_check permission="view users">
+        <x-admin.ui.widget.group.dashboard.users :widget="$widget" />
+    </x-admin.permission_check>
 
-    <x-admin.ui.widget.group.dashboard.financial_overview :widget="$widget" />
+    <x-admin.permission_check permission="view all transactions">
+        <x-admin.ui.widget.group.dashboard.trx :widget="$widget" />
+    </x-admin.permission_check>
+
+    <x-admin.permission_check permission="view subscription history">
+        <x-admin.ui.widget.group.dashboard.subscription_amount :widget="$widget" />
+    </x-admin.permission_check>
+
+    <x-admin.permission_check permission="view users">
+        <x-admin.ui.widget.group.dashboard.users_more :widget="$widget" />
+    </x-admin.permission_check>
+
+    <x-admin.permission_check :permission="['view deposit', 'view withdraw']">
+        <x-admin.ui.widget.group.dashboard.financial_overview :widget="$widget" />
+    </x-admin.permission_check>
 
     <div class="row gy-4 mb-4">
-        <x-admin.other.dashboard_trx_chart />
+        <x-admin.permission_check permission="view all transactions">
+            <x-admin.other.dashboard_trx_chart />
+        </x-admin.permission_check>
         <div class="col-xl-4">
-            <x-admin.other.dashboard_login_chart :userLogin=$userLogin />
+            <x-admin.permission_check permission="view login history">
+                <x-admin.other.dashboard_login_chart :userLogin=$userLogin />
+            </x-admin.permission_check>
         </div>
+        
     </div>
-    <x-admin.other.cron_modal />
+    {{-- <x-admin.other.cron_modal /> --}}
 @endsection
 
 @push('script-lib')

@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 class Message extends Model
 {
     use ApiQuery;
-    
+
     public function conversation()
     {
         return $this->belongsTo(Conversation::class);
@@ -19,6 +19,12 @@ class Message extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function agent()
+    {
+        return $this->belongsTo(User::class, 'agent_id')
+            ->where('is_agent', Status::YES);
     }
 
     public function campaign()
@@ -34,6 +40,11 @@ class Message extends Model
     public function chatbot()
     {
         return $this->belongsTo(Chatbot::class);
+    }
+
+    public function ctaUrl()
+    {
+        return $this->belongsTo(CtaUrl::class, 'cta_url_id');
     }
 
     public function statusBadge(): Attribute

@@ -7,6 +7,7 @@ use App\Http\Controllers\User\PurchasePlanController;
 use App\Lib\CurlRequest;
 use App\Models\CampaignContact;
 use App\Models\Conversation;
+use App\Models\Coupon;
 use App\Models\CronJob;
 use App\Models\CronJobLog;
 use App\Models\Message;
@@ -51,7 +52,7 @@ class CronController extends Controller
                 }
             }
             $cron->last_run = now();
-            $cron->next_run = now()->addSeconds($cron->schedule->interval);
+            $cron->next_run = now()->addSeconds((int)$cron->schedule->interval);
             $cron->save();
 
             $cronLog->end_at = $cron->last_run;
@@ -116,6 +117,8 @@ class CronController extends Controller
             $user->short_link_limit = 0;
             $user->floater_limit    = 0;
             $user->welcome_message  = 0;
+            $user->ai_assistance    = 0;
+            $user->cta_url_message  = 0;
             $user->save();
 
             notify($user, 'SUBSCRIPTION_EXPIRED', [
@@ -185,32 +188,45 @@ class CronController extends Controller
 
             $url      = "https://graph.facebook.com/v22.0/{$phoneNumberId}/messages?access_token={$accessToken}";
 
-
             $contactOriginal = $contact->contact;
 
-            $templateHeaderParams   = $campaign->template_header_params ?? [];
+            $templateHeaderParams = $campaign->template_header_params ?? [];
             $templateBodyParams   = $campaign->template_body_params ?? [];
 
             $headerParams = parseTemplateParams($templateHeaderParams, $contactOriginal);
-
             $bodyParams   = parseTemplateParams($templateBodyParams, $contactOriginal);
 
             $conversation    = Conversation::where('user_id', $campaign->user_id)->where('contact_id', $contactOriginal->id)->first();
 
             if (!$conversation) {
-                $newConversation             = new Conversation();
-                $newConversation->user_id    = $campaign->user_id;
-                $newConversation->contact_id = $contactOriginal->id;
-                $newConversation->save();
+                $conversation                      = new Conversation();
+                $conversation->user_id             = $campaign->user_id;
+                $conversation->whatsapp_account_id = $connectedWhatsapp->id;
+                $conversation->contact_id          = $contactOriginal->id;
+                $conversation->save();
             }
 
             $components = [];
 
-            if (is_array($headerParams) && count($headerParams)) {
-                $components[] = [
-                    'type' => 'header',
-                    'parameters' => $headerParams
-                ];
+            if (count($template->cards) == 0) {
+                if (is_array($headerParams) && count($headerParams)) {
+                    $components[] = [
+                        'type' => 'header',
+                        'parameters' => $headerParams
+                    ];
+                } elseif ($template->header_format === 'IMAGE' && !empty($template->header_media)) {
+                    $components[] = [
+                        'type' => 'header',
+                        'parameters' => [
+                            [
+                                'type' => 'image',
+                                'image' => [
+                                    'link' => url(getFilePath('templateHeader') . '/' . $template->header_media)
+                                ]
+                            ]
+                        ]
+                    ];
+                }
             }
 
             if (is_array($bodyParams) && count($bodyParams)) {
@@ -218,10 +234,62 @@ class CronController extends Controller
                     'type' => 'body',
                     'parameters' => $bodyParams
                 ];
+            } else {
+                $components[] = [
+                    'type' => 'body',
+                    'parameters' => []
+                ];
             }
 
-            if ($components == []) {
+            if (empty($components)) {
                 continue;
+            }
+
+            if (!empty($template->cards) && count($template->cards) > 0) {
+                $cards = [];
+
+                foreach ($template->cards as $index => $card) {
+                    $cardData = [];
+                    $cardData['card_index'] = $index;
+                    $cardData['components'] = [];
+                    $cardData['components'] = [];
+                    if ($card->header_format == 'IMAGE') {
+                        $cardData['components'][] = [
+                            'type' => 'header',
+                            'parameters' => [
+                                [
+                                    'type' => 'image',
+                                    'image' => [
+                                        'id' => $card->media_id
+                                    ]
+                                ]
+                            ]
+                        ];
+                    } // Need to work for video also
+
+                    if ($card->buttons && count($card->buttons) > 0) {
+                        $cardButtons = [];
+                        foreach ($card->buttons['buttons'] as $button) {
+                            if ($button['type'] == 'URL') {
+                                $cardButtons[] = [
+                                    'type' => 'button',
+                                    'sub_type' => strtolower($button['type']),
+                                    'index' => $index
+                                ];
+                            }
+                        }
+                        $cardData['components'] = array_merge($cardData['components'], $cardButtons);
+                    }
+
+                    $cards[] = $cardData;
+                }
+
+                $secondParams = [
+                    'type' => 'carousel',
+                    'cards' => $cards
+                ];
+
+                $components[] = $secondParams;
             }
 
             $data = [
@@ -229,14 +297,13 @@ class CronController extends Controller
                 'to' => '+' . $contactOriginal->mobileNumber,
                 'type' => 'template',
                 'template' => [
-                    'name' => $template->name,
+                    'name' => trim($template->name),
                     'language' => [
                         'code' => $template->language->code,
                     ],
                     'components' => $components
                 ],
             ];
-
             $response = Http::withHeaders([
                 'Authorization' => "Bearer {$accessToken}",
             ])->post($url, $data);
@@ -282,6 +349,15 @@ class CronController extends Controller
         } else if ($campaign->total_message <= $campaign->total_send) {
             $campaign->status = Status::CAMPAIGN_COMPLETED;
             $campaign->save();
+        }
+    }
+
+    public function couponExpiration()
+    {
+        $expiredCoupons = Coupon::whereNot('status', Status::COUPON_EXPIRED)->where('end_date', '<', Carbon::now())->get();
+        foreach ($expiredCoupons as $coupon) {
+            $coupon->status = Status::COUPON_EXPIRED;
+            $coupon->save();
         }
     }
 }

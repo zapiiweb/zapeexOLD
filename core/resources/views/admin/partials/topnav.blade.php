@@ -2,7 +2,7 @@
     $admin = auth('admin')->user();
 @endphp
 
-<x-admin.other.header_search :menus=$menus />
+<x-admin.other.header_search :menus=$menus :permissions=$permissions />
 
 <header class="dashboard__header">
     <div class="dashboard__header-left">
@@ -118,8 +118,7 @@
                         data-code="{{ $language->code }}">
                         <div class=" d-flex flex-wrap align-items-center gap-2">
                             <span class="language-dropdown__icon">
-                                <img
-                                    src="{{ @$language->image_src }}">
+                                <img src="{{ @$language->image_src }}">
                             </span>
                             {{ ucfirst($language->name) }}
                         </div>

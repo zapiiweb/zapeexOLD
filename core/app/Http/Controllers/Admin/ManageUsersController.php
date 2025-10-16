@@ -403,7 +403,13 @@ class ManageUsersController extends Controller
     public function login($id)
     {
         Auth::loginUsingId($id);
-        return to_route('user.home');
+        $user = Auth::user();
+        
+        if($user->hasAgentPermission('view dashboard')) {
+            return to_route('user.home');
+        }
+        
+        return to_route('user.profile.setting');
     }
 
     public function status(Request $request, $id)

@@ -105,7 +105,7 @@
                     </tr>
                     <tr>
                         <td>@lang('Discount')</td>
-                        <td class="text-end">{{ showAmount(0) }}</td>
+                        <td class="text-end">{{ showAmount($subscription->discount_amount) }}</td>
                     </tr>
                     <tr>
                         <td>@lang('Tax')</td>

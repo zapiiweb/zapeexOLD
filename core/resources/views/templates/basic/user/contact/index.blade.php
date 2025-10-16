@@ -147,6 +147,22 @@
                                 <form action="{{ route('user.contact.import') }}" method="POST" id="import-form"
                                     enctype="multipart/form-data">
                                     @csrf
+                                    <div class="form-group">
+                                        <label class="label-two">
+                                            @lang('Contact List')
+                                            <span data-bs-toggle="tooltip" data-bs-placement="top"
+                                                title="@lang('By specifying a contact list, all imported contacts will be added to the selected list. If left global, the contacts will not be added to any contact list.')">
+                                                <i class="las la-question-circle"></i>
+                                            </span>
+                                        </label>
+                                        <select class="form--control select2" name="contact_list_id"
+                                            data-minimum-results-for-search="-1">
+                                            <option value="0"> @lang('Global') </option>
+                                            @foreach ($contactLists as $list)
+                                                <option value="{{ $list->id }}"> {{ __(@$list->name) }} </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                     <div class="thumb-form">
                                         <input type="file" class="form--control drag-drop" name="file"
                                             accept=".csv,xlsx">
@@ -240,8 +256,8 @@
 
             $form.on('submit', function(e) {
                 e.preventDefault();
-                const formData = new FormData(this);
 
+                const formData = new FormData(this);
                 $progress.removeClass('d-none');
                 $bar.css('width', '0%');
 

@@ -12,6 +12,7 @@ use App\Lib\CurlRequest;
 use App\Lib\Export\ExportManager;
 use App\Lib\FileManager;
 use App\Lib\Export\ImportFileReader;
+use App\Models\AiUserSetting;
 use App\Models\Contact;
 use App\Models\Language;
 use App\Models\Transaction;
@@ -26,7 +27,7 @@ use Illuminate\Support\Facades\Schema;
 function systemDetails()
 {
     $system['name']                = 'ovowpp';
-    $system['web_version']         = '1.0';
+    $system['web_version']         = '1.3';
     $system['admin_panel_version'] = '1.0.1';
     $system['mobile_app_version']  = '1.0';
     $system['android_version']     = '1.0';
@@ -582,8 +583,8 @@ function frontendImage($sectionName, $image, $size = null, $seo = false)
 function apiResponse(string $remark, string $status, array $message = [], array $data = [], $statusCode = 200): JsonResponse
 {
     $response = [
-        'remark'  => $remark,
-        'status'  => $status
+        'remark' => $remark,
+        'status' => $status
     ];
 
     if (count($message)) $response['message'] = $message;
@@ -618,7 +619,7 @@ function os(): array
 
 function supportedDateFormats(): array
 {
-    return  [
+    return [
         'Y-m-d',
         'd-m-Y',
         'd/m/Y',
@@ -632,7 +633,7 @@ function supportedDateFormats(): array
 }
 function supportedTimeFormats(): array
 {
-    return  [
+    return [
         'H:i:s',
         'H:i',
         'h:i A',
@@ -642,12 +643,12 @@ function supportedTimeFormats(): array
 }
 function supportedThousandSeparator(): array
 {
-    return  [
-        ","     => "Comma",
-        "."     => "Dot",
-        "'"     => "Apostrophe",
+    return [
+        "," => "Comma",
+        "." => "Dot",
+        "'" => "Apostrophe",
         "space" => "Space",
-        "none"  => "None",
+        "none" => "None",
     ];
 }
 
@@ -661,10 +662,18 @@ function templateHeaderTypes()
     ];
 }
 
+function templateCardHeaderTypes()
+{
+    return [
+        'image' => 'IMAGE',
+        'video' => 'VIDEO'
+    ];
+}
+
 function metaTemplateStatus($status)
 {
     $metaTemplateStatus = [
-        'PENDING'  => Status::TEMPLATE_PENDING,
+        'PENDING' => Status::TEMPLATE_PENDING,
         'APPROVED' => Status::TEMPLATE_APPROVED,
         'REJECTED' => Status::TEMPLATE_REJECTED,
         'DISABLED' => Status::TEMPLATE_DISABLED
@@ -676,10 +685,10 @@ function metaTemplateStatus($status)
 function messageStatus($status)
 {
     $messageStatus = [
-        'sent'      => Status::SENT,
+        'sent' => Status::SENT,
         'delivered' => Status::DELIVERED,
-        'read'      => Status::READ,
-        'failed'    => Status::FAILED
+        'read' => Status::READ,
+        'failed' => Status::FAILED
     ];
 
     return $messageStatus[$status];
@@ -690,35 +699,43 @@ function getPlanPurchasePrice($plan, $recurringType)
     return $recurringType == Status::MONTHLY ? $plan->monthly_price : $plan->yearly_price;
 }
 
+function applyCouponDiscount($coupon, $amount)
+{
+    if ($coupon->type == Status::COUPON_TYPE_PERCENTAGE) {
+        return $amount - ($amount * $coupon->amount / 100);
+    } else {
+        return $amount - $coupon->amount;
+    }
+}
+
 function userReferralCommission($user, $amount = 0)
 {
-    $referrer           = User::active()->find($user->ref_by);
+    $referrer = User::active()->find($user->ref_by);
     $referralPercentage = gs('referral_amount_percentage');
     $commissionAmount = ($amount * $referralPercentage) / 100;
 
     if (!$referrer || $referralPercentage <= 0 || $commissionAmount <= 0) return false;
-
-
-    $referrer->balance += $commissionAmount;
+    $referrer->balance +=
+        $commissionAmount;
     $referrer->save();
 
     // transaction
-    $transaction               = new Transaction();
-    $transaction->user_id      = $referrer->id;
-    $transaction->amount       = $commissionAmount;
+    $transaction = new Transaction();
+    $transaction->user_id = $referrer->id;
+    $transaction->amount = $commissionAmount;
     $transaction->post_balance = $referrer->balance;
-    $transaction->charge       = 0;
-    $transaction->trx_type     = '+';
-    $transaction->trx          = getTrx();
-    $transaction->remark       = 'referral_commission';
-    $transaction->details      = 'Referral Commission';
+    $transaction->charge = 0;
+    $transaction->trx_type = '+';
+    $transaction->trx = getTrx();
+    $transaction->remark = 'referral_commission';
+    $transaction->details = 'Referral Commission';
     $transaction->save();
 
     notify($referrer, 'REFERRAL_COMMISSION', [
-        'amount'       => showAmount($commissionAmount, currencyFormat: false),
-        'user'         => $user->username,
-        'trx'          => $transaction->trx,
-        'remark'       => $transaction->remark,
+        'amount' => showAmount($commissionAmount, currencyFormat: false),
+        'user' => $user->username,
+        'trx' => $transaction->trx,
+        'remark' => $transaction->remark,
         'post_balance' => showAmount($referrer->balance, currencyFormat: false)
     ]);
 
@@ -735,7 +752,7 @@ function templateBodyParams($body)
 
 function variableShortCodes()
 {
-    return ['{{contactName}}', '{{contactMobile}}', '{{userName}}', '{{userMobile}}'];
+    return ['{{ contactName }}', '{{ contactMobile }}', '{{ userName }}', '{{ userMobile }}'];
 }
 
 function getContact($number)
@@ -749,16 +766,16 @@ function setCodeValue($code, $contact)
     $user = getParentUser();
 
     switch ($code) {
-        case '{{contactName}}':
+        case '{{ contactName }}':
             $result = $contact ? $contact->fullName : ' Sir';
             break;
-        case '{{contactMobile}}':
+        case '{{ contactMobile }}':
             $result = $contact->mobileNumber;
             break;
-        case '{{userName}}':
+        case '{{ userName }}':
             $result = $user->fullName;
             break;
-        case '{{userMobile}}':
+        case '{{ userMobile }}':
             $result = $user->mobileNumber;
             break;
         default:
@@ -789,12 +806,14 @@ function parseTemplateParams(array $params, $contact)
     return $updatedParams;
 }
 
-function importFileReader($file, $columns, $uniqueColumns = [], $dataInsert = true, $modelClass = Contact::class)
+function importFileReader($file, $columns, $uniqueColumns = [], $dataInsert = true, $modelClass =
+Contact::class, $references = [])
 {
-    $fileRead                 = new ImportFileReader($file, $modelClass);
-    $fileRead->columns        = $columns;
-    $fileRead->uniqueColumns  = $uniqueColumns;
+    $fileRead = new ImportFileReader($file, $modelClass);
+    $fileRead->columns = $columns;
+    $fileRead->uniqueColumns = $uniqueColumns;
     $fileRead->dataInsertMode = $dataInsert;
+    $fileRead->references = $references;
     $fileRead->readFile();
     return $fileRead;
 }
@@ -808,10 +827,15 @@ function isAjaxRequest()
     return request()->ajax();
 }
 
-function responseManager(string $remark, string $message, string $responseType = 'error', array $responseData = [], array $igNoreOnApi = [])
-{
+function responseManager(
+    string $remark,
+    string $message,
+    string $responseType = 'error',
+    array $responseData = [],
+    array $igNoreOnApi = []
+) {
     if (isApiRequest() || isAjaxRequest()) {
-        $notify[]     = $message;
+        $notify[] = $message;
         $ignoreForApi = array_merge($igNoreOnApi, ['view', 'pageTitle']);
         $responseData = array_diff_key(
             $responseData,
@@ -819,18 +843,15 @@ function responseManager(string $remark, string $message, string $responseType =
         );
         $responseDataToSnake = array_combine(
             array_map(function ($key) {
-                return strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $key));
+                return strtolower(preg_replace('/(?<!^)[A-Z] /', '_$0', $key));
             }, array_keys($responseData)),
             array_values($responseData)
         );
-
         return apiResponse($remark, $responseType, $notify, $responseDataToSnake);
     }
-
     if (array_key_exists('view', $responseData)) {
         return view($responseData['view'], $responseData);
     }
-
     $notify[] = [$responseType, $message];
     return back()->withNotify($notify);
 }
@@ -848,7 +869,7 @@ function getParentUser()
 function isParentUser()
 {
     $user = auth()->user();
-    return $user->is_agent ? false: true;
+    return $user->is_agent ? false : true;
 }
 
 function activeClass($condition, $className = 'active')
@@ -898,7 +919,7 @@ function decrementFeature($user, $feature, $count = 1)
 function getFeatureLimit($feature, $count = 1, $user = null)
 {
     $authUser = getParentUser();
-    
+
     if (!$user) {
         $user = $authUser;
     }
@@ -912,7 +933,7 @@ function getFeatureLimit($feature, $count = 1, $user = null)
 
 function getWhatsappAccountId($user)
 {
-    return   request()->whatsapp_account_id ?  request()->whatsapp_account_id : $user->currentWhatsapp()?->id;
+    return request()->whatsapp_account_id ? request()->whatsapp_account_id : $user->currentWhatsapp()?->id;
 }
 function getWhatsappAccount($user)
 {
@@ -921,4 +942,28 @@ function getWhatsappAccount($user)
     }
 
     return $user->currentWhatsapp();
+}
+
+function strPlural(int $value, string $label)
+{
+    return $value . ' ' . ($value == 1 ? $label : Str::plural($label));
+}
+
+function createAiSetting($user)
+{
+    $aiSetting          = new AiUserSetting();
+    $aiSetting->user_id = $user->id;
+    $aiSetting->save();
+}
+
+function getIntMessageType($messageType)
+{
+    return [
+        "text"     => Status::TEXT_TYPE_MESSAGE,
+        "image"    => Status::IMAGE_TYPE_MESSAGE,
+        "video"    => Status::VIDEO_TYPE_MESSAGE,
+        "document" => Status::DOCUMENT_TYPE_MESSAGE,
+        'audio'    => Status::AUDIO_TYPE_MESSAGE,
+        'url'      => Status::URL_TYPE_MESSAGE
+    ][$messageType];
 }

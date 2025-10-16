@@ -253,11 +253,13 @@ class NotificationController extends Controller
             'clickatell' => [
                 'api_key' => $request->clickatell_api_key,
             ],
+
             'infobip'       => [
                 'baseurl' => $request->infobip_baseurl,
                 'apikey' => $request->infobip_apikey,
                 'from' => $request->infobip_from,
             ],
+
             'message_bird' => [
                 'api_key' => $request->message_bird_api_key,
             ],

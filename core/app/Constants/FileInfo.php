@@ -77,6 +77,10 @@ class FileInfo
             'path' => 'assets/images/gateway',
             'size' => ''
         ];
+        $data['aiAssistant'] = [
+            'path' => 'assets/images/ai_assistant',
+            'size' => ''
+        ];
         $data['withdrawMethod'] = [
             'path' => 'assets/images/withdraw_method',
             'size' => ''
@@ -86,6 +90,14 @@ class FileInfo
         ];
         $data['templateHeader'] = [
             'path'      => 'assets/images/template_header',
+            'size'      => '',
+        ];
+        $data['templateCardHeader'] = [
+            'path'      => 'assets/images/template_card_header',
+            'size'      => '',
+        ];
+        $data['ctaHeader'] = [
+            'path'      => 'assets/images/cta_header',
             'size'      => '',
         ];
         $data['conversation'] = [

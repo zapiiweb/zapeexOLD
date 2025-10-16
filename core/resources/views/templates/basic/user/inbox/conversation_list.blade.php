@@ -18,9 +18,19 @@
                                 <i class="las la-video"></i> @lang('Video')
                             @elseif(@$lastMessage->message_type == Status::DOCUMENT_TYPE_MESSAGE)
                                 <i class="las la-file"></i> @lang('Document')
+                            @elseif(@$lastMessage->message_type == Status::AUDIO_TYPE_MESSAGE)
+                                <i class="las la-microphone"></i> @lang('Audio')
                             @else
                                 <i class="las la-image"></i> @lang('Photo')
                             @endif
+                        </p>
+                    @elseif (@$lastMessage->template)
+                        <p class="last-message-text text @if ($unreadMessage > 0) text--bold @endif">
+                            @lang('Template Message')
+                        </p>
+                    @elseif (@$lastMessage->ctaUrl)
+                        <p class="text text-muted">
+                            <i class="fa-solid fa-paperclip"></i> @lang('Cta URL')
                         </p>
                     @else
                         <p class="last-message-text text @if ($unreadMessage > 0) text--bold @endif">

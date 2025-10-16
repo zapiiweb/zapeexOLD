@@ -24,6 +24,7 @@
                     id="campaign-form">
                     @csrf
                     <div class="row gy-2">
+
                         <div class="col-12">
                             <div class="form-group">
                                 <label class="label-two">@lang('Title')</label>
@@ -87,7 +88,7 @@
                                 <label class="label-two">@lang('Choose template')</label>
                                 <select name="template_id" class="form--control select2 form-two"
                                     data-minimum-results-for-search="-1" required>
-                                    <option value="" disabled >@lang('Please select whatsapp account first')</option>
+                                    <option value="" disabled>@lang('Please select whatsapp account first')</option>
                                 </select>
                             </div>
                         </div>
@@ -124,7 +125,7 @@
                         <div class="preview-item__header">
                             <h5 class="preview-item__title">@lang('Template Preview')</h5>
                         </div>
-                        <div class="preview-item__content FL;E">
+                        <div class="preview-item__content">
                             <div class="preview-item__shape">
                                 <img src="{{ getImage($activeTemplateTrue . 'images/preview-1.png') }}" alt="image">
                             </div>
@@ -143,6 +144,9 @@
                                     </div>
                                 </div>
                                 <div class="button-preview mt-2 d-flex gap-2 flex-column">
+                                </div>
+                                <div class="carousel-cards overflow-auto mt-1 d-flex gap-2 align-items-center d-none">
+
                                 </div>
                             </div>
                         </div>
@@ -191,12 +195,22 @@
             $('#campaign-form').on("submit", function(e) {
                 e.preventDefault();
                 let form = $(this);
-                let url = form.attr('action');
-                let data = form.serialize();
-                $.post(url, data, function(response) {
-                    notify(response.status, response.message);
-                    $('#campaign-form').find('select').val('').trigger('change');
-                    $('#campaign-form').trigger('reset');
+                let route = "{{ route('user.campaign.save') }}";
+
+                $.ajax({
+                    url: route,
+                    method: 'POST',
+                    data: form.serialize(),
+                    success: function(res) {
+                        notify(res.status, res.message);
+                    },
+                    error: function(err) {
+                        notify('error', 'Something went wrong! Please try again later');
+                    },
+                    complete: function() {
+                        form.trigger('reset');
+                        form.find('select').trigger('change');
+                    }
                 });
             });
 
@@ -277,21 +291,18 @@
             $('select[name=template_id]').on('change', function() {
                 generateParamsField.call(this);
                 showTemplatePreview.call(this);
-                showTemplatePreview.call(this);
-
             });
 
             $('select[name=whatsapp_account_id]').on('change', function() {
                 let $this = $(this);
                 let getWhatsappAccountId = $this.val();
+                if (!getWhatsappAccountId) return;
                 getWhatsappAccountTemplates(getWhatsappAccountId);
-            });
-
-            let route = "{{ route('user.template.get', ':id') }}";
-            
+            }).trigger('change');
 
             function getWhatsappAccountTemplates() {
                 let id = $('select[name=whatsapp_account_id]').val();
+                let route = "{{ route('user.template.get', ':id') }}";
                 $.ajax({
                     url: route.replace(':id', id),
                     type: "POST",
@@ -306,13 +317,16 @@
                         }
                         $('select[name=template_id]').empty();
                         $('select[name=template_id]').append(
-                            `<option value="" disabled selected>@lang('Select template')</option>`);
+                            `<option value="" selected>@lang('Select template')</option>`);
                         let templates = response.data.templates ?? [];
+                        if (templates.length != 0) {
+                            $('select[name=template_id]').empty();
+                        };
                         let headerBasePath = "{{ asset(getFilePath('templateHeader')) }}";
                         $.each(templates, function(index, template) {
                             const mediaUrl = `${headerBasePath}/${template.header_media}`;
                             $('select[name=template_id]').append(`
-                            <option value="${template.id}" data-template-header='${JSON?.stringify(template.header)}' data-template-body="${template.body}" data-template-footer="${template.footer}" data-header-format="${template.header_format}" data-header-media="${mediaUrl}">
+                            <option value="${template.id}" data-template-header='${JSON?.stringify(template.header)}' data-cards='${JSON?.stringify(template.cards)}' data-template-body="${template.body}" data-template-footer="${template.footer}" data-header-format="${template.header_format}" data-header-media="${mediaUrl}">
                                 ${template.name}
                             </option>`);
                         });
@@ -323,15 +337,34 @@
 
             function showTemplatePreview() {
                 const $selected = $('select[name=template_id] :selected');
-
+                const $carouselPreview = $('.carousel-cards');
                 const templateBody = $selected.data('template-body') ?? "@lang('Template body')";
-                const footer = $selected.data('template-footer') ?? "@lang('Template footer')";
-                const templateHeaderText = $selected.data('template-header')?.text ?? "@lang('Template header')";
+                const footer = $selected.data('template-footer');
+                const templateHeaderText = $selected.data('template-header')?.text;
                 const headerMediaPath = $selected.data('header-media');
                 const headerFormat = $selected.data('header-format');
+                const carouselCards = $selected.data('cards') ?? [];
+
+                if (carouselCards.length > 0) {
+                    $carouselPreview.removeClass('d-none');
+
+                    $carouselPreview.empty();
+
+                    $.each(carouselCards, function(index, card) {
+                        const cardHtml = templateCardHtml(card, index);
+                        $carouselPreview.append(cardHtml);
+                    });
+
+                } else {
+                    $carouselPreview.addClass('d-none');
+                }
 
                 $('.body_text').text(templateBody);
-                $('.footer_text').text(footer);
+                if (footer) {
+                    $('.footer_text').text(footer);
+                } else {
+                    $('.footer_text').remove();
+                }
                 const $headerMedia = $('.header_media').empty();
                 const $headerText = $('.header_text');
 
@@ -356,6 +389,29 @@
                 }
             }
 
+            function templateCardHtml(card, index) {
+
+                const basePath = "{{ asset('assets/images/template_card_header') }}";
+                const imagePath = basePath + '/' + card.media_path;
+
+                const cardHtml = `
+                    <div class="card-item col-12" data-card-index="${index}">
+                        <div class="card-item__thumb">
+                            <img src="${imagePath}" alt="image">
+                        </div>
+                        <div class="button-preview mt-2 d-flex gap-2 flex-column">
+                            <button type="button" class="btn btn--template bg-white w-100" data-type="QUICK_REPLY">
+                                <i class="las la-reply"></i> <span class="text">{{ __('Send me more') }}</span>
+                            </button>
+                            <button type="button" class="btn btn--template bg-white w-100" data-type="URL">
+                                <i class="la la-external-link-alt"></i> <span class="text">{{ __('Shop') }}</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return cardHtml;
+            }
+
 
         })(jQuery);
     </script>
@@ -367,8 +423,6 @@
         .datepickers-container {
             z-index: 9999999999;
         }
-
-
 
         .divider-title::after {
             position: absolute;
@@ -395,10 +449,12 @@
             display: flex;
             gap: 16px;
         }
+
         @media screen and (max-width: 1199px) {
             .information-wrapper {
                 flex-direction: column;
             }
+
             .information-main-form {
                 width: 100%;
             }

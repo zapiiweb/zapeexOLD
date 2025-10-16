@@ -15,7 +15,8 @@ class Contact extends Model
     ];
 
     protected $appends = [
-        'image_src'
+        'image_src',
+        'full_name',
     ];
 
     public function user()
@@ -58,16 +59,28 @@ class Contact extends Model
     public function imageSrc(): Attribute
     {
         return new Attribute(
-            get: fn() => getImage(getFilePath('contactProfile') . '/' . $this->image, getFilePath('contactProfile'), isAvatar: true),
+            get: fn() => (
+                auth()->check() && auth()->user()->hasAgentPermission('view contact profile')
+            )
+                ? getImage(getFilePath('contactProfile') . '/' . $this->image, getFilePath('contactProfile'), isAvatar: true)
+                : asset('assets/images/avatar.jpg'),
         );
     }
 
     public function fullName(): Attribute
     {
         return new Attribute(
-            get: fn() => ($this->firstname || $this->lastname)
-                ? trim("{$this->firstname} {$this->lastname}")
-                : '+' . $this->mobileNumber,
+            get: fn() => (
+                auth()->check() && auth()->user()->hasAgentPermission('view contact name')
+            )
+                ? (
+                    ($this->firstname || $this->lastname)
+                        ? trim("{$this->firstname} {$this->lastname}")
+                        : '+' . $this->mobileNumber
+                )
+                : (($this->firstname || $this->lastname)
+                    ? trim("{$this->firstname} {$this->lastname}")
+                    : '+' . $this->mobileNumber),
         );
     }
 

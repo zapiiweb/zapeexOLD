@@ -58,4 +58,45 @@ class Campaign extends Model
             return $html;
         });
     }
+
+        /**
+     * specified column for export with column manipulation 
+     *
+     * @var array
+     */
+    public function exportColumns(): array
+    {
+        return  [
+            'title',
+            'template_id' => [
+                'name' => "Template",
+                "callback" => function ($item) {
+                    return $item->template->name;
+                }
+            ],
+            'send_at' => [
+                'name' => "Send At",
+                "callback" => function ($item) {
+                    return showDateTime($item->send_at, lang: 'en');
+                }
+            ],
+            'total_message',
+            'total_send',
+            'total_success',
+            'total_failed',
+            'status' => [
+                'name' => "Status",
+                "callback" => function ($item) {
+                    return strip_tags($item->statusBadge);
+                }
+            ],
+            'created_at' => [
+                'name'     => "Initiated",
+                "callback" => function ($item) {
+                    return showDateTime($item->created_at, lang: 'en');
+                }
+            ]
+        ];
+    }
+
 }

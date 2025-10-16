@@ -14,40 +14,56 @@
             <ul class="search-card__list">
                 @foreach ($menus as $k => $menu)
                     @foreach ($menu as $parentMenu)
-                        @if (@$parentMenu->submenu)
-                            @foreach (@$parentMenu->submenu as $subMenu)
-                                <li class="search-card__item" data-keyword='@json($subMenu->keyword)'>
-                                    <a href="{{ route($subMenu->route_name) }}" class="search-card__link">
+                        @php
+                            $showParent =
+                                empty($parentMenu->permission) ||
+                                count(array_intersect($parentMenu->permission, $permissions)) > 0;
+                        @endphp
+
+                        @if ($showParent)
+                            @if (@$parentMenu->submenu)
+                                @foreach (@$parentMenu->submenu as $subMenu)
+                                    @php
+                                        $showSub =
+                                            empty($subMenu->permission) ||
+                                            count(array_intersect($subMenu->permission, $permissions)) > 0;
+                                    @endphp
+
+                                    @if ($showSub)
+                                        <li class="search-card__item" data-keyword='@json($subMenu->keyword)'>
+                                            <a href="{{ route($subMenu->route_name) }}" class="search-card__link">
+                                                <div class="search-card__text">
+                                                    <span class="title">{{ __($subMenu->title) }}</span>
+                                                    <span class="subtitle">{{ __($parentMenu->title) }}</span>
+                                                </div>
+                                            </a>
+                                        </li>
+                                    @endif
+                                @endforeach
+                            @else
+                                <li class="search-card__item" data-keyword='@json(@$parentMenu->keyword ?? [])'>
+                                    <a href="{{ route($parentMenu->route_name) }}" class="search-card__link">
                                         <div class="search-card__text">
-                                            <span class="title">{{ __($subMenu->title) }}</span>
-                                            <span class="subtitle">{{ __($parentMenu->title) }}</span>
+                                            <span class="title">{{ __($parentMenu->title) }}</span>
+                                            <span class="subtitle">{{ __(ucwords(str_replace('_', ' ', $k))) }}</span>
                                         </div>
                                     </a>
                                 </li>
-                            @endforeach
-                        @else
-                            <li class="search-card__item" data-keyword='@json(@$parentMenu->keyword ?? [])'>
-                                <a href="{{ route($parentMenu->route_name) }}" class="search-card__link">
-                                    <div class="search-card__text">
-                                        <span class="title">{{ __($parentMenu->title) }}</span>
-                                        <span class="subtitle">{{ __(ucwords(str_replace('_', ' ', $k))) }}</span>
-                                    </div>
-                                </a>
-                            </li>
-                            @if ($parentMenu->title == 'Manage Sections')
-                                @foreach (getPageSections(true) as $s => $secs)
-                                    @php
-                                        $count++;
-                                    @endphp
-                                    <li class="search-card__item" data-keyword='@json(@$parentMenu->keyword ?? [])'>
-                                        <a href="{{ route('admin.frontend.sections', $s) }}" class="search-card__link">
-                                            <div class="search-card__text">
-                                                <span class="title"> {{ __($secs['name']) }}</span>
-                                                <span class="subtitle">@lang('Manage Frontend')</span>
-                                            </div>
-                                        </a>
-                                    </li>
-                                @endforeach
+
+                                @if ($parentMenu->title == 'Manage Sections')
+                                    @foreach (getPageSections(true) as $s => $secs)
+                                        @php $count++; @endphp
+                                        <li class="search-card__item" data-keyword='@json(@$parentMenu->keyword ?? [])'>
+                                            <a href="{{ route('admin.frontend.sections', $s) }}"
+                                                class="search-card__link">
+                                                <div class="search-card__text">
+                                                    <span class="title">{{ __($secs['name']) }}</span>
+                                                    <span class="subtitle">@lang('Manage Frontend')</span>
+                                                </div>
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                @endif
                             @endif
                         @endif
                     @endforeach

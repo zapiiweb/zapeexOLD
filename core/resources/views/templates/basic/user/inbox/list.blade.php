@@ -17,6 +17,7 @@
 @endsection
 
 @push('script-lib')
+    <script src="{{ asset($activeTemplateTrue . 'js/emoji-mart.min.js') }}"></script>
     <script src="{{ asset($activeTemplateTrue . 'js/pusher.min.js') }}"></script>
     <script src="{{ asset($activeTemplateTrue . 'js/broadcasting.js') }}"></script>
 @endpush
@@ -25,6 +26,7 @@
     <script>
         (function($) {
             "use strict";
+
             const $messageBody = $('.msg-body');
             const $messageForm = $('#message-form');
             let isSubmitting = false;
@@ -36,6 +38,7 @@
                 isSubmitting = true;
 
                 const formData = new FormData(this);
+
                 const $submitBtn = $messageForm.find('button[type=submit]');
 
                 formData.append('conversation_id', window.conversation_id);
@@ -47,20 +50,10 @@
                     data: formData,
                     processData: false,
                     contentType: false,
-                    timeout: 15000,
                     beforeSend: function() {
                         $submitBtn.attr('disabled', true).addClass('disabled');
                         $submitBtn.html(
                             `<div class="spinner-border text--base" role="status"></div>`);
-                        
-                        // Show notification only for actual file uploads (not text messages)
-                        const hasFile = (formData.get('document') && formData.get('document').size > 0) || 
-                                       (formData.get('video') && formData.get('video').size > 0) || 
-                                       (formData.get('image') && formData.get('image').size > 0);
-                        
-                        if (hasFile) {
-                            notify('info', "@lang('File is being uploaded and sent. Status will update automatically...')");
-                        }
                     },
                     success: function(response) {
                         if (response.status == 'success') {
@@ -74,22 +67,17 @@
                             setTimeout(() => {
                                 $messageBody.scrollTop($messageBody[0].scrollHeight);
                             }, 50);
-                            clearImagePreview();
                         } else {
                             notify('error', response.message || "@lang('Something went to wrong')");
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        if (status === 'timeout') {
-                            notify('warning', "@lang('Request timeout. The file may still be sent. Please refresh the page to check.')");
-                        } else {
-                            notify('error', "@lang('Failed to send message. Please try again.')");
                         }
                     },
                     complete: function() {
                         isSubmitting = false;
                         $submitBtn.attr('disabled', false).removeClass('disabled');
                         $submitBtn.html(messageSendSvg());
+                        $urlInput.val('');
+                        $('.message-input').attr('readonly', false);
+                        clearImagePreview();
                     }
                 });
             });
@@ -134,9 +122,7 @@
                 });
             });
 
-            
             const $messageInput = $(".message-input");
-
 
             $messageInput.keydown(function(e) {
                 if (e.key === "Enter") {
@@ -168,9 +154,42 @@
                 });
             });
 
+            const $emojiIcon = $(".emoji-icon");
+            const $emojiContainer = $(".emoji-container");
+
+            const picker = new EmojiMart.Picker({
+                onEmojiSelect: (emoji) => {
+                    $messageInput.val($messageInput.val() + emoji.native);
+                }
+            });
+
+            $emojiContainer.append(picker);
+
+            $emojiIcon.on("click", function(e) {
+                e.stopPropagation();
+                if (isUrlMessage()) return;
+                $emojiContainer.toggle();
+
+                if ($emojiContainer.is(":visible")) {
+                    $emojiIcon.html('<i class="far fa-times-circle"></i>');
+                } else {
+                    $emojiIcon.html('<i class="far fa-smile"></i>');
+                }
+            });
+
+
+            $(document).on("click", function(e) {
+                if (!$(e.target).closest($emojiContainer).length && !$(e.target).closest($emojiIcon).length) {
+                    $emojiContainer.hide();
+                    $emojiIcon.html('<i class="far fa-smile"></i>');
+                }
+            });
+
             const $imageInput = $(".image-input");
             const $documentInput = $(".media-item input[name='document']");
             const $videoInput = $(".media-item input[name='video']");
+            const $audioInput = $(".media-item input[name='audio']");
+            const $urlInput = $('input[name=cta_url_id]');
             const $previewContainer = $(".image-preview-container");
 
             // Image Preview
@@ -188,9 +207,67 @@
                 previewFile(event, "video");
             });
 
-            function previewFile(event, type) {
+            // Audio
+            $audioInput.on("change", function(event) {
+                previewFile(event, "audio");
+            });
+
+            // Audio
+            $urlInput.on("change", function(event) {
+                alert(234324);
+                // previewFile(event, "audio");
+            });
+
+            $('.select-url').on('click', function(e) {
+                let url = $(this).data('id');
+                $urlInput.val(url);
+                let name = $(this).data('name');
+                previewFile(event, "url", name);
+            });
+
+            // Block clicks on labels with media_selector if URL exists
+            $('.media_selector').on('click', function(e) {
+                if (isUrlMessage()) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation(); // stop the event from reaching input
+                    return false;
+                }
+            });
+
+            $('.media-input').on('click', function(e) {
+                if (isUrlMessage()) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    return false;
+                }
+            });
+
+            function isUrlMessage() {
+                if ($urlInput.val()) {
+                    notify('error', 'URL message do not support anything else.');
+                    return true;
+                }
+                return false;
+            }
+
+            function previewFile(event, type, name = null) {
+
+                if (type == 'url' && name) {
+                    $('.message-input').attr('readonly', true);
+                    $('.chat-url__list').removeClass('show');
+                    $previewContainer.empty();
+                    $previewContainer.append(`
+                    <div class="preview-item url-preview text-dark">
+                        ${name}
+                        <button class="remove-preview">&times;</button>
+                    </div>
+                    `);
+
+                    return;
+                }
+
                 const file = event.target.files[0];
-                if (!file) return;
+                if (!file && !name) return;
 
                 const reader = new FileReader();
 
@@ -216,6 +293,11 @@
                         <source src="${e.target.result}" type="${file.type}">
                             Your browser does not support the video tag.
                         </video>`;
+                    } else if (type === "audio") {
+                        previewContent = `<audio controls class="preview-item preview-audio">
+                        <source src="${e.target.result}" type="${file.type}">
+                            Your browser does not support the audio tag.
+                        </audio>`;
                     }
 
                     $previewContainer.append(`
@@ -231,11 +313,18 @@
 
             $previewContainer.on("click", ".remove-preview", function() {
                 $(this).closest(".image-preview").remove();
+                clearImagePreview();
+                $('.message-input').attr('readonly', false);
+                $('.chat-url__list').removeClass('show');
             });
 
             function clearImagePreview() {
                 $previewContainer.empty();
                 $imageInput.val("");
+                $documentInput.val("");
+                $videoInput.val("");
+                $audioInput.val("");
+                $urlInput.val("");
             }
 
             const pusherConnection = (eventName, whatsapp) => {
@@ -262,13 +351,14 @@
                                 if (data.data.conversationId == window.conversation_id) {
                                     $messageBody.append(data.data.html);
                                     setTimeout(() => {
-                                        $messageBody.scrollTop($messageBody[0].scrollHeight);
+                                        $messageBody.scrollTop($messageBody[0]
+                                            .scrollHeight);
                                     }, 50);
                                 }
 
                                 if (data.data.newContact) {
-                                    window.conversation_id=data.data.conversationId;
-                                    window.fetchChatList("",true);
+                                    window.conversation_id = data.data.conversationId;
+                                    window.fetchChatList("", true);
                                 } else {
                                     let targetConversation = $('body').find(
                                         `.chat-list__item[data-id="${data.data.conversationId}"]`
@@ -299,8 +389,12 @@
                 $('.chat-media__list').toggleClass('show');
             });
 
-            $('input[name=message_search]').on('input', function() {
-                loadMessages($(this).val());
+            $('.chat-media__btn').on('click', function() {
+                $('.chat-url__list').removeClass('show');
+            });
+
+            $('.cta-url-btn').on('click', function(e) {
+                $('.chat-url__list').toggleClass('show');
             });
 
             $("select[name=whatsapp_account_id]").parent().find('.select2.select2-container').addClass('mb-2');
@@ -311,6 +405,37 @@
                         <path d="M22 2L11 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
                     </svg>`
             }
+
+            $(document).on('click', '.ai-response-button', function(e) {
+                e.preventDefault();
+                let $message = $(this).data('customer-message');
+
+                if (!$message) return;
+
+                if (isSubmitting) return;
+                isSubmitting = true;
+                $messageInput.attr('readonly', true).attr('placeholder', '@lang("Generating response from AI...")');
+
+                $.ajax({
+                    url: "{{ route('user.inbox.generate.message') }}",
+                    type: "POST",
+                    data: {
+                        message: $message,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(response) {
+                        if (response.status == 'success') {
+                           $messageInput.val(response.data.ai_response);
+                        } else {
+                            notify('error', response.message || "@lang('Something went to wrong')");
+                        }
+                    },
+                    complete: function() {
+                        isSubmitting = false;
+                        $messageInput.attr('readonly', false).attr('placeholder', '@lang("Type your message here message...")');
+                    }
+                });
+            });
 
         })(jQuery);
     </script>
@@ -425,6 +550,18 @@
             display: inline-block;
         }
 
+        .url-preview {
+            position: relative;
+            display: inline-block;
+            height: 100%;
+            max-width: 200px !important;
+            width: 80px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+        }
+
         .remove-preview {
             position: absolute;
             top: -5px;
@@ -485,5 +622,7 @@
                 max-width: 200px;
             }
         }
+
+    
     </style>
 @endpush

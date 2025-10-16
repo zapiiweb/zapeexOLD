@@ -138,8 +138,6 @@ class AutomaticGatewayController extends Controller
         return Gateway::changeStatus($id);
     }
 
-
-
     public function gatewayCurrencyValidator(Request $request, Gateway $gateway)
     {
         $customAttributes = [];

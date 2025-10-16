@@ -33,7 +33,6 @@
     <div class="preloader">
         <span class="loader"></span>
     </div>
-
     <div class="body-overlay"></div>
 
     <div class="sidebar-overlay"></div>

@@ -24,7 +24,10 @@
             ],
             "title": "Dashboard",
             "icon": "las la-tachometer-alt",
-            "route_name": "admin.dashboard"
+            "route_name": "admin.dashboard",
+            "permission": [
+                "view dashboard"
+            ]
         },
         {
             "keyword": [
@@ -36,7 +39,10 @@
             ],
             "title": "Subscription History",
             "icon": "las la-list-alt",
-            "route_name": "admin.user.subscriptions"
+            "route_name": "admin.user.subscriptions",
+            "permission": [
+                "view subscription history"
+            ]
         },
         {
             "keyword": [
@@ -48,12 +54,23 @@
             ],
             "title": "Pricing Plans",
             "icon": "las la-wallet",
-            "route_name": "admin.pricing.plan.index"
+            "route_name": "admin.pricing.plan.index",
+            "permission": [
+                "view pricing plans"
+            ]
         },
         {
             "title": "System Data",
             "icon": "las la-file-alt",
             "menu_active": "admin.user.data.*",
+            "permission": [
+                "view contact",
+                "view contact list",
+                "view contact tag",
+                "view campaign",
+                "view chatbot",
+                "view short link"
+            ],
             "submenu": [
                 {
                     "title": "All Contacts",
@@ -64,7 +81,9 @@
                         "user data Management",
                         "manage user contacts",
                         "all contacts"
-                   
+                    ],
+                    "permission": [
+                        "view contact"
                     ]
                 },
                 {
@@ -77,6 +96,9 @@
                         "user contacts list",
                         "contact list management",
                         "contact list control"
+                    ],
+                    "permission": [
+                        "view contact list"
                     ]
                 },
                 {
@@ -85,10 +107,13 @@
                     "route_name": "admin.user.data.contact.tag",
                     "menu_active": "admin.user.data.contact.tag",
                     "keyword": [
-                       "user contact tag management",
+                        "user contact tag management",
                         "manage user contact tag",
                         "contact tag control",
                         "contact tag activity"
+                    ],
+                    "permission": [
+                        "view contact tag"
                     ]
                 },
                 {
@@ -101,6 +126,9 @@
                         "manage campaign",
                         "campaign control",
                         "campaign activity"
+                    ],
+                    "permission": [
+                        "view campaign"
                     ]
                 },
                 {
@@ -109,10 +137,13 @@
                     "route_name": "admin.user.data.chatbot",
                     "menu_active": "admin.user.data.chatbot",
                     "keyword": [
-                       "chatbot management",
+                        "chatbot management",
                         "manage chatbot",
                         "chatbot control",
                         "chatbot activity"
+                    ],
+                    "permission": [
+                        "view chatbot"
                     ]
                 },
                 {
@@ -128,9 +159,11 @@
                         "link management",
                         "link control",
                         "link activity"
+                    ],
+                    "permission": [
+                        "view short link"
                     ]
                 }
-               
             ]
         },
         {
@@ -144,6 +177,16 @@
                 "kycPendingUsersCount"
             ],
             "menu_active": "admin.users*",
+            "permission": [
+                "view users",
+                "view user agents",
+                "send user notification",
+                "view user notifications",
+                "update user balance",
+                "ban user",
+                "login as user",
+                "update user"
+            ],
             "submenu": [
                 {
                     "keyword": [
@@ -157,7 +200,10 @@
                     ],
                     "title": "Active Users",
                     "route_name": "admin.users.active",
-                    "menu_active": "admin.users.active"
+                    "menu_active": "admin.users.active",
+                    "permission": [
+                        "view users"
+                    ]
                 },
                 {
                     "keyword": [
@@ -170,7 +216,10 @@
                     "title": "Banned Users",
                     "route_name": "admin.users.banned",
                     "menu_active": "admin.users.banned",
-                    "counter": "bannedUsersCount"
+                    "counter": "bannedUsersCount",
+                    "permission": [
+                        "view users"
+                    ]
                 },
                 {
                     "keyword": [
@@ -183,7 +232,10 @@
                     "title": "Email Unverified",
                     "route_name": "admin.users.email.unverified",
                     "menu_active": "admin.users.email.unverified",
-                    "counter": "emailUnverifiedUsersCount"
+                    "counter": "emailUnverifiedUsersCount",
+                    "permission": [
+                        "view users"
+                    ]
                 },
                 {
                     "keyword": [
@@ -196,7 +248,10 @@
                     "title": "Mobile Unverified",
                     "route_name": "admin.users.mobile.unverified",
                     "menu_active": "admin.users.mobile.unverified",
-                    "counter": "mobileUnverifiedUsersCount"
+                    "counter": "mobileUnverifiedUsersCount",
+                    "permission": [
+                        "view users"
+                    ]
                 },
                 {
                     "keyword": [
@@ -209,7 +264,10 @@
                     "title": "KYC Unverified",
                     "route_name": "admin.users.kyc.unverified",
                     "menu_active": "admin.users.kyc.unverified",
-                    "counter": "kycUnverifiedUsersCount"
+                    "counter": "kycUnverifiedUsersCount",
+                    "permission": [
+                        "view users"
+                    ]
                 },
                 {
                     "keyword": [
@@ -222,7 +280,10 @@
                     "title": "KYC Pending",
                     "route_name": "admin.users.kyc.pending",
                     "menu_active": "admin.users.kyc.pending",
-                    "counter": "kycPendingUsersCount"
+                    "counter": "kycPendingUsersCount",
+                    "permission": [
+                        "view users"
+                    ]
                 },
                 {
                     "keyword": [
@@ -234,7 +295,10 @@
                     ],
                     "title": "With Balance",
                     "route_name": "admin.users.with.balance",
-                    "menu_active": "admin.users.with.balance"
+                    "menu_active": "admin.users.with.balance",
+                    "permission": [
+                        "view users"
+                    ]
                 },
                 {
                     "keyword": [
@@ -244,7 +308,10 @@
                     ],
                     "title": "Account Deleted Users",
                     "route_name": "admin.users.deleted",
-                    "menu_active": "admin.users.deleted"
+                    "menu_active": "admin.users.deleted",
+                    "permission": [
+                        "view users"
+                    ]
                 },
                 {
                     "keyword": [
@@ -256,7 +323,10 @@
                     ],
                     "title": "Plan Subscribed User",
                     "route_name": "admin.users.subscribe",
-                    "menu_active": "admin.users.subscribe"
+                    "menu_active": "admin.users.subscribe",
+                    "permission": [
+                        "view users"
+                    ]
                 },
                 {
                     "keyword": [
@@ -266,7 +336,10 @@
                     ],
                     "title": "Subscription Expired User",
                     "route_name": "admin.users.subscribe.expired",
-                    "menu_active": "admin.users.subscribe.expired"
+                    "menu_active": "admin.users.subscribe.expired",
+                    "permission": [
+                        "view users"
+                    ]
                 },
                 {
                     "keyword": [
@@ -275,7 +348,10 @@
                     ],
                     "title": "Free User",
                     "route_name": "admin.users.free",
-                    "menu_active": "admin.users.free"
+                    "menu_active": "admin.users.free",
+                    "permission": [
+                        "view users"
+                    ]
                 },
                 {
                     "keyword": [
@@ -288,7 +364,10 @@
                     ],
                     "title": "All Users",
                     "route_name": "admin.users.all",
-                    "menu_active": "admin.users.all"
+                    "menu_active": "admin.users.all",
+                    "permission": [
+                        "view users"
+                    ]
                 },
                 {
                     "keyword": [
@@ -298,7 +377,10 @@
                     ],
                     "title": "All Agent",
                     "route_name": "admin.users.agent",
-                    "menu_active": "admin.users.agent"
+                    "menu_active": "admin.users.agent",
+                    "permission": [
+                        "view user agents"
+                    ]
                 },
                 {
                     "keyword": [
@@ -310,8 +392,82 @@
                     ],
                     "title": "Send Notification",
                     "route_name": "admin.users.notification.all",
-                    "menu_active": "admin.users.notification.all"
+                    "menu_active": "admin.users.notification.all",
+                    "permission": [
+                        "send user notification"
+                    ]
                 }
+            ]
+        },
+        {
+            "title": "Manage Admin",
+            "icon": "la la-user-circle",
+            "menu_active": [
+                "admin.list",
+                "admin.role.*"
+            ],
+            "permission": [
+                "view admin",
+                "add admin",
+                "edit admin",
+                "view roles",
+                "add role",
+                "edit role",
+                "assign permissions"
+            ],
+            "submenu": [
+                {
+                    "title": "Manage Admin",
+                    "icon": "la la-user-circle",
+                    "menu_active": "admin.list",
+                    "route_name": "admin.list",
+                    "permission": [
+                        "view admin",
+                        "add admin",
+                        "edit admin"
+                    ],
+                    "keyword": [
+                        "admin",
+                        "system admin",
+                        "platform admin",
+                        "operator"
+                    ]
+                },
+                {
+                    "title": "Role & Permissions",
+                    "icon": "las la-user-tag",
+                    "menu_active": "admin.role.*",
+                    "route_name": "admin.role.list",
+                    "permission": [
+                        "view roles",
+                        "add role",
+                        "edit role",
+                        "assign permissions"
+                    ],
+                    "keyword": [
+                        "role",
+                        "permission"
+                    ]
+                }
+            ]
+        },
+        {
+            "keyword": [
+                "Coupon Management",
+                "Coupon",
+                "Discount Coupon",
+                "Plan Discount",
+                "Discount Coupon",
+                "coupon",
+                "discount coupon",
+                "plan discount"
+            ],
+            "title": "Manage Coupon",
+            "icon": "las la-ticket-alt",
+            "route_name": "admin.coupon.list",
+            "menu_active": "admin.coupon.list",
+            "permission": [
+                "view coupon"
             ]
         }
     ],
@@ -323,6 +479,9 @@
                 "pendingDepositsCount"
             ],
             "menu_active": "admin.deposit*",
+            "permission": [
+                "view deposit"
+            ],
             "submenu": [
                 {
                     "keyword": [
@@ -336,7 +495,10 @@
                     "title": "Pending Deposits",
                     "route_name": "admin.deposit.pending",
                     "menu_active": "admin.deposit.pending",
-                    "counter": "pendingDepositsCount"
+                    "counter": "pendingDepositsCount",
+                    "permission": [
+                        "view deposit"
+                    ]
                 },
                 {
                     "keyword": [
@@ -347,7 +509,10 @@
                     ],
                     "title": "Approved Deposits",
                     "route_name": "admin.deposit.approved",
-                    "menu_active": "admin.deposit.approved"
+                    "menu_active": "admin.deposit.approved",
+                    "permission": [
+                        "view deposit"
+                    ]
                 },
                 {
                     "keyword": [
@@ -358,7 +523,10 @@
                     ],
                     "title": "Successful Deposits",
                     "route_name": "admin.deposit.successful",
-                    "menu_active": "admin.deposit.successful"
+                    "menu_active": "admin.deposit.successful",
+                    "permission": [
+                        "view deposit"
+                    ]
                 },
                 {
                     "keyword": [
@@ -369,7 +537,10 @@
                     ],
                     "title": "Rejected Deposits",
                     "route_name": "admin.deposit.rejected",
-                    "menu_active": "admin.deposit.rejected"
+                    "menu_active": "admin.deposit.rejected",
+                    "permission": [
+                        "view deposit"
+                    ]
                 },
                 {
                     "keyword": [
@@ -380,7 +551,10 @@
                     ],
                     "title": "Initiated Deposits",
                     "route_name": "admin.deposit.initiated",
-                    "menu_active": "admin.deposit.initiated"
+                    "menu_active": "admin.deposit.initiated",
+                    "permission": [
+                        "view deposit"
+                    ]
                 },
                 {
                     "keyword": [
@@ -392,7 +566,10 @@
                     ],
                     "title": "All Deposits",
                     "route_name": "admin.deposit.list",
-                    "menu_active": "admin.deposit.list"
+                    "menu_active": "admin.deposit.list",
+                    "permission": [
+                        "view deposit"
+                    ]
                 }
             ]
         },
@@ -403,6 +580,9 @@
                 "pendingWithdrawCount"
             ],
             "menu_active": "admin.withdraw.data*",
+            "permission": [
+                "view withdraw"
+            ],
             "submenu": [
                 {
                     "keyword": [
@@ -427,7 +607,10 @@
                     ],
                     "title": "Approved Withdrawals",
                     "route_name": "admin.withdraw.data.approved",
-                    "menu_active": "admin.withdraw.data.approved"
+                    "menu_active": "admin.withdraw.data.approved",
+                    "permission": [
+                        "view withdraw"
+                    ]
                 },
                 {
                     "keyword": [
@@ -438,7 +621,10 @@
                     ],
                     "title": "Rejected Withdrawals",
                     "route_name": "admin.withdraw.data.rejected",
-                    "menu_active": "admin.withdraw.data.rejected"
+                    "menu_active": "admin.withdraw.data.rejected",
+                    "permission": [
+                        "view withdraw"
+                    ]
                 },
                 {
                     "keyword": [
@@ -450,7 +636,10 @@
                     ],
                     "title": "All Withdrawals",
                     "route_name": "admin.withdraw.data.all",
-                    "menu_active": "admin.withdraw.data.all"
+                    "menu_active": "admin.withdraw.data.all",
+                    "permission": [
+                        "view withdraw"
+                    ]
                 }
             ]
         },
@@ -460,6 +649,10 @@
             "menu_active": [
                 "admin.gateway.*",
                 "admin.withdraw.method.*"
+            ],
+            "permission": [
+                "manage gateways",
+                "manage withdraw methods"
             ],
             "submenu": [
                 {
@@ -509,6 +702,9 @@
                         "manual payment gateway",
                         "bank transfer",
                         "mobile money transfer"
+                    ],
+                    "permission": [
+                        "manage gateways"
                     ]
                 },
                 {
@@ -525,7 +721,10 @@
                     ],
                     "title": "Withdrawals Methods",
                     "icon": "la la-wallet",
-                    "route_name": "admin.withdraw.method.index"
+                    "route_name": "admin.withdraw.method.index",
+                    "permission": [
+                        "manage withdraw methods"
+                    ]
                 }
             ]
         }
@@ -555,6 +754,9 @@
                 "analytics",
                 "google analytics",
                 "facebook comment"
+            ],
+            "permission": [
+                "manage extensions"
             ]
         },
         {
@@ -576,6 +778,9 @@
                 "on-page SEO",
                 "off-page SEO",
                 "ranking reports"
+            ],
+            "permission": [
+                "seo settings"
             ]
         },
         {
@@ -594,12 +799,20 @@
                 "translation settings",
                 "configure languages",
                 "configure localization"
+            ],
+            "permission": [
+                "manage languages"
             ]
         },
         {
             "title": "Report",
             "icon": "las la-table",
             "menu_active": "admin.report.*",
+            "permission": [
+                "view login history",
+                "view all transactions",
+                "view all notifications"
+            ],
             "submenu": [
                 {
                     "title": "Transaction History",
@@ -615,6 +828,9 @@
                         "balance sheet",
                         "balance log",
                         "balance history"
+                    ],
+                    "permission": [
+                        "view all transactions"
                     ]
                 },
                 {
@@ -628,6 +844,9 @@
                         "Login report",
                         "Login history",
                         "Login activity"
+                    ],
+                    "permission": [
+                        "view login history"
                     ]
                 },
                 {
@@ -647,6 +866,9 @@
                         "sms history",
                         "push notification log",
                         "push notification history"
+                    ],
+                    "permission": [
+                        "view all notifications"
                     ]
                 }
             ]
@@ -654,95 +876,337 @@
     ],
     "settings": [
         {
-            "title": "General Settings",
+            "title": "Manage Settings",
             "icon": "las la-cog",
-            "route_name": "admin.setting.general",
-            "menu_active": "admin.setting.general",
-            "keyword": [
-                "general",
-                "fundamental",
-                "site information",
-                "site",
-                "website settings",
-                "basic settings",
-                "global settings",
-                "site color",
-                "timezone",
-                "site currency",
-                "pagination",
-                "currency format",
-                "site title",
-                "base color",
-                "secondary color",
-                "paginate"
-            ]
-        },
-        {
-            "title": "Pusher Configuration",
-            "icon": "las la-share-alt",
-            "route_name": "admin.setting.pusher.configuration",
-            "menu_active": "admin.setting.pusher.configuration",
-            "keyword": [
-                "pusher",
+            "menu_active": [
+                "admin.setting.general*",
+                "admin.setting.pusher.configuration",
+                "admin.setting.system.*",
+                "admin.kyc.*",
+                "admin.setting.socialite.*",
+                "admin.cron.*",
+                "admin.setting.custom.*",
+                "admin.setting.cookie",
+                "admin.setting.sitemap",
+                "admin.setting.robot",
+                "admin.setting.app.*",
+                "admin.maintenance.mode",
+                "admin.setting.brand",
+                "admin.ai-assistant.*"
+            ],
+            "permission": [
+                "notification settings",
+                "ai assistant settings",
+                "update general settings",
                 "pusher configuration",
-                "pusher settings",
-                "pusher setup",
-                "pusher integration",
-                "pusher API",
-                "pusher credentials",
-                "pusher key",
-                "pusher secret",
-                "pusher cluster",
-                "pusher app ID"
-            ]
-        },
-        {
-            "title": "Brand Setting",
-            "icon": "las la-copyright",
-            "route_name": "admin.setting.brand",
-            "menu_active": "admin.setting.brand",
-            "keyword": [
-                "branding",
-                "brand setting",
-                "identity",
-                "logo upload",
-                "site branding",
-                "brand identity",
-                "favicon",
-                "website icon",
-                "website favicon",
-                "website logo"
-            ]
-        },
-        {
-            "title": "System Configuration",
-            "icon": "las la-tools",
-            "route_name": "admin.setting.system.configuration",
-            "menu_active": "admin.setting.system.configuration",
-            "keyword": [
-                "basic modules",
-                "control",
-                "modules",
-                "system",
-                "configuration settings",
-                "system control",
-                "force ssl",
-                "force secure password",
-                "kyc control",
-                "email control",
-                "sms control",
-                "verification control",
-                "push notification control",
-                "language control",
-                "mobile verification",
-                "email verification",
-                "in app payment"
+                "update brand settings",
+                "system configuration",
+                "kyc settings",
+                "social login settings",
+                "manage cron job",
+                "cookie settings",
+                "custom css",
+                "sitemap xml",
+                "robots txt",
+                "in app payment settings",
+                "update maintenance mode"
+            ],
+            "submenu": [
+                {
+                    "title": "General Settings",
+                    "icon": "las la-cog",
+                    "route_name": "admin.setting.general",
+                    "menu_active": "admin.setting.general",
+                    "keyword": [
+                        "general",
+                        "fundamental",
+                        "site information",
+                        "site",
+                        "website settings",
+                        "basic settings",
+                        "global settings",
+                        "site color",
+                        "timezone",
+                        "site currency",
+                        "pagination",
+                        "currency format",
+                        "site title",
+                        "base color",
+                        "secondary color",
+                        "paginate"
+                    ],
+                    "permission": [
+                        "update general settings"
+                    ]
+                },
+                {
+                    "title": "Pusher Setting",
+                    "icon": "las la-share-alt",
+                    "route_name": "admin.setting.pusher.configuration",
+                    "menu_active": "admin.setting.pusher.configuration",
+                    "keyword": [
+                        "pusher",
+                        "pusher configuration",
+                        "pusher settings",
+                        "pusher setup",
+                        "pusher integration",
+                        "pusher API",
+                        "pusher credentials",
+                        "pusher key",
+                        "pusher secret",
+                        "pusher cluster",
+                        "pusher app ID"
+                    ],
+                    "permission": [
+                        "pusher configuration"
+                    ]
+                },
+                {
+                    "title": "Brand Setting",
+                    "icon": "las la-copyright",
+                    "route_name": "admin.setting.brand",
+                    "menu_active": "admin.setting.brand",
+                    "keyword": [
+                        "branding",
+                        "brand setting",
+                        "identity",
+                        "logo upload",
+                        "site branding",
+                        "brand identity",
+                        "favicon",
+                        "website icon",
+                        "website favicon",
+                        "website logo"
+                    ],
+                    "permission": [
+                        "update brand settings"
+                    ]
+                },
+                {
+                    "title": "System Configuration",
+                    "icon": "las la-tools",
+                    "route_name": "admin.setting.system.configuration",
+                    "menu_active": "admin.setting.system.configuration",
+                    "keyword": [
+                        "basic modules",
+                        "control",
+                        "modules",
+                        "system",
+                        "configuration settings",
+                        "system control",
+                        "force ssl",
+                        "force secure password",
+                        "kyc control",
+                        "email control",
+                        "sms control",
+                        "verification control",
+                        "push notification control",
+                        "language control",
+                        "mobile verification",
+                        "email verification",
+                        "in app payment"
+                    ],
+                    "permission": [
+                        "system configuration"
+                    ]
+                },
+                {
+                    "title": "AI Assistant Setting",
+                    "route_name": "admin.ai-assistant.index",
+                    "menu_active": "admin.ai-assistant.index",
+                    "keyword": [
+                        "Manage AI Assistant",
+                        "AI Assistant",
+                        "Ai Management",
+                        "Assistant Management",
+                        "Discount Coupon",
+                        "AI",
+                        "Ai Manage"
+                    ],
+                    "permission": [
+                        "ai assistant settings"
+                    ]
+                },
+                {
+                    "title": "KYC Setting",
+                    "icon": "las la-user-check",
+                    "route_name": "admin.kyc.setting",
+                    "menu_active": "admin.kyc.setting",
+                    "keyword": [
+                        "kyc verification",
+                        "identity verification",
+                        "document upload",
+                        "compliance check",
+                        "aml verification",
+                        "kyc process",
+                        "user identification",
+                        "kyc form",
+                        "kyc approval",
+                        "verification status",
+                        "id verification",
+                        "kyc review"
+                    ],
+                    "permission": [
+                        "kyc settings"
+                    ]
+                },
+                {
+                    "keyword": [
+                        "social login",
+                        "social media",
+                        "authentication",
+                        "social media login",
+                        "social media authentication",
+                        "facebook login",
+                        "google login",
+                        "linkedin login"
+                    ],
+                    "title": "Social Login Setting",
+                    "icon": "las la-share-alt",
+                    "route_name": "admin.setting.socialite.credentials",
+                    "permission": [
+                        "social login settings"
+                    ]
+                },
+                {
+                    "title": "CRON Job Setting",
+                    "icon": "las la-clock",
+                    "route_name": "admin.cron.index",
+                    "menu_active": "admin.cron.*",
+                    "keyword": [
+                        "cron job",
+                        "scheduled tasks",
+                        "automated tasks",
+                        "task scheduling",
+                        "cron schedule",
+                        "cron configuration",
+                        "background jobs",
+                        "cron execution",
+                        "cron timing",
+                        "automation",
+                        "task automation",
+                        "cron logs",
+                        "job queue",
+                        "system tasks"
+                    ],
+                    "permission": [
+                        "manage cron job"
+                    ]
+                },
+                {
+                    "keyword": [
+                        "GDPR cookie",
+                        "cookie policy",
+                        "data privacy",
+                        "GDPR settings",
+                        "cookie policy settings",
+                        "data privacy settings"
+                    ],
+                    "title": "GDPR Cookie",
+                    "icon": "las la-cookie-bite",
+                    "route_name": "admin.setting.cookie",
+                    "permission": [
+                        "cookie settings"
+                    ]
+                },
+                {
+                    "keyword": [
+                        "custom CSS",
+                        "modify styles",
+                        "frontend",
+                        "styling",
+                        "design customization",
+                        "CSS settings",
+                        "style settings",
+                        "frontend customization",
+                        "design settings",
+                        "customize CSS"
+                    ],
+                    "title": "Custom CSS",
+                    "icon": "lab la-css3-alt",
+                    "route_name": "admin.setting.custom.css",
+                    "permission": [
+                        "custom css"
+                    ]
+                },
+                {
+                    "keyword": [
+                        "Site map",
+                        "sitemap",
+                        "xml",
+                        "sitemap.xml"
+                    ],
+                    "title": "Sitemap XML",
+                    "subtitle": "Insert the sitemap XML here to enhance SEO performance.",
+                    "icon": "las la-sitemap",
+                    "route_name": "admin.setting.sitemap",
+                    "permission": [
+                        "sitemap xml"
+                    ]
+                },
+                {
+                    "keyword": [
+                        "Robots",
+                        "txt",
+                        "robots.txt",
+                        "robot.txt"
+                    ],
+                    "title": "Robots txt",
+                    "subtitle": "Insert the robots.txt content here to enhance bot web crawlers and instruct them on how to interact with certain areas of the website.",
+                    "icon": "las la-robot",
+                    "route_name": "admin.setting.robot",
+                    "permission": [
+                        "robots txt"
+                    ]
+                },
+                {
+                    "keyword": [
+                        "in app payment",
+                        "google pay",
+                        "payments",
+                        "mobile payments",
+                        "app transactions",
+                        "payment settings",
+                        "in-app payment settings",
+                        "mobile payment settings",
+                        "configure payments",
+                        "app transaction settings"
+                    ],
+                    "title": "In App Payment",
+                    "subtitle": "Configure google pay to accept payments directly within your app.",
+                    "icon": "lab la-google-play",
+                    "route_name": "admin.setting.app.purchase",
+                    "permission": [
+                        "in app payment settings"
+                    ]
+                },
+                {
+                    "keyword": [
+                        "maintenance mode",
+                        "system maintenance",
+                        "system health",
+                        "maintenance settings",
+                        "system health settings",
+                        "enable maintenance",
+                        "disable maintenance",
+                        "maintenance configuration"
+                    ],
+                    "title": "Maintenance Mode",
+                    "icon": "las la-robot",
+                    "route_name": "admin.maintenance.mode",
+                    "permission": [
+                        "update maintenance mode"
+                    ]
+                }
             ]
         },
         {
             "title": "Notification Setting",
             "icon": "las la-bell",
             "menu_active": "admin.setting.notification.*",
+            "permission": [
+                "notification settings"
+            ],
             "submenu": [
                 {
                     "title": "Global Template",
@@ -762,6 +1226,9 @@
                     "icon": "las la-dot-circle",
                     "route_name": "admin.setting.notification.email",
                     "menu_active": "admin.setting.notification.email",
+                    "permission": [
+                        "notification settings"
+                    ],
                     "keyword": [
                         "email configuration",
                         "email setting",
@@ -778,6 +1245,9 @@
                     "icon": "las la-dot-circle",
                     "route_name": "admin.setting.notification.sms",
                     "menu_active": "admin.setting.notification.sms",
+                    "permission": [
+                        "notification settings"
+                    ],
                     "keyword": [
                         "sms configure",
                         "sms setting",
@@ -797,6 +1267,9 @@
                     "icon": "las la-dot-circle",
                     "route_name": "admin.setting.notification.push",
                     "menu_active": "admin.setting.notification.push",
+                    "permission": [
+                        "notification settings"
+                    ],
                     "keyword": [
                         "push notification configure",
                         "push notification setting",
@@ -810,6 +1283,9 @@
                     "icon": "las la-dot-circle",
                     "route_name": "admin.setting.notification.templates",
                     "menu_active": "admin.setting.notification.templates",
+                    "permission": [
+                        "notification settings"
+                    ],
                     "keyword": [
                         "email template",
                         "sms template",
@@ -822,150 +1298,6 @@
                     ]
                 }
             ]
-        },
-        {
-            "title": "KYC Setting",
-            "icon": "las la-user-check",
-            "route_name": "admin.kyc.setting",
-            "menu_active": "admin.kyc.setting",
-            "keyword": [
-                "kyc verification",
-                "identity verification",
-                "document upload",
-                "compliance check",
-                "aml verification",
-                "kyc process",
-                "user identification",
-                "kyc form",
-                "kyc approval",
-                "verification status",
-                "id verification",
-                "kyc review"
-            ]
-        },
-        {
-            "keyword": [
-                "social login",
-                "social media",
-                "authentication",
-                "social media login",
-                "social media authentication",
-                "facebook login",
-                "google login",
-                "linkedin login"
-            ],
-            "title": "Social Login Setting",
-            "icon": "las la-share-alt",
-            "route_name": "admin.setting.socialite.credentials"
-        },
-        {
-            "title": "CRON Job Setting",
-            "icon": "las la-clock",
-            "route_name": "admin.cron.index",
-            "menu_active": "admin.cron.*",
-            "keyword": [
-                "cron job",
-                "scheduled tasks",
-                "automated tasks",
-                "task scheduling",
-                "cron schedule",
-                "cron configuration",
-                "background jobs",
-                "cron execution",
-                "cron timing",
-                "automation",
-                "task automation",
-                "cron logs",
-                "job queue",
-                "system tasks"
-            ]
-        },
-        {
-            "keyword": [
-                "GDPR cookie",
-                "cookie policy",
-                "data privacy",
-                "GDPR settings",
-                "cookie policy settings",
-                "data privacy settings"
-            ],
-            "title": "GDPR Cookie",
-            "icon": "las la-cookie-bite",
-            "route_name": "admin.setting.cookie"
-        },
-        {
-            "keyword": [
-                "custom CSS",
-                "modify styles",
-                "frontend",
-                "styling",
-                "design customization",
-                "CSS settings",
-                "style settings",
-                "frontend customization",
-                "design settings",
-                "customize CSS"
-            ],
-            "title": "Custom CSS",
-            "icon": "lab la-css3-alt",
-            "route_name": "admin.setting.custom.css"
-        },
-        {
-            "keyword": [
-                "Site map",
-                "sitemap",
-                "xml",
-                "sitemap.xml"
-            ],
-            "title": "Sitemap XML",
-            "subtitle": "Insert the sitemap XML here to enhance SEO performance.",
-            "icon": "las la-sitemap",
-            "route_name": "admin.setting.sitemap"
-        },
-        {
-            "keyword": [
-                "Robots",
-                "txt",
-                "robots.txt",
-                "robot.txt"
-            ],
-            "title": "Robots txt",
-            "subtitle": "Insert the robots.txt content here to enhance bot web crawlers and instruct them on how to interact with certain areas of the website.",
-            "icon": "las la-robot",
-            "route_name": "admin.setting.robot"
-        },
-        {
-            "keyword": [
-                "in app payment",
-                "google pay",
-                "payments",
-                "mobile payments",
-                "app transactions",
-                "payment settings",
-                "in-app payment settings",
-                "mobile payment settings",
-                "configure payments",
-                "app transaction settings"
-            ],
-            "title": "In App Payment",
-            "subtitle": "Configure google pay to accept payments directly within your app.",
-            "icon": "lab la-google-play",
-            "route_name": "admin.setting.app.purchase"
-        },
-        {
-            "keyword": [
-                "maintenance mode",
-                "system maintenance",
-                "system health",
-                "maintenance settings",
-                "system health settings",
-                "enable maintenance",
-                "disable maintenance",
-                "maintenance configuration"
-            ],
-            "title": "Maintenance Mode",
-            "icon": "las la-robot",
-            "route_name": "admin.maintenance.mode"
         }
     ],
     "frontend_manager": [
@@ -989,6 +1321,9 @@
                 "page publishing",
                 "page settings",
                 "dynamic pages"
+            ],
+            "permission": [
+                "manage pages"
             ]
         },
         {
@@ -1010,6 +1345,9 @@
                 "dynamic sections",
                 "section templates",
                 "responsive sections"
+            ],
+            "permission": [
+                "manage sections"
             ]
         }
     ],
@@ -1018,6 +1356,9 @@
             "title": "Support Ticket",
             "icon": "la la-ticket",
             "menu_active": "admin.ticket.*",
+            "permission": [
+                "view tickets"
+            ],
             "submenu": [
                 {
                     "title": "Pending Ticket",
@@ -1035,6 +1376,9 @@
                         "ticket resolution",
                         "ticket assignment",
                         "ticket prioritization"
+                    ],
+                    "permission": [
+                        "view tickets"
                     ]
                 },
                 {
@@ -1055,6 +1399,9 @@
                         "ticket archive",
                         "issue resolution",
                         "completed tickets"
+                    ],
+                    "permission": [
+                        "view tickets"
                     ]
                 },
                 {
@@ -1075,6 +1422,9 @@
                         "ticket follow-up",
                         "closed tickets",
                         "communication logs"
+                    ],
+                    "permission": [
+                        "view tickets"
                     ]
                 },
                 {
@@ -1095,6 +1445,9 @@
                         "ticket categorization",
                         "open tickets",
                         "closed tickets"
+                    ],
+                    "permission": [
+                        "view tickets"
                     ]
                 }
             ],
@@ -1120,6 +1473,9 @@
                 "unsubscribe management",
                 "subscriber analytics",
                 "contact management"
+            ],
+            "permission": [
+                "manage subscribers"
             ]
         },
         {
@@ -1140,6 +1496,9 @@
                 "unsubscribe management",
                 "subscriber analytics",
                 "contact management"
+            ],
+            "permission": [
+                "view application info"
             ]
         }
     ]

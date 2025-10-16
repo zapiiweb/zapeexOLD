@@ -45,6 +45,23 @@
                                 @lang('Failed')
                             </option>
                         </select>
+                        
+                        <select class="form-select form--control select2" name="export">
+                            <option selected value="">@lang('Export')</option>
+                            <option value="excel">
+                                @lang('Excel')
+                            </option>
+                            <option value="csv">
+                                @lang('CSV')
+                            </option>
+                            <option value="pdf">
+                                @lang('PDF')
+                            </option>
+                            <option value="print">
+                                @lang('Print')
+                            </option>
+                        </select>
+
                         <x-whatsapp_account :isHide="true" />
                     </form>
                 </div>

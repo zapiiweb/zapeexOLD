@@ -92,9 +92,9 @@
                                                         @lang('Play')
                                                     </a>
                                                 @endif
-                                                <a href="javascript:void(0)" data-cron='@json($cron)'
-                                                    class="dropdown-list d-block" data-next-run="{{ $formattedDateTime }}"
-                                                    class="editBtn">
+                                                <a type="button" data-cron='@json($cron)'
+                                                    class="dropdown-list d-block editBtn"
+                                                    data-next-run="{{ $formattedDateTime }}" class="editBtn">
                                                     <span class="me-2"><i class="fas fa-pen text--primary"></i></span>
                                                     @lang('Edit')
                                                 </a>

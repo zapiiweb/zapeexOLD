@@ -29,74 +29,94 @@ Route::middleware('admin')->group(function () {
 
     // Users Manager
     Route::controller('ManageUsersController')->name('users.')->prefix('users')->group(function () {
-        Route::get('/', 'allUsers')->name('all');
-        Route::get('deleted-account', 'deletedUsers')->name('deleted');
-        Route::get('agent', 'agentUsers')->name('agent');
-        Route::get('subscribed', 'subscribeUsers')->name('subscribe');
-        Route::get('subscribed-expired', 'subscriptionExpiredUsers')->name('subscribe.expired');
-        Route::get('free', 'freeUsers')->name('free');
-        Route::get('active', 'activeUsers')->name('active');
-        Route::get('banned', 'bannedUsers')->name('banned');
-        Route::get('email-verified', 'emailVerifiedUsers')->name('email.verified');
-        Route::get('email-unverified', 'emailUnverifiedUsers')->name('email.unverified');
-        Route::get('mobile-unverified', 'mobileUnverifiedUsers')->name('mobile.unverified');
-        Route::get('kyc-unverified', 'kycUnverifiedUsers')->name('kyc.unverified');
-        Route::get('kyc-pending', 'kycPendingUsers')->name('kyc.pending');
-        Route::get('mobile-verified', 'mobileVerifiedUsers')->name('mobile.verified');
-        Route::get('with-balance', 'usersWithBalance')->name('with.balance');
+        Route::middleware('permission:view users,admin')->group(function () {
+            Route::get('/', 'allUsers')->name('all');
+            Route::get('deleted-account', 'deletedUsers')->name('deleted');
+            Route::get('subscribed', 'subscribeUsers')->name('subscribe');
+            Route::get('subscribed-expired', 'subscriptionExpiredUsers')->name('subscribe.expired');
+            Route::get('free', 'freeUsers')->name('free');
+            Route::get('active', 'activeUsers')->name('active');
+            Route::get('banned', 'bannedUsers')->name('banned');
+            Route::get('email-verified', 'emailVerifiedUsers')->name('email.verified');
+            Route::get('email-unverified', 'emailUnverifiedUsers')->name('email.unverified');
+            Route::get('mobile-unverified', 'mobileUnverifiedUsers')->name('mobile.unverified');
+            Route::get('kyc-unverified', 'kycUnverifiedUsers')->name('kyc.unverified');
+            Route::get('kyc-pending', 'kycPendingUsers')->name('kyc.pending');
+            Route::get('mobile-verified', 'mobileVerifiedUsers')->name('mobile.verified');
+            Route::get('with-balance', 'usersWithBalance')->name('with.balance');
 
-        Route::get('detail/{id}', 'detail')->name('detail');
-        Route::get('kyc-data/{id}', 'kycDetails')->name('kyc.details');
-        Route::post('kyc-approve/{id}', 'kycApprove')->name('kyc.approve');
-        Route::post('kyc-reject/{id}', 'kycReject')->name('kyc.reject');
-        Route::post('update/{id}', 'update')->name('update');
-        Route::post('add-sub-balance/{id}', 'addSubBalance')->name('add.sub.balance');
-        Route::get('send-notification/{id}', 'showNotificationSingleForm')->name('notification.single');
-        Route::post('send-notification/{id}', 'sendNotificationSingle')->name('notification.single');
-        Route::get('login/{id}', 'login')->name('login');
-        Route::post('status/{id}', 'status')->name('status');
+            Route::get('detail/{id}', 'detail')->name('detail');
+        });
+        Route::get('agent', 'agentUsers')->name('agent')->middleware('permission:view user agents,admin');
 
-        Route::get('send-notification', 'showNotificationAllForm')->name('notification.all');
-        Route::post('send-notification', 'sendNotificationAll')->name('notification.all.send');
-        Route::get('list', 'list')->name('list');
+        Route::post('kyc-approve/{id}', 'kycApprove')->name('kyc.approve')->middleware('permission:update user,admin');
+        Route::get('kyc-data/{id}', 'kycDetails')->name('kyc.details')->middleware('permission:update user,admin');
+        Route::post('kyc-reject/{id}', 'kycReject')->name('kyc.reject')->middleware('permission:update user,admin');
+        Route::post('update/{id}', 'update')->name('update')->middleware('permission:update user,admin');
+        Route::post('add-sub-balance/{id}', 'addSubBalance')->name('add.sub.balance')->middleware('permission:update user balance,admin');
+        Route::get('send-notification/{id}', 'showNotificationSingleForm')->name('notification.single')->middleware('permission:send user notification,admin');
+        Route::post('send-notification/{id}', 'sendNotificationSingle')->name('notification.single')->middleware('permission:send user notification,admin');
+        Route::get('login/{id}', 'login')->name('login')->middleware('permission:login as user,admin');
+        Route::post('status/{id}', 'status')->name('status')->middleware('permission:ban user,admin');
+
+        Route::get('send-notification', 'showNotificationAllForm')->name('notification.all')->middleware('permission:send user notification,admin');
+        Route::post('send-notification', 'sendNotificationAll')->name('notification.all.send')->middleware('permission:send user notification,admin');
+        Route::get('list', 'list')->name('list')->middleware('permission:view users,admin');
         Route::get('count-by-segment/{methodName}', 'countBySegment')->name('segment.count');
-        Route::get('notification-log/{id}', 'notificationLog')->name('notification.log');
+        Route::get('notification-log/{id}', 'notificationLog')->name('notification.log')->middleware('permission:view user notifications,admin');
     });
 
     // Subscriber
-    Route::controller('SubscriberController')->prefix('subscriber')->name('subscriber.')->group(function () {
+    Route::controller('SubscriberController')->prefix('subscriber')->name('subscriber.')->middleware('permission:manage subscribers,admin')->group(function () {
         Route::get('/', 'index')->name('index');
-        Route::get('send-email', 'sendEmailForm')->name('send.email');
+        Route::get('send-email', 'sendEmailForm')->name('send.email')->middleware('permission:send user notification,admin');
+        Route::post('send-email', 'sendEmail')->name('send.email')->middleware('permission:send user notification,admin');
         Route::post('remove/{id}', 'remove')->name('remove');
-        Route::post('send-email', 'sendEmail')->name('send.email');
     });
 
     // Report
     Route::controller('ReportController')->prefix('report')->name('report.')->group(function () {
-        Route::get('transaction/', 'transaction')->name('transaction');
-        Route::get('login/history', 'loginHistory')->name('login.history');
-        Route::get('login/ipHistory/{ip}', 'loginIpHistory')->name('login.ipHistory');
-        Route::get('notification/history', 'notificationHistory')->name('notification.history');
+        Route::get('transaction/', 'transaction')->name('transaction')->middleware('permission:view all transactions,admin');
+        Route::get('login/history', 'loginHistory')->name('login.history')->middleware('permission:view login history,admin');
+        Route::get('login/ipHistory/{ip}', 'loginIpHistory')->name('login.ipHistory')->middleware('permission:view login history,admin');
+        Route::get('notification/history', 'notificationHistory')->name('notification.history')->middleware('permission:view all notifications,admin');
         Route::get('email/detail/{id}', 'emailDetails')->name('email.details');
     });
 
 
+    // Role & Permission
+    Route::controller('RoleController')->name('role.')->prefix('role')->group(function () {
+        Route::get('list', 'list')->name('list');
+        Route::post('create', 'save')->name('create');
+        Route::post('update/{id}', 'save')->name('update');
+        Route::get('permission/{id}', 'permission')->name('permission');
+        Route::post('permission/update/{id}', 'permissionUpdate')->name('permission.update');
+    });
+
+    // Coupon
+    Route::controller('CouponController')->prefix('coupon')->name('coupon.')->group(function () {
+        Route::get('list', 'list')->name('list')->middleware('permission:view coupon,admin');
+        Route::post('store', 'store')->name('store')->middleware('permission:add coupon,admin');
+        Route::post('update/{id}', 'store')->name('update')->middleware('permission:edit coupon,admin');
+        Route::post('status/{id}', 'status')->name('status')->middleware('permission:edit coupon,admin');
+    });
+
     // Admin Support
-    Route::controller('SupportTicketController')->prefix('ticket')->name('ticket.')->group(function () {
+    Route::controller('SupportTicketController')->prefix('ticket')->name('ticket.')->middleware('permission:view tickets,admin')->group(function () {
         Route::get('/', 'tickets')->name('index');
         Route::get('pending', 'pendingTicket')->name('pending');
         Route::get('closed', 'closedTicket')->name('closed');
         Route::get('answered', 'answeredTicket')->name('answered');
         Route::get('view/{id}', 'ticketReply')->name('view');
-        Route::post('reply/{id}', 'replyTicket')->name('reply');
-        Route::post('close/{id}', 'closeTicket')->name('close');
+        Route::post('reply/{id}', 'replyTicket')->name('reply')->middleware('permission:answer tickets,admin');
+        Route::post('close/{id}', 'closeTicket')->name('close')->middleware('permission:close tickets,admin');
         Route::get('download/{attachment_id}', 'ticketDownload')->name('download');
-        Route::post('delete/{id}', 'ticketDelete')->name('delete');
+        Route::post('delete/{id}', 'ticketDelete')->name('delete')->middleware('permission:close tickets,admin');
     });
 
 
     Route::controller('AdminController')->group(function () {
-        Route::get('dashboard', 'dashboard')->name('dashboard');
+        Route::get('dashboard', 'dashboard')->name('dashboard')->middleware('permission:view dashboard,admin');
         Route::get('chart/deposit-withdraw', 'depositAndWithdrawReport')->name('chart.deposit.withdraw');
         Route::get('chart/transaction', 'transactionReport')->name('chart.transaction');
         Route::get('profile', 'profile')->name('profile');
@@ -111,22 +131,28 @@ Route::middleware('admin')->group(function () {
         Route::post('notifications/delete-all', 'deleteAllNotification')->name('notifications.delete.all');
         Route::post('notifications/delete-single/{id}', 'deleteSingleNotification')->name('notifications.delete.single');
 
-        // Subscriptions 
-        Route::get('/subscriptions', 'subscriptionLog')->name('user.subscriptions');
+        // Subscriptions
+        Route::get('/subscriptions', 'subscriptionLog')->name('user.subscriptions')->middleware('permission:view subscription history,admin');
 
         //Report Bugs
         Route::get('download-attachments/{file_hash}', 'downloadAttachment')->name('download.attachment');
+
+        // Assign role
+        Route::get('list', 'list')->name('list')->middleware('permission:view admin,admin');
+        Route::post('store', 'save')->name('store')->middleware('permission:add admin,admin');
+        Route::post('update/{id}', 'save')->name('update')->middleware('permission:edit admin,admin');
+        Route::post('status-change/{id}', 'status')->name('status.change')->middleware('permission:edit admin,admin');
     });
 
     // extensions
-    Route::controller('ExtensionController')->prefix('extensions')->name('extensions.')->group(function () {
+    Route::controller('ExtensionController')->prefix('extensions')->name('extensions.')->middleware('permission:manage extensions,admin')->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('update/{id}', 'update')->name('update');
         Route::post('status/{id}', 'status')->name('status');
     });
 
     // Language Manager
-    Route::controller('LanguageController')->prefix('language')->name('language.')->group(function () {
+    Route::controller('LanguageController')->prefix('language')->name('language.')->middleware('permission:manage languages,admin')->group(function () {
         Route::get('/', 'langManage')->name('manage');
         Route::post('/', 'langStore')->name('manage.store');
         Route::post('delete/{id}', 'langDelete')->name('manage.delete');
@@ -140,7 +166,7 @@ Route::middleware('admin')->group(function () {
     });
 
     //Notification Setting
-    Route::name('setting.notification.')->controller('NotificationController')->prefix('notification')->group(function () {
+    Route::name('setting.notification.')->controller('NotificationController')->middleware('permission:notification settings,admin')->prefix('notification')->group(function () {
         //Template Setting
         Route::get('global/email', 'globalEmail')->name('global.email');
         Route::post('global/email/update', 'globalEmailUpdate')->name('global.email.update');
@@ -172,22 +198,24 @@ Route::middleware('admin')->group(function () {
     });
 
     //KYC setting
-    Route::controller('KycController')->group(function () {
+    Route::controller('KycController')->middleware('permission:kyc settings,admin')->group(function () {
         Route::get('kyc-setting', 'setting')->name('kyc.setting');
         Route::post('kyc-setting', 'settingUpdate')->name('kyc.setting.update');
     });
 
     // DEPOSIT SYSTEM
     Route::controller('DepositController')->prefix('deposit')->name('deposit.')->group(function () {
-        Route::get('all', 'deposit')->name('list');
-        Route::get('pending', 'pending')->name('pending');
-        Route::get('rejected', 'rejected')->name('rejected');
-        Route::get('approved', 'approved')->name('approved');
-        Route::get('successful', 'successful')->name('successful');
-        Route::get('initiated', 'initiated')->name('initiated');
-        Route::get('details/{id}', 'details')->name('details');
-        Route::post('reject', 'reject')->name('reject');
-        Route::post('approve/{id}', 'approve')->name('approve');
+        Route::middleware('permission:view deposit,admin')->group(function () {
+            Route::get('all', 'deposit')->name('list');
+            Route::get('pending', 'pending')->name('pending');
+            Route::get('rejected', 'rejected')->name('rejected');
+            Route::get('approved', 'approved')->name('approved');
+            Route::get('successful', 'successful')->name('successful');
+            Route::get('initiated', 'initiated')->name('initiated');
+            Route::get('details/{id}', 'details')->name('details');
+        });
+        Route::post('reject', 'reject')->name('reject')->middleware('permission:reject deposit,admin');
+        Route::post('approve/{id}', 'approve')->name('approve')->middleware('permission:approve deposit,admin');
     });
 
 
@@ -195,18 +223,20 @@ Route::middleware('admin')->group(function () {
     Route::name('withdraw.')->prefix('withdraw')->group(function () {
 
         Route::controller('WithdrawalController')->name('data.')->group(function () {
-            Route::get('pending/{user_id?}', 'pending')->name('pending');
-            Route::get('approved/{user_id?}', 'approved')->name('approved');
-            Route::get('rejected/{user_id?}', 'rejected')->name('rejected');
-            Route::get('all/{user_id?}', 'all')->name('all');
-            Route::get('details/{id}', 'details')->name('details');
-            Route::post('approve', 'approve')->name('approve');
-            Route::post('reject', 'reject')->name('reject');
+            Route::middleware('permission:view withdraw,admin')->group(function () {
+                Route::get('pending/{user_id?}', 'pending')->name('pending');
+                Route::get('approved/{user_id?}', 'approved')->name('approved');
+                Route::get('rejected/{user_id?}', 'rejected')->name('rejected');
+                Route::get('all/{user_id?}', 'all')->name('all');
+                Route::get('details/{id}', 'details')->name('details');
+            });
+            Route::post('approve', 'approve')->name('approve')->middleware('permission:approve withdraw,admin');
+            Route::post('reject', 'reject')->name('reject')->middleware('permission:reject withdraw,admin');
         });
 
 
         // Withdraw Method
-        Route::controller('WithdrawMethodController')->prefix('method')->name('method.')->group(function () {
+        Route::controller('WithdrawMethodController')->prefix('method')->name('method.')->middleware('permission:manage withdraw methods,admin')->group(function () {
             Route::get('/', 'methods')->name('index');
             Route::get('create', 'create')->name('create');
             Route::post('create', 'store')->name('store');
@@ -217,12 +247,12 @@ Route::middleware('admin')->group(function () {
     });
 
     // SEO
-    Route::get('seo', 'FrontendController@seoEdit')->name('seo');
+    Route::get('seo', 'FrontendController@seoEdit')->name('seo')->middleware('permission:seo settings,admin');
 
     // Frontend
     Route::name('frontend.')->prefix('frontend')->group(function () {
 
-        Route::controller('FrontendController')->group(function () {
+        Route::controller('FrontendController')->middleware('permission:manage sections,admin')->group(function () {
             Route::get('index', 'index')->name('index');
             Route::get('templates', 'templates')->name('templates');
             Route::post('templates', 'templatesActive')->name('templates.active');
@@ -236,7 +266,7 @@ Route::middleware('admin')->group(function () {
         });
 
         // Page Builder
-        Route::controller('PageBuilderController')->group(function () {
+        Route::controller('PageBuilderController')->middleware('permission:manage pages,admin')->group(function () {
             Route::get('manage-pages', 'managePages')->name('manage.pages');
             Route::get('manage-pages/check-slug/{id?}', 'checkSlug')->name('manage.pages.check.slug');
             Route::post('manage-pages', 'managePagesSave')->name('manage.pages.save');
@@ -251,58 +281,57 @@ Route::middleware('admin')->group(function () {
     });
 
     //System Information
-    Route::controller('SystemController')->name('system.')->prefix('system')->group(function () {
+    Route::controller('SystemController')->name('system.')->middleware('permission:view application info,admin')->prefix('system')->group(function () {
         Route::get('info', 'systemInfo')->name('info');
         Route::get('optimize-clear', 'optimizeClear')->name('optimize.clear');
     });
 
     Route::controller('GeneralSettingController')->group(function () {
 
-        Route::get('system-setting', 'systemSetting')->name('setting.system');
 
         // General Setting
-        Route::get('general-setting', 'general')->name('setting.general');
-        Route::post('general-setting', 'generalUpdate');
+        Route::get('general-setting', 'general')->name('setting.general')->middleware('permission:update general settings,admin');
+        Route::post('general-setting', 'generalUpdate')->middleware('permission:update general settings,admin');
 
         // Pusher Configuration
-        Route::get('pusher-configuration', 'pusherConfiguration')->name('setting.pusher.configuration');
-        Route::post('pusher-configuration', 'pusherConfigurationUpdate')->name('setting.pusher.configuration');
+        Route::get('pusher-configuration', 'pusherConfiguration')->name('setting.pusher.configuration')->middleware('permission:pusher configuration,admin');
+        Route::post('pusher-configuration', 'pusherConfigurationUpdate')->name('setting.pusher.configuration')->middleware('permission:pusher configuration,admin');
 
 
-        Route::get('setting/social/credentials', 'socialiteCredentials')->name('setting.socialite.credentials');
-        Route::post('setting/social/credentials/update/{key}', 'updateSocialiteCredential')->name('setting.socialite.credentials.update');
-        Route::post('setting/social/credentials/status/{key}', 'updateSocialiteCredentialStatus')->name('setting.socialite.credentials.status.update');
+        Route::get('setting/social/credentials', 'socialiteCredentials')->name('setting.socialite.credentials')->middleware('permission:social login settings,admin');
+        Route::post('setting/social/credentials/update/{key}', 'updateSocialiteCredential')->name('setting.socialite.credentials.update')->middleware('permission:social login settings,admin');
+        Route::post('setting/social/credentials/status/{key}', 'updateSocialiteCredentialStatus')->name('setting.socialite.credentials.status.update')->middleware('permission:social login settings,admin');
 
         //configuration
-        Route::get('setting/system-configuration', 'systemConfiguration')->name('setting.system.configuration');
-        Route::get('setting/system-configuration/{key}', 'systemConfigurationUpdate')->name("setting.system.configuration.update");
+        Route::get('setting/system-configuration', 'systemConfiguration')->name('setting.system.configuration')->middleware('permission:system configuration,admin');
+        Route::get('setting/system-configuration/{key}', 'systemConfigurationUpdate')->name("setting.system.configuration.update")->middleware('permission:system configuration,admin');
 
         // Logo-Icon
-        Route::get('setting/brand', 'logoIcon')->name('setting.brand');
-        Route::post('setting/brand', 'logoIconUpdate')->name('setting.brand');
+        Route::get('setting/brand', 'logoIcon')->name('setting.brand')->middleware('permission:update brand settings,admin');
+        Route::post('setting/brand', 'logoIconUpdate')->name('setting.brand')->middleware('permission:update brand settings,admin');
 
         //Custom CSS
-        Route::get('custom-css', 'customCss')->name('setting.custom.css');
-        Route::post('custom-css', 'customCssSubmit');
+        Route::get('custom-css', 'customCss')->name('setting.custom.css')->middleware('permission:custom css,admin');
+        Route::post('custom-css', 'customCssSubmit')->middleware('permission:custom css,admin');
 
-        Route::get('sitemap', 'sitemap')->name('setting.sitemap');
-        Route::post('sitemap', 'sitemapSubmit');
+        Route::get('sitemap', 'sitemap')->name('setting.sitemap')->middleware('permission:sitemap xml,admin');
+        Route::post('sitemap', 'sitemapSubmit')->middleware('permission:sitemap xml,admin');
 
-        Route::get('robot', 'robot')->name('setting.robot');
-        Route::post('robot', 'robotSubmit');
+        Route::get('robot', 'robot')->name('setting.robot')->middleware('permission:robots txt,admin');
+        Route::post('robot', 'robotSubmit')->middleware('permission:robots txt,admin');
 
         //Cookie
-        Route::get('cookie', 'cookie')->name('setting.cookie');
-        Route::post('cookie', 'cookieSubmit');
+        Route::get('cookie', 'cookie')->name('setting.cookie')->middleware('permission:cookie settings,admin');
+        Route::post('cookie', 'cookieSubmit')->middleware('permission:cookie settings,admin');
 
         //maintenance_mode
-        Route::get('maintenance-mode', 'maintenanceMode')->name('maintenance.mode');
-        Route::post('maintenance-mode', 'maintenanceModeSubmit');
+        Route::get('maintenance-mode', 'maintenanceMode')->name('maintenance.mode')->middleware('permission:update maintenance mode,admin');
+        Route::post('maintenance-mode', 'maintenanceModeSubmit')->middleware('permission:update maintenance mode,admin');
 
         //In app purchase
-        Route::get('in-app-purchase', 'inAppPurchase')->name('setting.app.purchase');
-        Route::post('in-app-purchase', 'inAppPurchaseConfigure');
-        Route::get('in-app-purchase/file/download', 'inAppPurchaseFileDownload')->name('setting.app.purchase.file.download');
+        Route::get('in-app-purchase', 'inAppPurchase')->name('setting.app.purchase')->middleware('permission:in app payment settings,admin');
+        Route::post('in-app-purchase', 'inAppPurchaseConfigure')->middleware('permission:in app payment settings,admin');
+        Route::get('in-app-purchase/file/download', 'inAppPurchaseFileDownload')->name('setting.app.purchase.file.download')->middleware('permission:in app payment settings,admin');
     });
     // Deposit Gateway
     Route::name('gateway.')->prefix('gateway')->group(function () {
@@ -317,7 +346,7 @@ Route::middleware('admin')->group(function () {
         });
 
         // Automatic Gateway
-        Route::controller('AutomaticGatewayController')->name('automatic.')->group(function () {
+        Route::controller('AutomaticGatewayController')->name('automatic.')->middleware('permission:manage gateways,admin')->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('edit/{alias}', 'edit')->name('edit');
             Route::post('update/{code}', 'update')->name('update');
@@ -328,7 +357,7 @@ Route::middleware('admin')->group(function () {
 
 
     //cron
-    Route::controller('CronConfigurationController')->name('cron.')->prefix('cron')->group(function () {
+    Route::controller('CronConfigurationController')->name('cron.')->prefix('cron')->middleware('permission:manage cron job,admin')->group(function () {
         Route::get('index', 'cronJobs')->name('index');
         Route::post('store', 'cronJobStore')->name('store');
         Route::post('update/{id}', 'cronJobUpdate')->name('update');
@@ -344,24 +373,31 @@ Route::middleware('admin')->group(function () {
 
     // Pricing Plan
     Route::controller('PricingPlanController')->prefix('pricing-plan')->name('pricing.plan.')->group(function () {
-        Route::get('/index', 'index')->name('index');
-        Route::post('/status/{id}', 'status')->name('status');
-        Route::post('/store/{id?}', 'store')->name('store');
+        Route::get('/index', 'index')->name('index')->middleware('permission:view pricing plans,admin');
+        Route::post('/status/{id}', 'status')->name('status')->middleware('permission:edit pricing plan,admin');
+        Route::post('/store/{id?}', 'store')->name('store')->middleware('permission:add pricing plan,admin');
+        Route::post('/update/{id?}', 'store')->name('update')->middleware('permission:edit pricing plan,admin');
     });
 
     // User Data Management
     Route::controller('UserDataController')->prefix('user/data')->name('user.data.')->group(function () {
-        Route::get('contact', 'contact')->name('contact');
-        Route::get('contact/list', 'contactList')->name('contact.list');
-        Route::get('contact/tag', 'contactTag')->name('contact.tag');
-        Route::get('campaign', 'campaign')->name('campaign');
-        Route::get('chatbot', 'chatbot')->name('chatbot');
-        Route::get('short/link', 'shortLink')->name('short.link');
-
-
+        Route::get('contact', 'contact')->name('contact')->middleware('permission:view contact,admin');
+        Route::get('contact/list', 'contactList')->name('contact.list')->middleware('permission:view contact list,admin');
+        Route::get('contact/tag', 'contactTag')->name('contact.tag')->middleware('permission:view contact tag,admin');
+        Route::get('campaign', 'campaign')->name('campaign')->middleware('permission:view campaign,admin');
+        Route::get('chatbot', 'chatbot')->name('chatbot')->middleware('permission:view chatbot,admin');
+        Route::get('short/link', 'shortLink')->name('short.link')->middleware('permission:view short link,admin');
     });
 
     Route::controller("ExportController")->group(function () {
         Route::get('export/{model}/{type}', 'export')->name('export');
     });
+
+    Route::controller('AiAssistantController')->middleware('permission:ai assistant settings,admin')->name('ai-assistant.')->prefix('ai-assistant')->group(function () {
+        Route::get('index', 'index')->name('index');
+        Route::post('status/{id}', 'status')->name('status');
+        Route::post('configure/{id}', 'configure')->name('configure');
+    });
+
+
 });

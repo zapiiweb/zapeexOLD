@@ -5,6 +5,7 @@ namespace App\Traits;
 use App\Constants\Status;
 use App\Lib\CurlRequest;
 use App\Models\Message;
+use App\Models\Template;
 use Carbon\Carbon;
 use Exception;
 
@@ -20,7 +21,6 @@ trait WhatsappManager
 
             $response = CurlRequest::curlContent($apiUrl, $header);
             $data     = json_decode($response, true);
-
             if (!is_array($data) || !isset($data['data']) || isset($data['error'])) {
                 throw new Exception($data['error']['message'] ?? 'Invalid WhatsApp business credentials. Please check your credentials and try again.');
             }
@@ -37,6 +37,7 @@ trait WhatsappManager
     public function sendWelcomeMessage($whatsappAccount, $user, $contact, $conversation)
     {
         $welcomeMessage = $whatsappAccount->welcomeMessage;
+
         if (!$welcomeMessage) return;
 
         $lockKey        = "welcome_message_sent:{$conversation->user_id}:{$conversation->contact_id}";
@@ -86,21 +87,12 @@ trait WhatsappManager
         cache()->forget($lockKey);
     }
 
-    public function chatbotResponse($whatsappAccount, $user, $contact, $conversation, $message = '')
+    public function chatbotResponse($whatsappAccount, $user, $contact, $conversation,$matchedChatbot)
     {
         $receiver = $contact->mobileNumber;
         $sender   = $user->id;
-
-        $matchedChatbot = $whatsappAccount->chatbots()
-            ->where('status', Status::ENABLE)
-            ->where('keywords', 'like', "%{$message}%")
-            ->first();
-
-        if (!$matchedChatbot) {
-            return;
-        }
-
         $lockKey = "chat_message_sent:{$receiver}:{$sender}";
+
         if (!cache()->add($lockKey, true, 10)) {
             return;
         }
@@ -135,6 +127,7 @@ trait WhatsappManager
         $message->conversation_id     = $conversation->id;
         $message->type                = Status::MESSAGE_SENT;
         $message->message             = $matchedChatbot->text;
+        $message->chatbot_id          = $matchedChatbot->id;
         $message->ordering            = Carbon::now();
         $message->save();
 
@@ -142,5 +135,39 @@ trait WhatsappManager
         $conversation->save();
 
         cache()->forget($lockKey);
+    }
+
+    public function templateUpdateNotify($templateId, $event, $reason = null)
+    {
+        $template = Template::where('whatsapp_template_id', (string)$templateId)->first();
+        if(!$template) return;
+
+        $user     = $template->user;
+        if (!$user) return;
+
+        if ($event == 'APPROVED') {
+            $template->status = metaTemplateStatus($event);
+            $template->save();
+
+            notify($user, 'TEMPLATE_APPROVED', [
+                'name'        => $template->name,
+                'template_id' => $template->id,
+                'time'        => showDateTime(Carbon::now()),
+                'reason'      => $reason ?? ''
+            ]);
+        }
+        if ($event == 'REJECTED') {
+            $template->status = metaTemplateStatus($event);
+            $template->rejected_reason = $reason;
+            $template->save();
+            
+            notify($user, 'TEMPLATE_REJECTED', [
+                'name'        => $template->name,
+                'template_id' => $template->id,
+                'time'        => showDateTime(Carbon::now()),
+                'reason'      => $reason ?? ''
+            ]);
+        }
+
     }
 }

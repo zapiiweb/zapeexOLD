@@ -20,6 +20,11 @@ class PlanPurchase extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function coupon()
+    {
+        return $this->belongsTo(Coupon::class);
+    }
+
     public function plan()
     {
         return $this->belongsTo(PricingPlan::class, 'plan_id');

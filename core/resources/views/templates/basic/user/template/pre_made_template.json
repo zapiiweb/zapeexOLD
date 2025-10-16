@@ -138,12 +138,8 @@
         "footer": "This code will expire in 10 minutes.",
         "button": [
             {
-                "type": "QUICK_REPLY",
-                "label": "Verify Now"
-            },
-            {
-                "type": "QUICK_REPLY",
-                "label": "Request New Code"
+                "type": "OTP",
+                "label": "Copy OTP"
             }
         ]
     },
@@ -156,26 +152,8 @@
         "footer": "Your security is our priority.",
         "button": [
             {
-                "type": "PHONE_NUMBER",
-                "label": "Contact Us"
-            },
-            {
-                "type": "URL",
-                "label": "View More"
-            }
-        ]
-    },
-    {
-        "category": "AUTHENTICATION",
-        "name": "password_reset_request",
-        "header": "Image 10",
-        "body": "🔁 Reset Your Password\nHi {{1}}, We received a request to reset your password. Click the button below to proceed.",
-        "bodyVariableCount": 2,
-        "footer": "If you didn't request this, please ignore.",
-        "button": [
-            {
-                "type": "PHONE_NUMBER",
-                "label": "Contact Us"
+                "type": "OTP",
+                "label": "Copy OTP"
             }
         ]
     }

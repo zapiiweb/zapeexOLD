@@ -46,8 +46,10 @@
 
 @if ($subscribers->count())
     @push('breadcrumb-plugins')
-        <a href="{{ route('admin.subscriber.send.email') }}" class="btn  btn--primary">
-            <i class="fa-regular fa-paper-plane"></i> @lang('Send Email')
-        </a>
+        <x-admin.permission_check permission="send user notification">
+            <a href="{{ route('admin.subscriber.send.email') }}" class="btn  btn--primary">
+                <i class="fa-regular fa-paper-plane"></i> @lang('Send Email')
+            </a>
+        </x-admin.permission_check>
     @endpush
 @endif

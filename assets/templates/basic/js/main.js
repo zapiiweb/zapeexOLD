@@ -59,7 +59,7 @@
         sidebarControllTwo('profile-bar-icon', 'sidebar-menu__close', 'profile-page-wrapper')
 
         // ========================== Small Device Header Menu On Click Dropdown menu collapse Stop Js Start =====================
-        $('body').on('click','.body-right__top-btn .close-icon-two', function () {
+        $('body').on('click', '.body-right__top-btn .close-icon-two', function () {
             $('.body-right').removeClass('show-sidebar');
             $('.sidebar-overlay').removeClass('show');
         });
@@ -349,34 +349,5 @@
         $('.account-dropdown-list').removeClass('show');
     });
     // ==================== account switch Dropdown End ==================
-
-    // ==================== Sidebar Collapse Js Start ==================
-    // Check localStorage for saved state
-    if (localStorage.getItem('sidebar-collapsed') === 'true') {
-        $('.sidebar-menu').addClass('collapsed');
-        $('body').addClass('sidebar-collapsed');
-    }
-
-    // Toggle sidebar collapse
-    $(document).on('click', '.sidebar-collapse-btn', function(e) {
-        e.preventDefault();
-        $('.sidebar-menu').toggleClass('collapsed');
-        $('body').toggleClass('sidebar-collapsed');
-        
-        // Save state to localStorage
-        const isCollapsed = $('.sidebar-menu').hasClass('collapsed');
-        localStorage.setItem('sidebar-collapsed', isCollapsed);
-    });
-
-    // On large screens, allow hover to show full menu when collapsed
-    if ($(window).width() > 991) {
-        $('.sidebar-menu.collapsed').on('mouseenter', function() {
-            $(this).addClass('hover-expanded');
-        });
-        $('.sidebar-menu.collapsed').on('mouseleave', function() {
-            $(this).removeClass('hover-expanded');
-        });
-    }
-    // ==================== Sidebar Collapse Js End ==================
 
 })(jQuery);

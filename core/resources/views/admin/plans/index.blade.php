@@ -24,14 +24,20 @@
                                         <td>{{ showAmount(@$pricingPlan->yearly_price) }}</td>
                                         <td> @php echo $pricingPlan->popularBadge; @endphp </td>
                                         <td>
-                                            <x-admin.other.status_switch :status="$pricingPlan->status" :action="route('admin.pricing.plan.status', $pricingPlan->id)"
-                                                title="pricing plan" />
+                                            @if (auth('admin')->user()->can('edit pricing plan'))
+                                                <x-admin.other.status_switch :status="$pricingPlan->status" :action="route('admin.pricing.plan.status', $pricingPlan->id)"
+                                                    title="pricing plan" />
+                                            @else
+                                                {!! $pricingPlan->statusBadge !!}
+                                            @endif
                                         </td>
                                         <td>
                                             <div data-plan='@json($pricingPlan)'>
-                                                <button class="btn btn-outline--primary table-action-btn editBtn">
-                                                    <i class="las la-edit"></i> @lang('Edit')
-                                                </button>
+                                                <x-admin.permission_check permission="edit pricing plan">
+                                                    <button class="btn btn-outline--primary table-action-btn editBtn">
+                                                        <i class="las la-edit"></i> @lang('Edit')
+                                                    </button>
+                                                </x-admin.permission_check>
                                                 <button type="button"
                                                     class="btn  btn-outline--info ms-1 table-action-btn detailsBtn">
                                                     <i class="las la-info-circle"></i> @lang('Details')
@@ -136,7 +142,7 @@
                     <input class="form-control" type="number" name="floater_limit" min="-1"
                         value="{{ old('floater_limit') }}" required>
                 </div>
-                <div class="form-group col-lg-6">
+                <div class="form-group col-lg-3">
                     <div class="verification-switch">
                         <div class="verification-switch__item">
                             <label class="form-check-label fw-500" for="welcome_message">@lang('Welcome Message Available')</label>
@@ -147,13 +153,35 @@
                         </div>
                     </div>
                 </div>
-                <div class="form-group col-lg-6">
+                <div class="form-group col-lg-3">
                     <div class="verification-switch">
                         <div class="verification-switch__item">
                             <label class="form-check-label fw-500" for="is_popular">@lang('Is Popular')</label>
                             <div class="form-check form-switch form-switch-success form--switch pl-0">
                                 <input class="form-check-input" type="checkbox" role="switch" id="is_popular"
                                     name="is_popular">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group col-lg-3">
+                    <div class="verification-switch">
+                        <div class="verification-switch__item">
+                            <label class="form-check-label fw-500" for="ai_assistance">@lang('AI Assistance')</label>
+                            <div class="form-check form-switch form-switch-success form--switch pl-0">
+                                <input class="form-check-input" type="checkbox" role="switch" id="ai_assistance"
+                                    name="ai_assistance">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group col-lg-3">
+                    <div class="verification-switch">
+                        <div class="verification-switch__item">
+                            <label class="form-check-label fw-500" for="cta_url_message">@lang('CTA URL Message')</label>
+                            <div class="form-check form-switch form-switch-success form--switch pl-0">
+                                <input class="form-check-input" type="checkbox" role="switch" id="cta_url_message"
+                                    name="cta_url_message">
                             </div>
                         </div>
                     </div>
@@ -171,9 +199,11 @@
                 <h4 class="modal-title">
                     @lang('Plan Details')
                 </h4>
-                <button class="text--primary editBtn plan" type="button" data-plan="">
-                    <i class="las la-edit"></i>
-                </button>
+                <x-admin.permission_check permission="edit pricing plan">
+                    <button class="text--primary editBtn plan" type="button" data-plan="">
+                        <i class="las la-edit"></i>
+                    </button>
+                </x-admin.permission_check>
             </div>
             <button type="button" class="btn-close close" data-bs-dismiss="modal" aria-label="Close">
                 <i class="las la-times"></i>
@@ -181,56 +211,58 @@
         </x-admin.ui.modal.header>
         <x-admin.ui.modal.body>
             <ul class="plan-details list-group list-group-flush">
-                <div class="plan-details__item list-group-item d-flex justify-content-between gap-2 flex-wrap ps-0">
+                <div class="plan-details__item list-group-item">
                     <span class="item-title">@lang('Name')</span>
                     <span class="name"></span>
                 </div>
-                 <div class="plan-details__item list-group-item d-flex justify-content-between gap-2 flex-wrap ps-0">
+                <div class="plan-details__item list-group-item">
                     <span class="item-title">@lang('Description')</span>
                     <span class="description"></span>
                 </div>
-                <div class="plan-details__item list-group-item d-flex justify-content-between gap-2 flex-wrap ps-0">
+                <div class="plan-details__item list-group-item">
                     <span class="item-title">@lang('Monthly Price')</span>
                     <span class="monthly_price"></span>
                 </div>
-                <div class="plan-details__item list-group-item d-flex justify-content-between gap-2 flex-wrap ps-0">
+                <div class="plan-details__item list-group-item">
                     <span class="item-title">@lang('Yearly Price')</span>
                     <span class="yearly_price"></span>
                 </div>
-                <div class="plan-details__item list-group-item d-flex justify-content-between gap-2 flex-wrap ps-0">
+                <div class="plan-details__item list-group-item">
                     <span class="item-title">@lang('Whatsapp Account Limit')</span>
                     <span class="whatsapp_accounts"></span>
                 </div>
-                <div class="plan-details__item list-group-item d-flex justify-content-between gap-2 flex-wrap ps-0">
+                <div class="plan-details__item list-group-item">
                     <span class="item-title">@lang('Agent Limit')</span>
                     <span class="agent_limit"></span>
                 </div>
-                <div class="plan-details__item list-group-item d-flex justify-content-between gap-2 flex-wrap ps-0">
+                <div class="plan-details__item list-group-item">
                     <span class="item-title">@lang('Contact Limit')</span>
                     <span class="contact_limit"></span>
                 </div>
-                <div class="plan-details__item list-group-item d-flex justify-content-between gap-2 flex-wrap ps-0">
+                <div class="plan-details__item list-group-item">
                     <span class="item-title">@lang('Template Limit')</span>
                     <span class="template_limit"></span>
                 </div>
-                <div class="plan-details__item list-group-item d-flex justify-content-between gap-2 flex-wrap ps-0">
+                <div class="plan-details__item list-group-item">
                     <span class="item-title">@lang('Chatbot Limit')</span>
                     <span class="chatbot_limit"></span>
                 </div>
-                <div class="plan-details__item list-group-item d-flex justify-content-between gap-2 flex-wrap ps-0">
+                <div class="plan-details__item list-group-item">
                     <span class="item-title">@lang('ShortLink Limit')</span>
                     <span class="shortlink_limit"></span>
                 </div>
-                <div class="plan-details__item list-group-item d-flex justify-content-between gap-2 flex-wrap ps-0">
+                <div class="plan-details__item list-group-item">
                     <span class="item-title">@lang('Floater Limit')</span>
                     <span class="shortlink_limit"></span>
                 </div>
-                <div
-                    class="plan-details__item list-group-item d-flex justify-content-between gap-2 flex-wrap ps-0 border-0">
+                <div class="plan-details__item list-group-item border-0">
                     <span class="item-title">@lang('Welcome Message Available')</span>
                     <span class="welcome_message"></span>
                 </div>
-                <div class="plan d-flex align-items-center justify-content-end"></div>
+                <div class="plan-details__item list-group-item border-0">
+                    <span class="item-title">@lang('AI Assistance')</span>
+                    <span class="ai_assistance"></span>
+                </div>
             </ul>
         </x-admin.ui.modal.body>
 
@@ -240,11 +272,13 @@
 @endsection
 
 @push('breadcrumb-plugins')
-    <div class="d-flex flex-wrap gap-3 flex-fill">
-        <button type="button" class="btn btn-outline--primary flex-fill addBtn">
-            <i class="la la-plus"></i> @lang('New Plan')
-        </button>
-    </div>
+    <x-admin.permission_check permission="add pricing plan">
+        <div class="d-flex flex-wrap gap-3 flex-fill">
+            <button type="button" class="btn btn-outline--primary flex-fill addBtn">
+                <i class="la la-plus"></i> @lang('New Plan')
+            </button>
+        </div>
+    </x-admin.permission_check>
 @endpush
 
 @push('script')
@@ -268,8 +302,8 @@
                 $detailModal.modal('hide');
 
                 let plan = $(this).parent().data('plan');
-                
-                let route = "{{ route('admin.pricing.plan.store', ':id') }}";
+
+                let route = "{{ route('admin.pricing.plan.update', ':id') }}";
 
                 $createModal.find('form').attr('action', route.replace(':id', plan.id));
                 $createModal.find('.modal-title').text("@lang('Edit Plan')");
@@ -287,6 +321,8 @@
                 $createModal.find('input[name=floater_limit]').val(plan.floater_limit);
                 $createModal.find('input[name=chatbot_limit]').val(plan.chatbot_limit);
                 $createModal.find('input[name=welcome_message]').prop('checked', plan.welcome_message);
+                $createModal.find('input[name=ai_assistance]').prop('checked', plan.ai_assistance);
+                $createModal.find('input[name=cta_url_message]').prop('checked', plan.cta_url_message);
                 $createModal.find('input[name=is_popular]').prop('checked', plan.is_popular);
                 $createModal.modal('show');
             });
@@ -295,30 +331,37 @@
                 let plan = $(this).parent().data('plan');
 
                 $detailModal.find('.plan').data('plan', plan);
-
-                $detailModal.find('.plan-details').find('.name').text(plan.name);
-                $detailModal.find('.plan-details').find('.description').text(plan.description);
-                $detailModal.find('.plan-details').find('.monthly_price').text(
+                let listItem = $detailModal.find('.plan-details');
+                listItem.find('.name').text(plan.name);
+                listItem.find('.description').text(plan.description);
+                listItem.find('.monthly_price').text(
                     `{{ gs('cur_sym') }}${getAmount(plan.monthly_price)}`);
-                $detailModal.find('.plan-details').find('.yearly_price').text(
+                listItem.find('.yearly_price').text(
                     `{{ gs('cur_sym') }}${getAmount(plan.yearly_price)}`);
-                $detailModal.find('.plan-details').find('.whatsapp_accounts').text(plan.account_limit);
-                $detailModal.find('.plan-details').find('.agent_limit').text(plan.agent_limit);
-                $detailModal.find('.plan-details').find('.contact_limit').text(plan.contact_limit);
-                $detailModal.find('.plan-details').find('.template_limit').text(plan.template_limit);
-                $detailModal.find('.plan-details').find('.chatbot_limit').text(plan.chatbot_limit);
-                $detailModal.find('.plan-details').find('.shortlink_limit').text(plan.short_link_limit);
-                $detailModal.find('.plan-details').find('.floater_limit').text(plan.floater_limit);
+                listItem.find('.whatsapp_accounts').text(plan.account_limit);
+                listItem.find('.agent_limit').text(plan.agent_limit);
+                listItem.find('.contact_limit').text(plan.contact_limit);
+                listItem.find('.template_limit').text(plan.template_limit);
+                listItem.find('.chatbot_limit').text(plan.chatbot_limit);
+                listItem.find('.shortlink_limit').text(plan.short_link_limit);
+                listItem.find('.floater_limit').text(plan.floater_limit);
 
                 if (plan.welcome_message) {
-                    $detailModal.find('.plan-details')
-                        .find('.welcome_message')
+                    listItem.find('.welcome_message')
                         .html(`<span class="text--success">@lang('Yes')</span>`);
 
                 } else {
-                    $detailModal.find('.plan-details')
-                        .find('.welcome_message')
-                        .html(`<span class="text--success">@lang('No')</span>`);
+                    listItem.find('.welcome_message')
+                        .html(`<span class="text--danger">@lang('No')</span>`);
+                }
+
+                if (plan.ai_assistance) {
+                    listItem.find('.ai_assistance')
+                        .html(`<span class="text--success">@lang('Yes')</span>`);
+
+                } else {
+                    listItem.find('.ai_assistance')
+                        .html(`<span class="text--danger">@lang('No')</span>`);
                 }
 
                 $detailModal.modal('show');
@@ -332,6 +375,15 @@
     <style>
         .verification-switch {
             grid-template-columns: unset;
+        }
+
+        .list-group-item {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding-left: 0;
         }
     </style>
 @endpush

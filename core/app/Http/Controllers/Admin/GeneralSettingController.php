@@ -12,12 +12,7 @@ use Illuminate\Validation\Rule;
 
 class GeneralSettingController extends Controller
 {
-    public function systemSetting()
-    {
-        $pageTitle = 'System Settings';
-        $settings  = json_decode(file_get_contents(resource_path('views/admin/setting/settings.json')));
-        return view('admin.setting.system', compact('pageTitle', 'settings'));
-    }
+  
 
     public function general()
     {
@@ -43,6 +38,9 @@ class GeneralSettingController extends Controller
             'allow_precision'            => 'required|integer|gt:0|lte:8',
             'subscription_notify_before' => 'required|integer|gt:0|lte:7',
             'referral_amount_percentage' => 'required|numeric|gt:0|lt:100',
+            'meta_app_id'                => 'nullable|string',
+            'meta_app_secret'            => 'nullable|string',
+            'meta_configuration_id'      => 'nullable|string',
             'webhook_verify_token'       => 'nullable|string',
         ]);
 
@@ -62,9 +60,11 @@ class GeneralSettingController extends Controller
         $general->thousand_separator         = $request->thousand_separator;
         $general->subscription_notify_before = $request->subscription_notify_before;
         $general->referral_amount_percentage = $request->referral_amount_percentage;
+        $general->meta_app_id                = $request->meta_app_id;
+        $general->meta_app_secret            = $request->meta_app_secret;
+        $general->meta_configuration_id      = $request->meta_configuration_id;
         $general->webhook_verify_token       = $request->webhook_verify_token;
-  
-        
+
         $general->save();
 
         $timezoneFile = config_path('timezone.php');

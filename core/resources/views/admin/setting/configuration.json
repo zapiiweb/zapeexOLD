@@ -70,5 +70,11 @@
         "icon": "las la-globe",
         "description_enabled": "Enable this feature to allow users to easily switch between different  languages according to their preferences.",
         "description_disabled": "Disable this feature to remove all language switching options for users within the application."
+    },
+    "whatsapp_embedded_signup": {
+        "title": "WhatsApp embedded signup",
+        "icon": "lab la-whatsapp",
+        "description_enabled": "Enable this feature to allow users for connecting their whatsapp business account vai embedded form.",
+        "description_disabled": "Disable this feature to allow users for connecting their whatsapp business account via embedded form."
     }
 }

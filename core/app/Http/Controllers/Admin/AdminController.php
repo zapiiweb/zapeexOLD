@@ -12,15 +12,17 @@ use App\Models\User;
 use App\Models\UserLogin;
 use App\Models\Withdrawal;
 use App\Rules\FileTypeValidate;
+use App\Traits\AdminOperation;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
 {
+    use AdminOperation;
+
     public function dashboard()
     {
-
         $userQuery         = User::where('parent_id', Status::NO);
         $depositQuery      = Deposit::query();
         $withdrawQuery     = Withdrawal::query();
@@ -78,7 +80,7 @@ class AdminController extends Controller
     {
         $pageTitle    = "Subscription History";
         $baseQuery     = PlanPurchase::query();
-        $subscriptions = (clone $baseQuery)->orderBy('id', getOrderBy())->with('user', 'gateway')->searchable(['plan:name', 'user:username'])->dateFilter()->paginate(getPaginate());
+        $subscriptions = (clone $baseQuery)->orderBy('id', getOrderBy())->with('user', 'gateway')->searchable(['plan:name', 'user:username'])->filter(['coupon_id'])->dateFilter()->paginate(getPaginate());
 
         $widget['total_subscription']       = (clone $baseQuery)->sum('amount');
         $widget['today_subscription']       = (clone $baseQuery)->whereDate('created_at', Carbon::today())->sum('amount');

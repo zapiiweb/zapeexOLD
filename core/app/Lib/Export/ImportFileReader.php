@@ -2,6 +2,7 @@
 
 namespace App\Lib\Export;
 
+use App\Models\ContactList;
 use Carbon\Carbon;
 use Exception;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -66,6 +67,14 @@ class ImportFileReader
      */
 
     public $allData = [];
+
+    /**
+     * Here could be pre-defined reference data like contactList,contactTags
+     *
+     * @var array
+     */
+
+    public $references = [];
 
     /**
      * ALL Unique data store here
@@ -158,19 +167,45 @@ class ImportFileReader
     public function saveData()
     {
         $user = getParentUser();
-        if (!featureAccessLimitCheck($user->contact_limit,count($this->allUniqueData))) {
+
+        if (!featureAccessLimitCheck($user->contact_limit, count($this->allUniqueData))) {
             $this->exceptionSet('You have reached the maximum number of contact limit');
         }
+
         if (count($this->allUniqueData) > 0 && $this->dataInsertMode) {
             try {
                 $this->allUniqueData = array_map(function ($data) use ($user) {
-                    $data['user_id'] = $user->id;
+                    $data['user_id']    = $user->id;
                     $data['created_at'] = Carbon::now();
                     $data['updated_at'] = Carbon::now();
                     return $data;
                 }, $this->allUniqueData);
+
                 $this->modelName::insert($this->allUniqueData);
+
+                $insertedIds = $this->modelName::where('user_id', $user->id)
+                    ->latest('id')
+                    ->take(count($this->allUniqueData))
+                    ->pluck('id')
+                    ->toArray();
+
+                if (!empty($insertedIds) && !empty($this->references['contact_list_id'])) {
+                    $contactListId = $this->references['contact_list_id'];
+
+                    $pivotData = [];
+                    foreach ($insertedIds as $contactId) {
+                        $pivotData[$contactId] = ['created_at' => Carbon::now()];
+                    }
+
+                    $contactList = ContactList::find($contactListId);
+
+                    if ($contactList) {
+                        $contactList->contact()->syncWithoutDetaching($pivotData);
+                    }
+                }
+
                 decrementFeature($user, 'contact_limit', count($this->allUniqueData));
+
             } catch (Exception $e) {
                 $this->exceptionSet('This file can\'t be uploaded. It may contains duplicate data.');
             }
@@ -178,6 +213,7 @@ class ImportFileReader
 
         $this->notify = count($this->allUniqueData) . " data added successfully total " . count($this->allData) . ' data';
     }
+
 
     public function exceptionSet($exception)
     {

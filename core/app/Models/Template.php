@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Constants\Status;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Template extends Model
@@ -45,17 +44,25 @@ class Template extends Model
         return $this->hasMany(Message::class);
     }
 
-    public function verificationStatus(): Attribute
+    public function cards()
     {
-        return Attribute::get(function () {
-            return match ($this->status) {
-                Status::TEMPLATE_PENDING => '<span class="custom--badge badge--primary">' . trans('Pending') . '</span>',
-                Status::TEMPLATE_APPROVED => '<span class="custom--badge badge--success">' . trans('Approved') . '</span>',
-                Status::TEMPLATE_REJECTED => '<span class="custom--badge badge--danger">' . trans('Rejected') . '</span>',
-                Status::TEMPLATE_DISABLED => '<span class="custom--badge badge--warning">' . trans('Disabled') . '</span>',
-                default => '',
-            };
-        });
+        return $this->hasMany(TemplateCard::class,'template_id','id');
+    }
+
+    public function verificationStatus()
+    {
+        $html = '';
+
+        if ($this->status == Status::TEMPLATE_PENDING) {
+            $html = '<span class="custom--badge badge--primary">' . trans('Pending') . '</span>';
+        } elseif ($this->status == Status::TEMPLATE_APPROVED) {
+            $html = '<span class="custom--badge badge--success">' . trans('Approved') . '</span>';
+        } elseif ($this->status == Status::TEMPLATE_REJECTED) {
+            $html = '<span class="custom--badge badge--danger" data-bs-toggle="tooltip" title="' . __($this->rejected_reason ?? 'Unspecified') . '">' . trans('Rejected') . '</span>';
+        } elseif ($this->status == Status::TEMPLATE_DISABLED) {
+            $html = '<span class="custom--badge badge--warning">' . trans('Disabled') . '</span>';
+        }
+        return $html;
     }
 
     // scopes

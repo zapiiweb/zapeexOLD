@@ -1,3 +1,7 @@
+@php
+    $user = auth()->user();
+    $viewMobile = @$user->hasAgentPermission('view contact mobile');
+@endphp
 <div class="chatbox-area__left">
     <span class="close-icon">
         <i class="fas fa-times"></i>
@@ -45,6 +49,8 @@
     </div>
 </div>
 
+<x-confirmation-modal isFrontend="true" />
+
 @push('script')
     <script>
         "use strict";
@@ -67,9 +73,9 @@
             let moreMessageList = true;
             let isFetchMessage = true;
 
-            window.fetchChatList = function(search = '',resetPage=false) {
-                if(resetPage){
-                    page=1;
+            window.fetchChatList = function(search = '', resetPage = false) {
+                if (resetPage) {
+                    page = 1;
                 }
                 let url = "{{ route('user.inbox.conversation.list') }}";
                 $.ajax({
@@ -224,8 +230,8 @@
                 window.history.pushState({}, '', url);
             }
 
-            function loadMessages(search = '',) {
-                
+            function loadMessages(search = '', ) {
+
                 let url = "{{ route('user.inbox.conversation.message', ':id') }}" + `?page=${messagePage}`;
 
                 $.ajax({
@@ -256,12 +262,11 @@
                                 mobile,
                                 image_src
                             } = contact;
-                            const fullName = (firstname || lastname) ?
-                                `${firstname ?? ''} ${lastname ?? ''}`.trim() :
-                                '@lang('Anonymous')';
-
-                            $('.contact__name').text(fullName);
-                            $('.contact__mobile').text('+' + mobile_code + mobile);
+                            const maskMobile = maskNumber(mobile_code + mobile);
+                            const mobileNumber = '{{ $viewMobile }}' ? `+${mobile_code + mobile}` :
+                                `${maskMobile}`;
+                            $('.contact__name').text(contact.full_name);
+                            $('.contact__mobile').text(mobileNumber);
                             $('.contact__profile').attr('src', image_src);
 
                             if (messagePage == 1) {
@@ -333,6 +338,14 @@
                 const url = "{{ route('user.inbox.list') }}?whatsapp_account_id=" + id;
                 window.location = url;
             });
+
+            function maskNumber(number, visibleDigits = 2, maskChar = "*") {
+                let str = number.toString();
+                if (str.length <= visibleDigits) {
+                    return str.padStart(visibleDigits, maskChar);
+                }
+                return maskChar.repeat(str.length - visibleDigits) + str.slice(-visibleDigits);
+            }
 
         })(jQuery);
     </script>

@@ -3,10 +3,14 @@
 namespace App\Traits;
 
 use App\Constants\Status;
+use App\Lib\AiAssistantLib\Gemini;
+use App\Lib\AiAssistantLib\OpenAi;
 use App\Lib\CurlRequest;
 use App\Lib\WhatsApp\WhatsAppLib;
+use App\Models\AiAssistant;
 use App\Models\ContactNote;
 use App\Models\Conversation;
+use App\Models\CtaUrl;
 use App\Models\Message;
 use App\Models\WhatsappAccount;
 use Carbon\Carbon;
@@ -43,12 +47,15 @@ trait InboxManager
             $view = 'Template::user.inbox.list';
         }
 
+        $ctaUrls = CtaUrl::where('user_id', $user->id)->get();
+
         return responseManager("inbox", $pageTitle, "success", [
-            'view'           => $view,
-            'pageTitle'      => $pageTitle,
-            'conversationId' => @$conversationId,
-            'conversation'   => @$conversation,
-            'whatsappAccount' => @$whatsappAccount
+            'view'            => $view,
+            'pageTitle'       => $pageTitle,
+            'conversationId'  => @$conversationId,
+            'conversation'    => @$conversation,
+            'whatsappAccount' => @$whatsappAccount,
+            'ctaUrls'         => $ctaUrls
         ]);
     }
 
@@ -264,21 +271,31 @@ trait InboxManager
     public function sendMessage(Request $request)
     {
         $request->validate([
-            'message'         => 'required_without_all:image,document,video,audio',
+            'message'         => 'required_without_all:image,document,video,audio,cta_url_id',
             'conversation_id' => 'required',
             'image'           => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:5120'],
-            'document'        => ['nullable', 'file', 'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar', 'max:102400'],
-            'video'           => ['nullable', 'file', 'mimes:mp4,mov,avi', 'max:16384'],
-            'audio'           => ['nullable', 'file', 'mimes:aac,mp3,m4a,wav', 'max:16384'],
+            'document'        => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:102400'],
+            'video'           => ['nullable', 'file', 'mimes:mp4', 'max:16384'],
+            'audio'           => 'nullable|file|max:16384',
+            'cta_url_id'      => 'nullable|int',
         ], [
             'conversation_id.required'     => 'Please select a conversation to send message.',
             'message.required_without_all' => 'The message field is required',
         ]);
+
+        $ctaUrl       = null;
         $user         = getParentUser();
         $conversation = Conversation::where('user_id', $user->id)->find($request->conversation_id);
 
         if (!$conversation) {
             return apiResponse("not_found", "error", ["The conversation is not found"]);
+        }
+
+        if ($request->cta_url_id) {
+            $ctaUrl = CtaUrl::where('user_id', $user->id)->find($request->cta_url_id);
+            if (!$ctaUrl) {
+                return apiResponse("not_found", "error", ["The cta url is not found"]);
+            }
         }
 
         try {
@@ -287,51 +304,40 @@ trait InboxManager
                 return apiResponse("not_found", "error", ["The whatsapp account is not found"]);
             }
 
-            \Log::info('INBOX: Sending message', [
-                'conversation_id' => $conversation->id,
-                'mobile' => $conversation->contact->mobileNumber,
-                'has_file' => $request->hasFile('document') || $request->hasFile('image') || $request->hasFile('video') || $request->hasFile('audio')
-            ]);
-
-            $messageSend = (new WhatsAppLib())->messageSend($request, $conversation->contact->mobileNumber, $whatsappAccount);
-
-            \Log::info('INBOX: Message sent response', ['messageSend' => $messageSend]);
+            if ($ctaUrl) {
+                if (!featureAccessLimitCheck($user->cta_url_message)) {
+                    return apiResponse("not_found", "error", ["Your current plan does not support CTA URL messages. Please upgrade your plan."]);
+                }
+                $messageSend = (new WhatsAppLib())->sendCtaUrlMessage($conversation->contact->mobileNumber, $whatsappAccount, $ctaUrl);
+            } else {
+                $messageSend = (new WhatsAppLib())->messageSend($request, $conversation->contact->mobileNumber, $whatsappAccount);
+            }
 
             extract($messageSend);
+
+            $agentId = 0;
+            if (auth()->user()->is_agent) $agentId = auth()->id();
 
             $message                      = new Message();
             $message->user_id             = $user->id;
             $message->whatsapp_account_id = $whatsappAccount->id;
             $message->whatsapp_message_id = $whatsAppMessage[0]['id'];
-            $message->job_id              = $jobId ?? null;  // For async Baileys tracking
             $message->conversation_id     = $conversation->id;
+            $message->cta_url_id          = $ctaUrlId ?? 0;
             $message->type                = Status::MESSAGE_SENT;
             $message->message             = $request->message;
             $message->media_id            = $mediaId;
-            $message->message_type        = $this->getIntMessageType($messageType);;
+            $message->message_type        = getIntMessageType($messageType);;
             $message->media_caption       = $mediaCaption;
             $message->media_filename      = $mediaFileName;
             $message->media_url           = $mediaUrl;
             $message->media_path          = $mediaPath;
             $message->mime_type           = $mimeType;
             $message->media_type          = $mediaType;
-            // For Baileys async, start with SENT status (webhook will update delivery status later)
-            $message->status              = Status::SENT;
+            $message->agent_id            = $agentId;
+            $message->status              = Status::MESSAGE_SENT;
             $message->ordering            = Carbon::now();
-            
-            \Log::info('INBOX: Saving message to database', [
-                'message_data' => [
-                    'user_id' => $message->user_id,
-                    'conversation_id' => $message->conversation_id,
-                    'whatsapp_message_id' => $message->whatsapp_message_id,
-                    'media_filename' => $message->media_filename,
-                    'media_path' => $message->media_path
-                ]
-            ]);
-            
             $message->save();
-            
-            \Log::info('INBOX: Message saved successfully', ['message_id' => $message->id]);
 
             $conversation->last_message_at = Carbon::now();
             $conversation->save();
@@ -350,12 +356,6 @@ trait InboxManager
                 'message' => $message
             ]);
         } catch (Exception $ex) {
-            \Log::error('INBOX: Exception occurred in sendMessage', [
-                'message' => $ex->getMessage(),
-                'file' => $ex->getFile(),
-                'line' => $ex->getLine(),
-                'trace' => $ex->getTraceAsString()
-            ]);
             $notify[] =  $ex->getMessage() ?? "Something went to wrong";
             return apiResponse("exception", "error", $notify);
         }
@@ -381,6 +381,9 @@ trait InboxManager
             return apiResponse("not_found", "error", ["The receiver does not exist"]);
         }
 
+        $agentId = 0;
+        if (auth()->user()->is_agent) $agentId = auth()->id();
+
         try {
             $whatsappAccount  = $user->currentWhatsapp();
             $messageResend = (new WhatsAppLib())->messageResend($message, $conversation->contact->mobileNumber, $whatsappAccount);
@@ -388,6 +391,7 @@ trait InboxManager
             $message->whatsapp_message_id = $messageResend['whatsAppMessage'][0]['id'];
             $message->status              = Status::MESSAGE_SENT;
             $message->ordering            = Carbon::now();
+            $message->agent_id            = $agentId;
             $message->save();
 
             if (isApiRequest()) {
@@ -399,63 +403,6 @@ trait InboxManager
         } catch (Exception $ex) {
             $notify[] =  $ex->getMessage() ?? "Something went to wrong";
             return apiResponse("exception", "error", $notify);
-        }
-    }
-
-    private function getIntMessageType($messageType)
-    {
-        return [
-            "text"     => Status::TEXT_TYPE_MESSAGE,
-            "image"    => Status::IMAGE_TYPE_MESSAGE,
-            "video"    => Status::VIDEO_TYPE_MESSAGE,
-            "document" => Status::DOCUMENT_TYPE_MESSAGE,
-        ][$messageType];
-    }
-
-    public function streamMedia($mediaId)
-    {
-        $user = getParentUser();
-
-        $message = Message::where('media_id', $mediaId)
-            ->where('user_id', $user->id)
-            ->first();
-
-        if (!$message) {
-            return apiResponse("message_not_found", "error", ["Message not found"]);
-        }
-
-        $accessToken = $user->currentWhatsapp()->access_token;
-
-        try {
-            if ($message->message_type == Status::VIDEO_TYPE_MESSAGE || $message->message_type == Status::IMAGE_TYPE_MESSAGE || $message->message_type == Status::AUDIO_TYPE_MESSAGE) {
-                $filePath = getFilePath('conversation') . "/" . $message->media_path;
-
-                if ($message->media_path && File::exists($filePath)) {
-                    return response()->file($filePath);
-                } else {
-                    return responseManager('exception', "Failed to load the media");
-                }
-            }
-
-            $mediaUrl = (new WhatsAppLib())
-                ->getMediaUrl($mediaId, $accessToken)['url'];
-
-            $response = Http::withHeaders([
-                'Authorization' => "Bearer {$accessToken}",
-            ])->get($mediaUrl);
-
-            if ($response->failed()) {
-                return responseManager('exception', "Failed to load the media");
-            }
-
-            $fileContent = $response->body();
-            $mimeType = $response->header('Content-Type');
-
-            return response($fileContent, 200)
-                ->header('Content-Type', $mimeType)
-                ->header('Content-Disposition', 'inline');
-        } catch (Exception $ex) {
-            return responseManager('exception', $ex->getMessage());
         }
     }
 
@@ -474,7 +421,7 @@ trait InboxManager
         $accessToken = $user->currentWhatsapp()->access_token;
 
         try {
-            if ($message->message_type == Status::IMAGE_TYPE_MESSAGE || $message->message_type == Status::VIDEO_TYPE_MESSAGE || $message->message_type == Status::AUDIO_TYPE_MESSAGE) {
+            if ($message->message_type == Status::IMAGE_TYPE_MESSAGE) {
                 $filePath = getFilePath('conversation') . "/" . $message->media_path;
 
                 if ($message->media_path && File::exists($filePath)) {
@@ -505,6 +452,55 @@ trait InboxManager
                 ->header('Content-Disposition', "attachment; filename={$fileName}");
         } catch (Exception $ex) {
             return responseManager('exception', $ex->getMessage());
+        }
+    }
+
+    public function generateAiMessage(Request $request)
+    {
+        $request->validate([
+            'message'         => 'required|string',
+        ], [
+            'message.required' => 'Unable to generate response. Please try again.',
+            'message.string'   => 'The only type of message allowed is text.',
+        ]);
+
+        $user = getParentUser();
+
+        if (!featureAccessLimitCheck($user->ai_assistance)) {
+            return responseManager('not_available', 'Your current plan does not support AI Assistant. Please upgrade your plan.');
+        }
+
+        $activeProvider = AiAssistant::active()->first();
+        if (!$activeProvider) {
+            return responseManager('not_available', 'AI Assistant is currently disabled. Please try again.');
+        }
+
+        $userAiSetting  = $user->aiSetting;
+        if (!$userAiSetting || !$userAiSetting->status) {
+            return responseManager('not_available', 'AI Assistant is disabled');
+        }
+
+        $provider = [
+            'openai' => OpenAi::class,
+            'gemini' => Gemini::class
+        ];
+
+        $aiAssistantClass = $provider[$activeProvider->provider];
+
+        $aiAssistant = new $aiAssistantClass();
+        $systemPrompt    = $userAiSetting->system_prompt;
+        $aiResponse      = $aiAssistant->getAiReply($systemPrompt, $request->message);
+
+        if ($aiResponse['success'] == true) {
+            if ($aiResponse['response'] == null) {
+                return responseManager('null_response', 'AI Assistant is unable to generate response for this message.');
+            } else {
+                return responseManager('ai_response', 'Response generated successfully', 'success', [
+                    'ai_response' => $aiResponse['response']
+                ]);
+            }
+        } else {
+            return responseManager('error', 'Unable to generate AI response. Please try again.');
         }
     }
 }

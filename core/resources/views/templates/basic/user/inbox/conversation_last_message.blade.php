@@ -13,11 +13,19 @@
             <p class="text text-muted{{ $boldClass }}">
                 <i class="las la-file"></i> {{ __('Document') }}
             </p>
+        @elseif ($message->message_type === Status::AUDIO_TYPE_MESSAGE)
+            <p class="text text-muted{{ $boldClass }}">
+                <i class="las la-microphone"></i> {{ __('Audio') }}
+            </p>
         @else
             <p class="text text-muted{{ $boldClass }}">
                 <i class="las la-image"></i> {{ __('Photo') }}
             </p>
         @endif
+    @elseif ($message->message_type === Status::URL_TYPE_MESSAGE)
+        <p class="text text-muted{{ $boldClass }}">
+            <i class="fa-solid fa-paperclip"></i> {{ __('Cta URL') }}
+        </p>
     @else
         @php
             $shortMessage = strLimit($message->message, 15);

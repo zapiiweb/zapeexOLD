@@ -19,7 +19,7 @@
                     <input type="text" class="form--control h-48" value="{{ old('username') }}" name="username" required>
                 </div>
                 <div class="form-group">
-                    <label for="password" class="form--label">@lang('Password')</label>
+                    <label  class="form--label">@lang('Password')</label>
                     <div class="position-relative">
                         <input id="password" name="password" required type="password" class="form--control h-48">
                         <span class="password-show-hide fas toggle-password fa-eye-slash" id="#password"></span>

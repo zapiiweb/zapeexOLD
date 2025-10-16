@@ -30,13 +30,12 @@
         "pusher/pusher-php-server": "^7.2",
         "razorpay/razorpay": "^2.9",
         "sendgrid/sendgrid": "^8.1",
+        "spatie/laravel-permission": "^6.21",
         "stripe/stripe-php": "^13.13",
         "twilio/sdk": "^7.16",
-        "vonage/client": "^4.0",
-        "google/apiclient": "^2.15"
+        "vonage/client": "^4.0"
     },
     "require-dev": {
-        "barryvdh/laravel-debugbar": "^3.14",
         "fakerphp/faker": "^1.23",
         "laravel/pint": "^1.13",
         "laravel/sail": "^1.26",

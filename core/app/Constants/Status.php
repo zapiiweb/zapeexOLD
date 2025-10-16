@@ -83,6 +83,7 @@ class Status
     const VIDEO_TYPE_MESSAGE = 3;
     const DOCUMENT_TYPE_MESSAGE = 4;
     const AUDIO_TYPE_MESSAGE = 5;
+    const URL_TYPE_MESSAGE = 6;
 
     const SENT = 1;
     const DELIVERED = 2;
@@ -95,6 +96,15 @@ class Status
     const CAMPAIGN_MESSAGE_IS_SUCCESS = 1;
     const CAMPAIGN_MESSAGE_IS_FAILED  = 9;
 
+    const SUPPER_ADMIN_ID     = 1;
+    const SUPER_ADMIN_ROLE_ID = 1;
+    
+    const COUPON_TYPE_PERCENTAGE = 1;
+    const COUPON_TYPE_FIXED = 2;
 
     const UNLIMITED = -1;
+
+    const COUPON_EXPIRED = 2;
+    const COUPON_ACTIVE = 1;
+    const COUPON_INACTIVE = 0;
 }

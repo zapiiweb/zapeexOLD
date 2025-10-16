@@ -82,7 +82,7 @@ trait AgentManager
         $agent->is_agent         = Status::YES;
         $agent->save();
 
-        decrementFeature($user,'agent_limit');
+        decrementFeature($user, 'agent_limit');
 
         notify($agent, 'AGENT_REGISTERED', [
             'user'        => $agent->fullname,

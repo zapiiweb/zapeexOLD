@@ -146,17 +146,5 @@
                 notify(data.status, data.message);
             });
         });
-
-        $('.statusForm').find('select[name=conversation_status]').on('change', function() {
-            let value = $(this).val();
-            let route = "{{ route('user.contact.conversation.status', ':id') }}";
-            $.post(route.replace(':id', '{{ $conversation->id }}'), {
-                status: value,
-                _token: "{{ csrf_token() }}"
-            }, function(data) {
-                notify(data.status, data.message);
-            });
-        });
-
     })(jQuery);
 </script>

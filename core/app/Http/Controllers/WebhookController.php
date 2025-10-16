@@ -16,7 +16,6 @@ use App\Traits\WhatsappManager;
 use Carbon\Carbon;
 use Exception;
 
-
 class WebhookController extends Controller
 {
     use WhatsappManager;
@@ -35,9 +34,8 @@ class WebhookController extends Controller
     public function webhookResponse(Request $request)
     {
         $entry = $request->input('entry', []);
-
         if (!is_array($entry)) return;
-
+        
         $receiverPhoneNumber = null;
         $senderPhoneNumber   = null;
         $senderId            = null;
@@ -61,15 +59,21 @@ class WebhookController extends Controller
 
         foreach ($entry as $entryItem) {
 
-
             foreach ($entryItem['changes'] as $change) {
 
                 if (!is_array($change) || !isset($change['value'])) continue;
+
+                if (isset($change['field']) && $change['field'] == 'message_template_status_update') {
+                    sleep(10); // wait for 10 seconds until the template store
+                    $this->templateUpdateNotify($change['value']['message_template_id'], $change['value']['event'], $change['value']['reason'] ?? '');
+                    continue;
+                };
+
                 $metaValue = $change['value'];
                 if (!is_array($metaValue)) continue;
 
                 $profileName = $metaValue['contacts'][0]['profile']['name'] ?? null;
-                $metaData    = $metaValue['metadata'];
+                $metaData    = $metaValue['metadata'] ?? [];
                 $metaMessage = $metaValue['messages'] ?? null;
 
                 if (isset($metaData['phone_number_id'])) {
@@ -119,7 +123,6 @@ class WebhookController extends Controller
                 }
             }
         }
-
         if ($messageId && $messageStatus) {
 
             $wMessage = Message::where('whatsapp_message_id', $messageId)->first();
@@ -175,7 +178,7 @@ class WebhookController extends Controller
                 $contact->user_id     = $user->id;
                 $contact->save();
             }
-            
+
             $conversation = Conversation::where('contact_id', $contact->id)->where('user_id', $user->id)->where('whatsapp_account_id', $whatsappAccount->id)->first();
             if (!$conversation) {
                 $newContact   = true;
@@ -184,6 +187,8 @@ class WebhookController extends Controller
 
             $messageExists = Message::where('whatsapp_message_id', $senderId)->exists();
 
+            $whatsappLib = new WhatsAppLib();
+            
             if (!$messageExists) {
                 // Save the incoming message
                 $message                      = new Message();
@@ -193,7 +198,7 @@ class WebhookController extends Controller
                 $message->conversation_id     = $conversation->id;
                 $message->message             = $messageText;
                 $message->type                = Status::MESSAGE_RECEIVED;
-                $message->message_type        = $this->getIntMessageType($messageType);
+                $message->message_type        = getIntMessageType($messageType);
                 $message->media_id            = $mediaId;
                 $message->media_type          = $mediaType;
                 $message->media_caption       = $messageCaption;
@@ -203,15 +208,14 @@ class WebhookController extends Controller
 
                 $conversation->last_message_at = Carbon::now();
                 $conversation->save();
-
+                
                 // If it's a media message, fetch and store the media
                 if ($mediaId) {
                     $accessToken = $whatsappAccount->access_token;
                     try {
-                        $whatsappLib = new WhatsAppLib();
                         $mediaUrl = $whatsappLib->getMediaUrl($mediaId, $accessToken);
 
-                        if ($mediaUrl) {
+                        if ($mediaUrl && $mediaType == 'image') {
                             $mediaPath           = $whatsappLib->storedMediaToLocal($mediaUrl['url'], $mediaId, $accessToken, $user->id);
                             $message->media_url  = $mediaUrl;
                             $message->media_path = $mediaPath;
@@ -236,29 +240,29 @@ class WebhookController extends Controller
                     'conversationId'  => $conversation->id,
                     'mediaPath'       => getFilePath('conversation')
                 ]));
+
             }
-
-            $this->chatbotResponse($whatsappAccount, $user, $contact, $conversation, $messageText);
+            
             $messagesInConversation = Message::where('conversation_id', $conversation->id)->where('type', Status::MESSAGE_RECEIVED)->count();
-
-            if ($messagesInConversation == 1) {
+            if ($messagesInConversation == 1 && @$whatsappAccount->welcomeMessage) {
                 $this->sendWelcomeMessage($whatsappAccount, $user, $contact, $conversation);
+            }else{
+
+                $matchedChatbot = $whatsappAccount->chatbots()
+                    ->where('status', Status::ENABLE)
+                    ->where('keywords', 'like', "%{$messageText}%")
+                    ->first();
+                    
+                    if($matchedChatbot){
+                        $this->chatbotResponse($whatsappAccount, $user, $contact, $conversation, $matchedChatbot);
+                    }else
+                    {
+                        $whatsappLib->sendAutoReply($user, $conversation, $messageText);
+                    }
             }
         }
 
         return response()->json(['status' => 'received'], 200);
-    }
-
-
-    private function getIntMessageType($messageType)
-    {
-        return [
-            "text"     => Status::TEXT_TYPE_MESSAGE,
-            "image"    => Status::IMAGE_TYPE_MESSAGE,
-            "video"    => Status::VIDEO_TYPE_MESSAGE,
-            "document" => Status::DOCUMENT_TYPE_MESSAGE,
-            "audio"    => Status::AUDIO_TYPE_MESSAGE,
-        ][$messageType];
     }
 
     private function createConversation($contact, $whatsappAccount)
@@ -272,8 +276,7 @@ class WebhookController extends Controller
 
         return $conversation;
     }
-
-    /**
+ /**
      * Handle Baileys webhook for incoming messages and send confirmations
      */
     public function baileysWebhook(Request $request)
@@ -367,7 +370,7 @@ class WebhookController extends Controller
 
             // Handle incoming messages
             $from = $request->input('from');
-            $messageText = $request->input('message');
+            $messageText = $request->input('message');  
             $messageType = $request->input('messageType', 'text');
             $pushName = $request->input('pushName');
             $caption = $request->input('caption');

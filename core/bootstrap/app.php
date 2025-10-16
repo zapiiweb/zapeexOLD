@@ -53,8 +53,6 @@ return Application::configure(basePath: dirname(__DIR__))
         }
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->trustProxies(at: '*');
-        
         $middleware->group('web', [
             AddQueuedCookiesToResponse::class,
             StartSession::class,
@@ -81,7 +79,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'has.subscription' => HasSubscription::class,
             'has.whatsapp'     => HasMetaWhatsapp::class,
             'agent.permission' => HasAgentPermission::class,
-            'parent.user'      => IsParentUser::class
+            'parent.user'      => IsParentUser::class,
+            'permission'       => \Spatie\Permission\Middleware\PermissionMiddleware::class,
         ]);
         $middleware->validateCsrfTokens(
             except: ['user/deposit', 'ipn*']

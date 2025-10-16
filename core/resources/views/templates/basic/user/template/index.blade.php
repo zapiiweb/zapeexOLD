@@ -9,6 +9,10 @@
             <x-permission_check permission="add template">
                 <div class="container-top__right">
                     <div class="btn--group">
+                        <a href="{{ route('user.template.create.carousel') }}" class="btn btn--base btn-shadow">
+                            <i class="las la-plus"></i>
+                            @lang('Carousel Template')
+                        </a>
                         <a href="{{ route('user.template.create') }}" class="btn btn--base btn-shadow">
                             <i class="las la-plus"></i>
                             @lang('Add New')
@@ -70,7 +74,7 @@
                     <tbody>
                         @forelse ($templates as $template)
                             <tr>
-                                <td>{{ @$template->whatsapp_template_id }} {{ $template->id }}</td>
+                                <td>{{ @$template->whatsapp_template_id }}</td>
                                 <td>
                                     <div class="dashboard-table__info">
                                         <span class="title">{{ $template->name }}</span>
@@ -80,8 +84,8 @@
                                 </td>
                                 <td>
                                     <div>
-                                        @php echo $template->verificationStatus @endphp
-                                        @if ($template->status !== Status::TEMPLATE_REJECTED)
+                                        @php echo $template->verificationStatus() @endphp
+                                        @if ($template->status ==  Status::TEMPLATE_PENDING)
                                             <a href="{{ route('user.template.verification.check', $template->id) }}">
                                                 <i class="las la-redo-alt"></i>
                                             </a>

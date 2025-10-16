@@ -9,8 +9,8 @@ use App\Models\Frontend;
 use App\Models\Language;
 use App\Models\SupportTicket;
 use App\Models\User;
-use App\Models\WhatsappAccount;
 use App\Models\Withdrawal;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 
 class GlobalVariablesServiceProvider extends ServiceProvider
@@ -42,6 +42,7 @@ class GlobalVariablesServiceProvider extends ServiceProvider
                 'pendingTicketCount'   => SupportTicket::whereIn('status', [Status::TICKET_OPEN, Status::TICKET_REPLY])->count(),
                 'pendingDepositsCount' => Deposit::pending()->count(),
                 'pendingWithdrawCount' => Withdrawal::pending()->count(),
+                'permissions'          => Auth::guard('admin')->user()->getAllPermissions()->pluck('name')->toArray() ?? [],
             ]);
         });
 
@@ -79,6 +80,12 @@ class GlobalVariablesServiceProvider extends ServiceProvider
         view()->composer('components.permission_check', function ($view) {
             $view->with([
                 'user' => auth()->user()
+            ]);
+        });
+
+        view()->composer(['components.admin.permission_check', 'admin.partials.topnav',], function ($view) {
+            $view->with([
+                'admin' => Auth::guard('admin')->user()
             ]);
         });
 

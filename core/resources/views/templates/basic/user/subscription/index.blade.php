@@ -145,6 +145,22 @@
                                             <span class="text--danger">@lang('No')</span>
                                         @endif
                                     </div>
+                                    <div class="plan-details__item">
+                                        <span class="item-title">@lang('AI Assistance')</span>
+                                        @if ($user->ai_assistance)
+                                            <span class="text--success">@lang('Yes')</span>
+                                        @else
+                                            <span class="text--danger">@lang('No')</span>
+                                        @endif
+                                    </div>
+                                    <div class="plan-details__item">
+                                        <span class="item-title">@lang('CTA URL Message')</span>
+                                        @if ($user->cta_url_message)
+                                            <span class="text--success">@lang('Yes')</span>
+                                        @else
+                                            <span class="text--danger">@lang('No')</span>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -207,6 +223,7 @@
                                 <tr>
                                     <th>@lang('Plan Name')</th>
                                     <th>@lang('Purchase Price')</th>
+                                    <th>@lang('Discount Coupon')</th>
                                     <th>@lang('Purchase Date')</th>
                                     <th>@lang('Expiration Date')</th>
                                     <th>@lang('Payment Method')</th>
@@ -218,6 +235,16 @@
                                     <tr>
                                         <td>{{ __(@$subscription->plan->name) }}</td>
                                         <td>{{ showAmount(@$subscription->amount) }}</td>
+                                        <td>
+                                            @if (@$subscription->coupon)
+                                                <span class="copy-coupon ms-1" title="Copy">
+                                                    <span class="coupon-code">{{ $subscription->coupon->code }}</span>
+                                                    <i class="las la-copy"></i>
+                                                </span>
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
                                         <td>{{ showDateTime(@$subscription->created_at) }}</td>
                                         <td>{{ showDateTime(@$subscription->expired_at) }}</td>
                                         <td>{{ __(@$subscription->get_payment_method) }}</td>
@@ -235,7 +262,6 @@
                         </table>
                     </div>
                     {{ paginateLinks($subscriptions) }}
-
                 </div>
             </div>
         </div>
@@ -290,6 +316,16 @@
                 history.replaceState(null, '', url);
             });
 
+            $(document).on('click', '.copy-coupon', function() {
+                let code = $(this).find('.coupon-code').text().trim();
+
+                navigator.clipboard.writeText(code).then(function() {
+                    notify('success', "@lang('Coupon code copied!')");
+                }).catch(function() {
+                    notify('error', "@lang('Failed to copy coupon code.')");
+                });
+            });
+
         })(jQuery);
     </script>
 @endpush
@@ -312,6 +348,10 @@
 
         .active-plan-title {
             color: hsl(var(--body-color)) !important;
+        }
+
+        .copy-coupon {
+            cursor: pointer !important;
         }
     </style>
 @endpush

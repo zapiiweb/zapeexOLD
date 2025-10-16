@@ -109,6 +109,11 @@ class Deposit extends Model
         return $this->belongsTo(PricingPlan::class, 'plan_id');
     }
 
+    public function coupon()
+    {
+        return $this->belongsTo(Coupon::class);
+    }
+
     public function statusBadge(): Attribute
     {
         return new Attribute(function () {

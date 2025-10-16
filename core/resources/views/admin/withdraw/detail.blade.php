@@ -101,14 +101,18 @@
                     @endif
                     @if ($withdrawal->status == Status::PAYMENT_PENDING)
                         <div class="mt-3 d-flex gap-2 flex-wrap">
-                            <button class="btn btn-outline--success " data-bs-toggle="modal"
-                                data-bs-target="#approveModal">
-                                <i class="las la-check-double"></i> @lang('Approve')
-                            </button>
-                            <button class="btn btn-outline--danger " data-bs-toggle="modal"
-                                data-bs-target="#rejectModal">
-                                <i class="las la-ban"></i> @lang('Reject')
-                            </button>
+                            <x-admin.permission_check permission="approve withdraw">
+                                <button class="btn btn-outline--success " data-bs-toggle="modal"
+                                    data-bs-target="#approveModal">
+                                    <i class="las la-check-double"></i> @lang('Approve')
+                                </button>
+                            </x-admin.permission_check>
+                            <x-admin.permission_check permission="reject withdraw">
+                                <button class="btn btn-outline--danger " data-bs-toggle="modal"
+                                    data-bs-target="#rejectModal">
+                                    <i class="las la-ban"></i> @lang('Reject')
+                                </button>
+                            </x-admin.permission_check>
                         </div>
                     @endif
                 </x-admin.ui.card.body>

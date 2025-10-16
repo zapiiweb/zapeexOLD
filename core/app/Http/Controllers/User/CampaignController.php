@@ -11,6 +11,7 @@ use App\Models\ContactTag;
 use App\Models\Template;
 use App\Models\WhatsappAccount;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 
 class CampaignController extends Controller
@@ -19,12 +20,16 @@ class CampaignController extends Controller
     {
         $user      = getParentUser();
         $pageTitle = "Manage Campaign";
-        $campaigns = Campaign::where('user_id', $user->id)->where('whatsapp_account_id', getWhatsappAccountId($user))->with('template')->searchable(['title'])->filter(['status'])->orderBy('send_at', 'desc')->paginate(getPaginate());
+        $baseQuery = Campaign::where('user_id', $user->id)->where('whatsapp_account_id', getWhatsappAccountId($user))->with('template')->searchable(['title'])->filter(['status'])->orderBy('id', 'desc');
+        if (request()->export) {
+            return exportData($baseQuery, request()->export, "campaign", "A4 landscape");
+        }
+        $campaigns = $baseQuery->paginate(getPaginate());
         return view('Template::user.campaign.index', compact('pageTitle', 'campaigns'));
     }
 
     public function createCampaign()
-    {   
+    {
         $user             = getParentUser();
         $pageTitle        = "New Campaign";
         $contactLists     = ContactList::where('user_id', $user->id)->with('contact')->orderBy('name', 'asc')->get();
@@ -32,7 +37,7 @@ class CampaignController extends Controller
         $templates        = Template::where('user_id', $user->id)->approved()->orderBy('id', 'desc')->get();
         $whatsappAccounts = WhatsappAccount::where('user_id', $user->id)->with('templates')->get();
 
-        return view('Template::user.campaign.create', compact('pageTitle', 'contactLists', 'templates', 'whatsappAccounts','contactTags'));
+        return view('Template::user.campaign.create', compact('pageTitle', 'contactLists', 'templates', 'whatsappAccounts', 'contactTags'));
     }
 
     public function saveCampaign(Request $request)
@@ -76,7 +81,7 @@ class CampaignController extends Controller
             ->with('language')
             ->where('id', $request->template_id)
             ->first();
-           
+
         if (!$template) {
             return responseManager('not_found', 'The selected template is not found');
         }
@@ -123,7 +128,7 @@ class CampaignController extends Controller
             return responseManager('contact_limit', 'At least one contact is required');
         }
 
-        if ($request->scheduled_at) {
+        if ($request->schedule == 'on' && $request->scheduled_at) {
             $status          = Status::CAMPAIGN_SCHEDULED;
             $sendAt          = now()->parse($request->scheduled_at);
         } else {
@@ -158,12 +163,49 @@ class CampaignController extends Controller
         $user             = getParentUser();
         $pageTitle        = "Campaign Report";
         $campaign         = Campaign::where('id', $id)->where('user_id', $user->id)->firstOrFail();
-        $campaignContacts = CampaignContact::where('campaign_id', $campaign->id)->with('contact')->paginate(getPaginate());
+        $baseQuery        = CampaignContact::where('campaign_id', $campaign->id)->with('contact');
 
         $widget['sending_ratio'] = $campaign->total_send / $campaign->total_message * 100;
         $widget['success_ratio'] = $campaign->total_success / $campaign->total_message * 100;
         $widget['fail_ratio']    = $campaign->total_failed / $campaign->total_message * 100;
 
+        if (request()->export) {
+            if (request()->export == 'minimal') {
+                return $this->downloadCsv($campaign);
+            }
+
+            if (request()->export == 'maximal') {
+                return exportData($baseQuery, 'excel', "campaignContact", "A4 landscape");
+            }
+        }
+
+        $campaignContacts = $baseQuery->paginate(getPaginate());
         return view('Template::user.campaign.report', compact('pageTitle', 'campaign', 'widget', 'campaignContacts'));
+    }
+
+    public function downloadCsv($campaign)
+    {
+        $fileName = 'CampaignReport.csv';
+        $filePath = storage_path($fileName);
+
+        $file = fopen($filePath, 'w');
+
+        if ($file === false) {
+            throw new \Exception("Error opening the file");
+        }
+
+        $headers = ['Total message', 'Sent message', 'Success message', 'Failed message', 'Send at'];
+        $rows = [
+            [$campaign->total_message, $campaign->total_send, $campaign->total_success, $campaign->total_failed, showDateTime($campaign->send_at)],
+        ];
+
+        fputcsv($file, $headers);
+
+        foreach ($rows as $row) {
+            fputcsv($file, $row);
+        }
+        fclose($file);
+
+        return response()->download($filePath)->deleteFileAfterSend(true);
     }
 }

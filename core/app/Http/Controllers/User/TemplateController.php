@@ -13,6 +13,7 @@ use App\Models\TemplateLanguage;
 use App\Http\Controllers\Controller;
 use App\Lib\CurlRequest;
 use App\Lib\WhatsApp\WhatsAppLib;
+use App\Models\TemplateCard;
 use App\Models\WhatsappAccount;
 use Exception;
 use Illuminate\Support\Facades\File;
@@ -54,6 +55,180 @@ class TemplateController extends Controller
         return view('Template::user.template.create', compact('pageTitle', 'templateCategories', 'templateLanguages', 'preMadeTemplates'));
     }
 
+    public function createCarouselTemplate()
+    {
+        $user      = getParentUser();
+        $templates = $user->templates()->where('created_at', '>=', Carbon::now()->subHour())->count();
+
+        if ($templates >= 100) {
+            $notify[] = ['error', 'You can create only 100 templates per hour.'];
+            return back()->withNotify($notify);
+        }
+
+        $pageTitle          = "Create Carousel Template";
+        $templateCategories = TemplateCategory::get();
+        $templateLanguages  = TemplateLanguage::get();
+
+        return view('Template::user.template.create_carousel', compact('pageTitle', 'templateCategories', 'templateLanguages'));
+    }
+
+    public function storeCarouselTemplate(Request $request)
+    {
+        $request->validate([
+            'name'                          => 'required|string|max:512|regex:/^[a-zA-Z0-9_-]+$/',
+            'language_id'                   => 'required',
+            'template_body'                 => 'required|string|max:1024',
+
+            'cards'                         => 'required|array|min:2|max:10',
+            'cards.*.header_format'         => 'required|in:IMAGE,VIDEO',
+            'cards.*.header.handle'         => 'required|file|mimetypes:image/jpeg,image/png,image/jpg,image/gif,image/webp,video/mp4,video/quicktime,video/x-msvideo',
+
+            'cards.*.buttons'               => 'required|array|min:1|max:2',
+            'cards.*.buttons.*.text'        => 'required|string|max:25',
+            'cards.*.buttons.*.type'        => 'required|string|in:QUICK_REPLY,URL',
+            'cards.*.buttons.*.url'         => 'required_if:cards.*.buttons.*.type,URL|url|max:2048',
+        ]);
+
+        $user = getParentUser();
+
+        if (!featureAccessLimitCheck($user->template_limit)) {
+            $notify = 'Your template limit is over. Please upgrade your plan';
+            return responseManager('limit', $notify);
+        }
+
+        $whatsappAccount = WhatsappAccount::where('user_id', $user->id)->where('id', $request->whatsapp_account_id)->first();
+      
+        if (!$whatsappAccount) {
+            return responseManager('invalid', 'The selected whatsapp account is invalid');
+        }
+
+        $templateExists = Template::where('user_id', $user->id)
+            ->where('name', $request->name)
+            ->where('language_id', $request->language_id)
+            ->exists();
+
+        if ($templateExists) {
+            $notify = 'Sorry! The template name already exists';
+            return responseManager('exists', $notify);
+        }
+
+        $language = TemplateLanguage::find($request->language_id);
+
+        if (!$language) {
+            $notify = 'The template language is not found';
+            return responseManager('not_found', $notify);
+        }
+
+        $whatsappManager = new WhatsAppLib();
+
+        $whatsappTemplateData = [
+            'name'     => $request->name,
+            'language' => $language->code,
+            'category' => "MARKETING"
+        ];
+
+        $whatsappTemplateData['components'] = [];
+
+        if (!empty($request->template_body)) {
+            $whatsappTemplateData['components'][] = $this->templateBody($request, "MARKETING");
+        }
+
+        $cardsPayload = [];
+        $dbCards = [];
+
+        $mediaLink = $whatsappManager->getWhatsAppBaseUrl() . "{$whatsappAccount->phone_number_id}/media";
+
+        foreach ($request->cards as $card) {
+            
+            $headerFormat = $card['header_format'];
+            $headerMediaName = null;
+            $header       = $card['header'] ?? [];
+            $cardData['components'] = [];
+
+            try{
+                if(isset($header['handle']) && !empty($header['handle'])){
+                    $headerMediaName = fileUploader($header['handle'],getFilePath('templateCardHeader'),getFileSize('templateCardHeader'));
+                }
+
+                if(!$headerMediaName){
+                    return responseManager('error', 'Could not upload header media');
+                }
+
+                $fileData = [];
+                $fileData['name'] = $headerMediaName;
+                $fileData['path'] = getFilePath('templateCardHeader').'/'.$headerMediaName;
+                $fileData['size'] = filesize($fileData['path']);
+                $fileData['type'] = mime_content_type($fileData['path']);
+
+                $sessionId        = $whatsappManager->getSessionId($whatsappAccount->meta_app_id, $fileData, $whatsappAccount->access_token);
+                $mediaId          = $whatsappManager->uploadMedia($mediaLink, $header['handle'], $whatsappAccount->access_token, $whatsappAccount->access_token);
+                $header['handle'] = $whatsappManager->getMediaHandle($sessionId['id'], $whatsappAccount->access_token, $fileData['path'], $fileData['type']);
+
+            }catch(\Exception $e){
+                return responseManager('error', $e->getMessage());
+            }
+
+            $cardData['components'][] = $this->templateHeader($headerFormat, $header);
+
+            $cardButtons = $this->templateButtons($card['buttons'], "MARKETING", true);
+            if (!empty($cardButtons)) {  
+                $cardData['components'][]  = [
+                    'type' => "BUTTONS",
+                    'buttons' => $cardButtons
+                ];
+            }
+
+            $cardsPayload[] = $cardData;
+            $dbCards[] = [
+                'header' => $cardData['components'][0],
+                'buttons' => $cardData['components'][1],
+                'media_id' => $mediaId['id'],
+                'media_path' => $headerMediaName
+            ];
+
+        }
+
+        $carouselParam = [
+            'type' => "carousel",
+            'cards' => $cardsPayload
+        ];
+
+        $whatsappTemplateData['components'][] = $carouselParam;
+        try {
+            $whatsappData = $whatsappManager->submitTemplate($whatsappAccount->whatsapp_business_account_id, $whatsappAccount->access_token, $whatsappTemplateData);
+        } catch (\Exception $e) {
+            return responseManager('error', $e->getMessage());
+        }
+        $category = TemplateCategory::where('name', 'MARKETING')->first();
+
+        $template                              = new Template();
+        $template->user_id                     = $user->id;
+        $template->whatsapp_account_id         = $whatsappAccount->id;
+        $template->whatsapp_template_id        = $whatsappData['id'];
+        $template->name                        = $request->name;
+        $template->category_id                 = $category->id;
+        $template->language_id                 = $request->language_id;
+        $template->body                        = $request->template_body;
+        $template->status                      = metaTemplateStatus($whatsappData['status']);
+        $template->save();
+
+        foreach($dbCards as $card){
+            $templateCard              = new TemplateCard();
+            $templateCard->template_id = $template->id;
+            $templateCard->user_id     = $user->id;
+            $templateCard->media_id    = $card['media_id'];
+            $templateCard->media_path  = $card['media_path'];
+            $templateCard->header      = $card['header'];
+            $templateCard->buttons     = $card['buttons'];
+            $templateCard->save();
+        }
+
+        decrementFeature($user,'template_limit');
+
+        $notify = "Your carousel template submitted for approval";
+        return responseManager('success', $notify,'success');
+    }
+
     public function storeTemplate(Request $request)
     {
         $this->validation($request);
@@ -66,7 +241,7 @@ class TemplateController extends Controller
         }
 
         $whatsappAccount = WhatsappAccount::where('user_id', $user->id)->where('id', $request->whatsapp_account_id)->first();
-
+      
         if (!$whatsappAccount) {
             return responseManager('invalid', 'The selected whatsapp account is invalid');
         }
@@ -98,7 +273,7 @@ class TemplateController extends Controller
         $header          = $request->header ?? [];
         $headerFormat    = $request->header_format ?? null;
         $headerMediaName = null;
-
+        
         $whatsappManager = new WhatsAppLib();
 
         try {
@@ -107,7 +282,7 @@ class TemplateController extends Controller
                 $headerMediaName = fileUploader($header['handle'], getFilePath('templateHeader'), getFileSize('templateHeader'));
 
                 if (!$headerMediaName) {
-                    return responseManager('error', 'Couldn\'t upload your image');
+                    return responseManager('error', 'Couldn\'t upload your file');
                 }
 
                 $fileData         = [];
@@ -116,13 +291,13 @@ class TemplateController extends Controller
                 $fileData['size'] = filesize($fileData['path']);
                 $fileData['type'] = mime_content_type($fileData['path']);
 
-                $sessionId        = $whatsappManager->getSessionId($whatsappAccount->app_id, $fileData, $whatsappAccount->access_token);
+                $sessionId        = $whatsappManager->getSessionId($whatsappAccount->meta_app_id, $fileData, $whatsappAccount->access_token);
                 $header['handle'] = $whatsappManager->getMediaHandle($sessionId['id'], $whatsappAccount->access_token, $fileData['path'], $fileData['type']);
             }
         } catch (\Exception $e) {
             return responseManager('error', $e->getMessage());
         }
-
+        
         $whatsappTemplateData = [
             'name'     => $request->name,
             'language' => $language->code,
@@ -200,41 +375,56 @@ class TemplateController extends Controller
         ]);
     }
 
-    private function templateButtons($request, $category)
+    private function templateButtons($request, $category,$card = false)
     {
         $formateButtons = [];
 
-        foreach ($request->buttons ?? [] as $button) {
+        $allButtons = [];
 
-            $buttonType  = $button['type'];
-            $text        = $button['text'];
+        if($card){
+            $allButtons = $request;
+        }else {
+            $allButtons = $request->buttons;
+        }
+
+        foreach ($allButtons ?? [] as $button) {
+
+            $buttonType = $button['type'];
 
             if ($category == 'AUTHENTICATION' && $buttonType !== 'OTP') {
                 continue;
             }
+
             $requiredFields = [
                 'QUICK_REPLY'  => 'quick_reply',
                 'PHONE_NUMBER' => 'phone_number',
                 'URL'          => 'url',
                 'OTP'          => 'otp_type',
             ];
-            if ($buttonType == 'PHONE_NUMBER' || $buttonType == 'URL' || $buttonType == 'OTP') {
+
+            if ($buttonType == 'OTP') {
+                $formateButtons[] = [
+                    'type' => 'OTP',
+                    'otp_type' => $button['otp_type'],
+                ];
+            } elseif (in_array($buttonType, ['PHONE_NUMBER', 'URL'])) {
                 $field = $requiredFields[$buttonType];
                 $formateButtons[] = [
                     'type' => $buttonType,
-                    'text' => $text,
+                    'text' => $button['text'],
                     $field => $button[$field],
                 ];
             } else {
                 $formateButtons[] = [
                     'type' => $buttonType,
-                    'text' => $text,
+                    'text' => $button['text'],
                 ];
             }
         }
 
         return $formateButtons;
     }
+
 
     private function templateHeader($headerFormat, $header)
     {
@@ -261,22 +451,36 @@ class TemplateController extends Controller
     private function templateBody($request, $category)
     {
         $bodyText = $request->template_body ?? '';
-
+    
         $result = [
             "type" => 'BODY',
         ];
-
+    
         if ($category && $category === 'AUTHENTICATION' && $request->add_security_recommendation) {
             $result['add_security_recommendation'] = true;
         } else {
             $result['text'] = $bodyText;
+    
             if ($bodyText && isset($request->body['example']['body_text'])) {
-                $result['example'] = $request->body['example'];
+                $bodyExamples = $request->body['example']['body_text'];
+    
+                if (!empty($bodyExamples) && is_array($bodyExamples)) {
+                    if (!isset($bodyExamples[0]) || !is_array($bodyExamples[0])) {
+                        $bodyExamples = [array_values($bodyExamples)];
+                    }
+                }
+    
+                $result['example'] = [
+                    'body_text' => $bodyExamples
+                ];
             }
         }
-
+    
         return $result;
     }
+
+
+
 
     public function templateFooter($request, $category)
     {
@@ -308,6 +512,7 @@ class TemplateController extends Controller
         $templates = Template::where('user_id', $user->id)
             ->where('whatsapp_account_id', $whatsappAccount->id)
             ->approved()
+            ->with('cards')
             ->get() ?? [];
         return responseManager(
             'templates',
@@ -383,7 +588,7 @@ class TemplateController extends Controller
             $response = CurlRequest::curlContent("https://graph.facebook.com/v22.0/{$businessAccountId}/message_templates?name={$template->name}", $header);
             $data     = json_decode($response, true);
             if (!is_array($data) || isset($data['error']) || !isset($data['data'][0]['status'])) {
-                $notify[] = ['error', @$data['error']['error_user_msg'] ?? "Something went to wrong"];
+                $notify[] = ['error', @$data['error']['error_user_msg'] ?? @$data['error']['message'] ?? "Something went to wrong"];
                 return back()->withNotify($notify);
             }
 

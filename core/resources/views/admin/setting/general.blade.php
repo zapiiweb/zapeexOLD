@@ -142,6 +142,43 @@
                         </div>
                     </div>
                     <div class="col-12">
+                        <div class="my-4">
+                            <h6 class="divider-title">
+                                @lang('EMBEDDED SIGN UP CONFIGURATION')
+                                <a href="https://developers.facebook.com/apps/" class="text-primary" target="_blank"><i class="las la-external-link-alt"></i> @lang('Meta Dashboard')</a>
+                            </h6>
+                        </div>
+                    </div>
+                    <div class="form-group col-sm-6">
+                        <label>
+                            @lang('Meta App Id')
+                            <span data-bs-toggle="tooltip" title="@lang('The meta app id from your meta dashboard.')">
+                                <i class="las la-info-circle"></i>
+                            </span>
+                        </label>
+                        <input type="text" name="meta_app_id" class="form-control" value="{{ gs('meta_app_id') }}">
+                    </div>
+                    <div class="form-group col-sm-6">
+                        <label>
+                            @lang('Meta App Secret')
+                            <span data-bs-toggle="tooltip" title="@lang('The meta app secret from your meta dashboard.')">
+                                <i class="las la-info-circle"></i>
+                            </span>
+                        </label>
+                        <input type="text" name="meta_app_secret" class="form-control"
+                            value="{{ gs('meta_app_secret') }}">
+                    </div>
+                    <div class="form-group col-sm-6">
+                        <label>
+                            @lang('Meta Configuration ID')
+                            <span data-bs-toggle="tooltip" title="@lang('The meta configuration id from your meta business setting page.')">
+                                <i class="las la-info-circle"></i>
+                            </span>
+                        </label>
+                        <input type="text" name="meta_configuration_id" class="form-control"
+                            value="{{ gs('meta_configuration_id') }}">
+                    </div>
+                    <div class="col-12">
                         <x-admin.ui.btn.submit />
                     </div>
                 </div>
@@ -205,6 +242,33 @@
         [data-theme=dark] .sp-container {
             border-color: hsl(var(--border-color)) !important;
             border: solid 1px hsl(var(--border-color));
+        }
+
+        .divider-title {
+            position: relative;
+            text-align: center;
+            width: max-content;
+            margin: 0 auto;
+        }
+
+        .divider-title::before {
+            position: absolute;
+            content: '';
+            top: 14px;
+            left: -90px;
+            background: #6b6b6b65;
+            height: 2px;
+            width: 80px;
+        }
+
+        .divider-title::after {
+            position: absolute;
+            content: '';
+            top: 14px;
+            right: -90px;
+            background: #6b6b6b65;
+            height: 2px;
+            width: 80px;
         }
     </style>
 @endpush

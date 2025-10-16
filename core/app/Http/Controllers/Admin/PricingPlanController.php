@@ -35,7 +35,7 @@ class PricingPlanController extends Controller
             'short_link_limit' => 'required|integer|gte:-1',
             'floater_limit'    => 'required|integer|gte:-1',
         ]);
-        
+
         if ($id) {
             $message     = "Pricing plan updated successfully";
             $pricingPlan = PricingPlan::findOrFail($id);
@@ -58,6 +58,8 @@ class PricingPlanController extends Controller
         $pricingPlan->floater_limit    = $request->floater_limit;
         $pricingPlan->is_popular       = $request->is_popular ? Status::YES : Status::NO;
         $pricingPlan->welcome_message  = $request->welcome_message ? Status::YES : Status::NO;
+        $pricingPlan->ai_assistance    = $request->ai_assistance ? Status::YES : Status::NO;
+        $pricingPlan->cta_url_message  = $request->cta_url_message ? Status::YES : Status::NO;
         $pricingPlan->save();
 
         $notify[] = ['success', $message];
