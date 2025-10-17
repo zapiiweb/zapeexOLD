@@ -321,7 +321,17 @@ trait InboxManager
             $message                      = new Message();
             $message->user_id             = $user->id;
             $message->whatsapp_account_id = $whatsappAccount->id;
-            $message->whatsapp_message_id = $whatsAppMessage[0]['id'];
+            
+            if (isset($jobId) && $jobId) {
+                $message->job_id              = $jobId;
+                $message->whatsapp_message_id = null;
+                $message->status              = Status::PENDING;
+            } else {
+                $message->job_id              = null;
+                $message->whatsapp_message_id = $whatsAppMessage[0]['id'];
+                $message->status              = Status::MESSAGE_SENT;
+            }
+            
             $message->conversation_id     = $conversation->id;
             $message->cta_url_id          = $ctaUrlId ?? 0;
             $message->type                = Status::MESSAGE_SENT;
@@ -335,7 +345,6 @@ trait InboxManager
             $message->mime_type           = $mimeType;
             $message->media_type          = $mediaType;
             $message->agent_id            = $agentId;
-            $message->status              = Status::MESSAGE_SENT;
             $message->ordering            = Carbon::now()->format('Y-m-d H:i:s.u');
             $message->save();
 

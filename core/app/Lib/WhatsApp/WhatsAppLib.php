@@ -627,7 +627,8 @@ class WhatsAppLib
                 $message                      = new Message();
                 $message->user_id             = $user->id;
                 $message->whatsapp_account_id = $whatsappAccount->id;
-                $message->whatsapp_message_id = $whatsAppMessage[0]['id'];
+                $message->job_id              = $whatsAppMessage[0]['id'];
+                $message->whatsapp_message_id = null;
                 $message->conversation_id     = $conversation->id;
                 $message->type                = Status::MESSAGE_SENT;
                 $message->message             = $request->message;
@@ -639,7 +640,7 @@ class WhatsAppLib
                 $message->media_path          = $mediaPath;
                 $message->mime_type           = $mimeType;
                 $message->media_type          = $mediaType;
-                $message->status              = Status::MESSAGE_SENT;
+                $message->status              = Status::PENDING;
                 $message->ordering            = Carbon::now()->format('Y-m-d H:i:s.u');
                 $message->ai_reply            = Status::YES;
                 $message->save();
