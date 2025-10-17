@@ -130,12 +130,12 @@ Route::middleware('auth')->name('user.')->group(function () {
                 Route::get('conversation/details/{conversationId}', 'contactDetails')->name('contact.details');
                 Route::post('note/store', 'storeNote')->name('note.store');
                 Route::post('note/delete/{id}', 'deleteNote')->name('note.delete');
-                Route::get('media/download/{mediaId}', 'downloadMedia')->name('media.download');
 
                 Route::middleware('has.subscription', 'has.whatsapp')->group(function () {
                     Route::post('chat/message/send', 'sendMessage')->name('message.send')->middleware('agent.permission:send message');
                     Route::post('chat/message/resend', 'resendMessage')->name('message.resend')->middleware('agent.permission:send message');
                     Route::get('chat/message/status/{conversationId}', 'updateMessageStatus')->name('message.status');
+                    Route::get('media/download/{mediaId}', 'downloadMedia')->name('media.download');
 
                     Route::post('generate-message', 'generateAiMessage')->name('generate.message')->middleware('agent.permission:send message');
                 });
