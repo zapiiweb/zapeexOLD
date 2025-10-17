@@ -222,7 +222,8 @@ function getPageSections($arr = false)
 function getImage($image, $size = null, $isAvatar = false)
 {
     $clean = '';
-    if (file_exists($image) && is_file($image)) {
+    $absolutePath = base_path($image);
+    if (file_exists($absolutePath) && is_file($absolutePath)) {
         return asset($image) . $clean;
     }
     if ($isAvatar) {

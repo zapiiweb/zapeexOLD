@@ -95,3 +95,15 @@ Preferred communication style: Simple, everyday language.
 - Guzzle HTTP (for API requests)
 - libphonenumber (for phone validation)
 - HTMLPurifier (for XSS prevention)
+## Recent Bug Fixes
+
+### 2025-10-17: Fixed Media Display in Chat
+**Problem**: Images showed as `default.png` instead of actual media files.
+
+**Root Cause**: The `getImage()` helper used relative paths which failed when Laravel's working directory wasn't `/workspace/core`.
+
+**Solution**: Changed `getImage()` to use `base_path($image)` for absolute path verification.
+
+**Files Modified**:
+- `core/app/Http/Helpers/helpers.php` - Line 228: Fixed path resolution
+- `core/app/Http/Controllers/WebhookController.php` - Line 479: Added media_id for Baileys
