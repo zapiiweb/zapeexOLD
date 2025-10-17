@@ -59,7 +59,6 @@
 
     @stack('script')
 
-</body>
 <script>
     (function($) {
         "use strict";
