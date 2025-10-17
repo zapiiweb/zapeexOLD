@@ -344,22 +344,11 @@ class WebhookController extends Controller
             if ($type === 'status_update') {
                 $status = $request->input('status');
                 
-                \Log::info("Baileys webhook: Status update received", [
-                    'sessionId' => $sessionId,
-                    'messageId' => $messageId,
-                    'status' => $status
-                ]);
-                
                 $message = Message::where('whatsapp_message_id', $messageId)->first();
                 
                 if ($message) {
                     $message->status = $status;
                     $message->save();
-
-                    \Log::info("Baileys webhook: Status updated successfully", [
-                        'messageId' => $message->id,
-                        'newStatus' => $status
-                    ]);
 
                     // Broadcast status update via Pusher
                     $html = view('Template::user.inbox.single_message', compact('message'))->render();
@@ -374,10 +363,6 @@ class WebhookController extends Controller
                         'conversationId' => $message->conversation_id,
                         'unseenMessage'  => $message->conversation->unseenMessages()->count() < 10 ? $message->conversation->unseenMessages()->count() : '9+',
                     ]));
-                } else {
-                    \Log::warning("Baileys webhook: Message not found for status update", [
-                        'messageId' => $messageId
-                    ]);
                 }
 
                 return response()->json(['success' => true]);
@@ -385,19 +370,6 @@ class WebhookController extends Controller
 
             // Handle incoming messages
             $from = $request->input('from');
-            
-            // Skip if no 'from' field (e.g., status updates)
-            if (!$from) {
-                \Log::warning('Baileys webhook: No from field', ['request' => $request->all()]);
-                return response()->json(['success' => true, 'message' => 'No from field']);
-            }
-            
-            // Skip status broadcasts and group messages
-            if (str_contains($from, 'status@broadcast') || str_contains($from, '@g.us')) {
-                \Log::info('Baileys webhook: Skipping status/group message', ['from' => $from]);
-                return response()->json(['success' => true, 'message' => 'Status or group message skipped']);
-            }
-            
             $messageText = $request->input('message');  
             $messageType = $request->input('messageType', 'text');
             $pushName = $request->input('pushName');
