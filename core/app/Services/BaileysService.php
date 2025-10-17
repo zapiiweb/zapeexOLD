@@ -151,7 +151,7 @@ class BaileysService
     {
         try {
             // Build callback URL for Baileys to notify when sending completes
-            $callbackUrl = url('/webhook/baileys');
+            $callbackUrl = route('webhook.baileys');
             
             $payload = [
                 'sessionId' => $sessionId,

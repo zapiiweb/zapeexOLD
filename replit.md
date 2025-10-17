@@ -60,6 +60,19 @@ Preferred communication style: Simple, everyday language.
 **Files Modified**:
 - `core/app/Http/Controllers/WebhookController.php` - Lines 505-524: Fixed baileysWebhook chatbot handling
 
+### 2025-10-17: Fixed Baileys Webhook Callback 404 Error
+**Problem**: Baileys service showed "Webhook callback failed: Request failed with status code 404" when sending messages.
+
+**Root Cause**: The `BaileysService.php` was using `url('/webhook/baileys')` to generate the callback URL, which created a relative or incomplete URL. The Baileys service needs a complete absolute URL (http://host:port/webhook/baileys) to make the callback successfully.
+
+**Solution Implemented**:
+- Changed from `url('/webhook/baileys')` to `route('webhook.baileys')`
+- Laravel's `route()` helper generates the complete absolute URL
+- Now Baileys can successfully call back to confirm message delivery status
+
+**Files Modified**:
+- `core/app/Services/BaileysService.php` - Line 157: Fixed callback URL generation
+
 ## System Architecture
 
 ### Backend Framework
