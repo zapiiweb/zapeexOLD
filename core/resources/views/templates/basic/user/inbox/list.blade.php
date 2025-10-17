@@ -19,10 +19,10 @@
     <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content bg-transparent border-0">
-                <div class="modal-header border-0 pb-0">
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-0 text-center">
+                <div class="modal-body p-0 text-center position-relative">
+                    <button type="button" class="btn btn-danger position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close" style="z-index: 1050; width: 45px; height: 45px; border-radius: 50%; font-size: 24px; line-height: 1;">
+                        <i class="las la-times"></i>
+                    </button>
                     <img id="previewImage" src="" alt="Preview" class="img-fluid" style="max-height: 80vh; width: auto;">
                 </div>
             </div>
