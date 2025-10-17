@@ -222,6 +222,11 @@ function getPageSections($arr = false)
 function getImage($image, $size = null, $isAvatar = false)
 {
     $clean = '';
+    
+    if (str_starts_with($image, '/')) {
+        return asset($image) . $clean;
+    }
+    
     if (file_exists($image) && is_file($image)) {
         return asset($image) . $clean;
     }
