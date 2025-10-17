@@ -74,7 +74,8 @@
                         <div class="mt-2 d-flex align-items-center justify-content-between">
                             <span class="text-muted small">{{ @$message->media_filename ?? 'video' }}</span>
                             <a href="{{ asset('assets/media/conversation/' . $message->media_path) }}"
-                                class="btn btn-sm btn--primary"
+                                class="btn btn-sm"
+                                style="background-color: #25d466; color: white; border-color: #25d466;"
                                 download="{{ @$message->media_filename ?? 'video' }}">
                                 <i class="las la-download"></i> Download
                             </a>
