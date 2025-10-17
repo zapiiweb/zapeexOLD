@@ -31,18 +31,26 @@ Preferred communication style: Simple, everyday language.
 #### Issue #2: Media Download Failing ("Error failed load the media")
 **Problem**: Clicking images to download them showed error "Error failed load the media" and redirected to login page.
 
-**Root Cause**: The download route was **inside middleware group** `has.subscription` and `has.whatsapp`, which were blocking access and causing 302 redirects to login.
+**Root Causes**: 
+1. Download route was **inside middleware groups** `has.subscription`, `has.whatsapp`, and `agent.permission:view inbox`
+2. Code tried to access `$user->currentWhatsapp()->access_token` **before** checking if message was an image (causing error for non-agent users)
 
-**Solution**: 
-- **Moved download route outside restrictive middlewares** (`core/routes/user.php` line 136)
-- Now only requires `agent.permission:view inbox` (basic authentication)
-- Download method already validates user owns the message
+**Solutions**: 
+1. **Moved download route completely outside restrictive middlewares** (`core/routes/user.php` line 128)
+   - Now only requires basic authentication (`auth`, `check.status`, `registration.complete`)
+   - Works for all authenticated users (agents and non-agents)
+
+2. **Fixed downloadMedia method logic** (`InboxManager.php` line 424):
+   - Now checks message type FIRST before accessing WhatsApp account
+   - For images: downloads directly from local file (no WhatsApp access needed)
+   - For other media: validates WhatsApp exists before accessing token
 
 **Files Modified**:
 - `core/app/Http/Controllers/WebhookController.php` - Added media_id assignment (line 475)
 - `core/app/Constants/FileInfo.php` - Changed conversation path to `'../assets/media/conversation'`
 - `core/app/Http/Helpers/helpers.php` - Added path normalization in getImage()
-- `core/routes/user.php` - Moved download route outside middleware restrictions (line 136)
+- `core/routes/user.php` - Moved download route outside all restrictive middlewares (line 128)
+- `core/app/Traits/InboxManager.php` - Fixed downloadMedia logic to check message type before accessing WhatsApp
 - Database: Updated existing messages with `media_id`
 
 **Technical Details**:

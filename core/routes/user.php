@@ -121,6 +121,11 @@ Route::middleware('auth')->name('user.')->group(function () {
                 Route::get('config/webhook', 'whatsappWebhook')->name('webhook.config');
             });
 
+            // Media download (no middleware restrictions, validates user ownership in controller)
+            Route::controller("InboxController")->name('inbox.')->group(function () {
+                Route::get('inbox/media/download/{mediaId}', 'downloadMedia')->name('media.download');
+            });
+
             // Inbox
             Route::name('inbox.')->prefix('inbox')->controller("InboxController")->middleware('agent.permission:view inbox')->group(function () {
                 Route::get('', 'list')->name('list');
@@ -130,7 +135,6 @@ Route::middleware('auth')->name('user.')->group(function () {
                 Route::get('conversation/details/{conversationId}', 'contactDetails')->name('contact.details');
                 Route::post('note/store', 'storeNote')->name('note.store');
                 Route::post('note/delete/{id}', 'deleteNote')->name('note.delete');
-                Route::get('media/download/{mediaId}', 'downloadMedia')->name('media.download');
 
                 Route::middleware('has.subscription', 'has.whatsapp')->group(function () {
                     Route::post('chat/message/send', 'sendMessage')->name('message.send')->middleware('agent.permission:send message');
