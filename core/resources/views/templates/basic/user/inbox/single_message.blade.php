@@ -94,14 +94,20 @@
                     </div>
                 @endif
                 @if (@$message->message_type == Status::AUDIO_TYPE_MESSAGE)
-                    <div class="text-dark d-flex justify-content-between flex-column">
-                        <a href="{{ asset('assets/media/conversation/' . $message->media_path) }}"
-                            class="text--primary download-document"
-                            download="{{ @$message->media_filename ?? 'audio' }}">
-                            <img class="message-image audio-image"
-                                src="{{ asset('assets/images/audio_preview.png') }}" alt="image">
-                        </a>
-                        {{ @$message->media_filename ?? 'Audio' }}
+                    <div class="audio-message-container">
+                        <audio class="message-audio" controls style="width: 100%; max-width: 400px;">
+                            <source src="{{ asset('assets/media/conversation/' . $message->media_path) }}" type="audio/{{ pathinfo($message->media_path, PATHINFO_EXTENSION) }}">
+                            Your browser does not support the audio tag.
+                        </audio>
+                        <div class="mt-2 d-flex align-items-center justify-content-between">
+                            <span class="text-muted small">{{ @$message->media_filename ?? 'audio' }}</span>
+                            <a href="{{ asset('assets/media/conversation/' . $message->media_path) }}"
+                                class="btn btn-sm"
+                                style="background-color: #25d466; color: white; border-color: #25d466;"
+                                download="{{ @$message->media_filename ?? 'audio' }}">
+                                <i class="las la-download"></i> Download
+                            </a>
+                        </div>
                     </div>
                 @endif
             @endif
