@@ -8,6 +8,23 @@ OvoWpp is a comprehensive cross-platform SaaS-based WhatsApp CRM and marketing s
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (October 17, 2025)
+
+### Media System Improvements
+- **File Path Fix**: Corrected media file paths from `../assets/media/conversation` to `assets/media/conversation` in FileInfo.php
+- **Supported File Types**:
+  - Images: JPG, JPEG, PNG, WEBP (max 25 MB)
+  - Videos: MP4, MOV, AVI (max 50 MB) with inline HTML5 player
+  - Audio: All formats (max 20 MB) with inline HTML5 player
+  - Documents: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, ZIP, RAR (max 100 MB)
+  - Custom preview icons for each document type (PDF, DOC, XLS, PPT, ZIP)
+
+### Baileys Webhook Fixes
+- **Status Update System**: Fixed message status updates (sent/delivered/read) not working
+- **Webhook Error Resolution**: Added validation to skip status broadcasts and group messages that were causing 400 errors
+- **Status Mapping**: Baileys status (1=sent, 2=delivered, 3=read) correctly mapped to system status
+- **Real-time Updates**: Status changes broadcast via Pusher for instant UI updates
+
 ## System Architecture
 
 ### Backend
