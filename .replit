@@ -6,7 +6,7 @@ expertMode = true
 channel = "stable-25_05"
 
 [workflows]
-runButton = "Project"
+runButton = "Baileys WhatsApp Service"
 
 [[workflows.workflow]]
 name = "Project"
@@ -73,10 +73,6 @@ externalPort = 6000
 [[ports]]
 localPort = 36435
 externalPort = 3002
-
-[[ports]]
-localPort = 36817
-externalPort = 6800
 
 [[ports]]
 localPort = 38949
