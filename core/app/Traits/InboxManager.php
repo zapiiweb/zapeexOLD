@@ -273,10 +273,10 @@ trait InboxManager
         $request->validate([
             'message'         => 'required_without_all:image,document,video,audio,cta_url_id',
             'conversation_id' => 'required',
-            'image'           => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'image'           => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:25600'],
             'document'        => ['nullable', 'file', 'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar', 'max:102400'],
-            'video'           => ['nullable', 'file', 'mimes:mp4', 'max:16384'],
-            'audio'           => 'nullable|file|max:16384',
+            'video'           => ['nullable', 'file', 'mimes:mp4', 'max:51200'],
+            'audio'           => 'nullable|file|max:20480',
             'cta_url_id'      => 'nullable|int',
         ], [
             'conversation_id.required'     => 'Please select a conversation to send message.',
