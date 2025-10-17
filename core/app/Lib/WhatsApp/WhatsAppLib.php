@@ -402,7 +402,7 @@ class WhatsAppLib
             $fileExtension = explode('/', $mimeType)[1];
             $fileName      = "{$mediaId}.{$fileExtension}";
 
-            $parentFolder = getFilePath('conversation');
+            $parentFolder = getFileSystemPath('conversation');
             $subFolder    = "{$userId}/" . date('Y/m/d');
             $folderPath   = $parentFolder . "/" . $subFolder;
             $filePath     = $folderPath . "/" . $fileName;
@@ -519,7 +519,7 @@ class WhatsAppLib
         $fileExtension = $file->getClientOriginalExtension();
         $fileName = uniqid() . '.' . $fileExtension;
         
-        $parentFolder = getFilePath('conversation');
+        $parentFolder = getFileSystemPath('conversation');
         $subFolder = "{$userId}/" . date('Y/m/d');
         $folderPath = $parentFolder . "/" . $subFolder;
         

@@ -422,7 +422,7 @@ trait InboxManager
 
         try {
             if ($message->message_type == Status::IMAGE_TYPE_MESSAGE) {
-                $filePath = getFilePath('conversation') . "/" . $message->media_path;
+                $filePath = getFileSystemPath('conversation') . "/" . $message->media_path;
 
                 if ($message->media_path && File::exists($filePath)) {
                     return response()->download($filePath);
