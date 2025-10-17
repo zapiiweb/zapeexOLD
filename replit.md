@@ -10,38 +10,45 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### 2025-10-17: Fixed Media Files Not Displaying in Conversations
-**Problem**: Images and media files were not being displayed in conversations (both received and sent messages). Files were being saved but not shown in the chat interface.
+### 2025-10-17: Fixed Media Files Display and Download Issues
 
-**Root Cause**: 
-The Baileys webhook was **not saving the `media_id` field** when receiving media messages. The view template (`single_message.blade.php`) checks `@if (@$message->media_id)` before rendering images, so without this field, images were never displayed even though files were saved correctly.
+#### Issue #1: Images Not Displaying in Conversations
+**Problem**: Images and media files were not being displayed in conversations. Files were being saved but not shown in the chat interface.
 
-**Solution Implemented**:
+**Root Cause**: The Baileys webhook was **not saving the `media_id` field** when receiving media messages. The view template checks `@if (@$message->media_id)` before rendering images.
+
+**Solution**:
 1. **Added `media_id` to Baileys webhook** (`WebhookController.php` line 475):
    - Now saves `$message->media_id = $messageType !== 'text' ? $messageId : null;`
-   - Uses the WhatsApp message ID as the media identifier
-   - Only sets media_id for non-text messages (images, videos, documents, audio)
+   - Uses WhatsApp message ID as media identifier
+   
+2. **Updated existing messages**: `UPDATE messages SET media_id = whatsapp_message_id WHERE media_path IS NOT NULL AND media_id IS NULL`
 
-2. **Updated existing media messages** with missing `media_id`:
-   - Ran SQL update: `UPDATE messages SET media_id = whatsapp_message_id WHERE media_path IS NOT NULL AND media_id IS NULL`
-   - Fixed all historical messages that were saved without media_id
-
-3. **Path configuration** (`FileInfo.php` + `helpers.php`):
-   - Changed conversation path to `'../assets/media/conversation'` for proper file resolution
+3. **Path configuration**:
+   - Changed conversation path to `'../assets/media/conversation'` for PHP operations
    - Enhanced `getImage()` to normalize `../` to `/` for browser URLs
-   - Ensures files are accessible both for PHP operations and HTTP requests
+
+#### Issue #2: Media Download Failing ("Error failed load the media")
+**Problem**: Clicking images to download them showed error "Error failed load the media" and redirected to login page.
+
+**Root Cause**: The download route was **inside middleware group** `has.subscription` and `has.whatsapp`, which were blocking access and causing 302 redirects to login.
+
+**Solution**: 
+- **Moved download route outside restrictive middlewares** (`core/routes/user.php` line 136)
+- Now only requires `agent.permission:view inbox` (basic authentication)
+- Download method already validates user owns the message
 
 **Files Modified**:
-- `core/app/Http/Controllers/WebhookController.php` - Added media_id assignment in Baileys webhook (line 475)
+- `core/app/Http/Controllers/WebhookController.php` - Added media_id assignment (line 475)
 - `core/app/Constants/FileInfo.php` - Changed conversation path to `'../assets/media/conversation'`
-- `core/app/Http/Helpers/helpers.php` - Added path normalization in getImage() function
+- `core/app/Http/Helpers/helpers.php` - Added path normalization in getImage()
+- `core/routes/user.php` - Moved download route outside middleware restrictions (line 136)
 - Database: Updated existing messages with `media_id`
 
 **Technical Details**:
-- Media files stored at: `/home/runner/workspace/assets/media/conversation/{user_id}/{year}/{month}/{day}/{filename}`
-- Browser URL pattern: `https://.../assets/media/conversation/{user_id}/{year}/{month}/{day}/{filename}`
-- View condition: `@if (@$message->media_id)` → now evaluates to true for media messages
-- Download route: `/user/inbox/media/download/{media_id}` → uses media_id for file retrieval
+- Media storage: `/home/runner/workspace/assets/media/conversation/{user_id}/{year}/{month}/{day}/{filename}`
+- Browser URL: `https://.../assets/media/conversation/{user_id}/{year}/{month}/{day}/{filename}`
+- Download route: `/user/inbox/media/download/{media_id}` (now accessible without subscription/whatsapp middlewares)
 
 ## System Architecture
 
