@@ -47,7 +47,7 @@
                                 <i class="fas fa-file-alt"></i>
                             </span>
                             <span class="title">@lang('Document')</span>
-                            <input hidden class="media-input" name="document" type="file"accept="application/pdf">
+                            <input hidden class="media-input" name="document" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
                         </label>
                         <label for="video" class="media-item media_selector"
                             data-media-type="{{ Status::VIDEO_TYPE_MESSAGE }}">
