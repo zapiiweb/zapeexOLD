@@ -113,7 +113,7 @@
          @endauth
      </div>
      <div class="d-flex align-items-center justify-content-between">
-         <span class="message-time">{{ showDateTime(@$message->created_at, 'h:i A') }}
+         <span class="message-time">{{ showDateTime(@$message->created_at, gs('time_format')) }}
              @auth
                  @if ($message->agent)
                      | <span class="message-time">

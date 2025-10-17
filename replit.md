@@ -32,6 +32,19 @@ Preferred communication style: Simple, everyday language.
 - `core/app/Lib/WhatsApp/WhatsAppLib.php` - Message ordering for AI responses
 - `core/app/Http/Controllers/CronController.php` - Message ordering for campaign messages
 
+### 2025-10-17: Fixed Time Format Display in Messages
+**Problem**: Messages were displaying time in 12-hour format (07:04 PM) even when the system was configured to use 24-hour format (19:04) in General Settings.
+
+**Root Cause**: The message template `single_message.blade.php` had a hardcoded time format `'h:i A'` (12-hour with AM/PM) instead of using the system's configured time format.
+
+**Solution Implemented**:
+- Changed message time display from fixed format `'h:i A'` to use configured format: `gs('time_format')`
+- Now respects the Time Format setting in General Settings (Admin → General Setting → Time Format)
+- Supports all available formats: H:i:s, H:i, h:i A, g:i a, g:i:s a
+
+**Files Modified**:
+- `core/resources/views/templates/basic/user/inbox/single_message.blade.php` - Line 116: Message timestamp display
+
 ## System Architecture
 
 ### Backend Framework
