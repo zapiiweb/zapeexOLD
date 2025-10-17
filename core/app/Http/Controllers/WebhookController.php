@@ -377,17 +377,6 @@ class WebhookController extends Controller
             $fileName = $request->input('fileName');
             $mimetype = $request->input('mimetype');
             $profilePicUrl = $request->input('profilePicUrl');
-            
-            // Log completo dos dados recebidos (temporário para debug)
-            if ($messageType !== 'text') {
-                \Log::info('BAILEYS MEDIA RECEIVED', [
-                    'messageType' => $messageType,
-                    'fileName' => $fileName,
-                    'mimetype' => $mimetype,
-                    'caption' => $caption,
-                    'all_data' => $request->all()
-                ]);
-            }
 
             // Parse phone number using libphonenumber (same as Meta webhook)
             // Remove @s.whatsapp.net if present
