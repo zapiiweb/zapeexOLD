@@ -66,13 +66,19 @@
                         alt="image" style="cursor: pointer;">
                 @endif
                 @if (@$message->message_type == Status::VIDEO_TYPE_MESSAGE)
-                    <div class="text-dark d-flex align-items-center justify-content-between">
-                        <a href="{{ asset('assets/media/conversation/' . $message->media_path) }}"
-                            class="text--primary download-document"
-                            download="{{ @$message->media_filename ?? 'video' }}">
-                            <img class="message-image" src="{{ asset('assets/images/video_preview.png') }}"
-                                alt="image">
-                        </a>
+                    <div class="video-message-container">
+                        <video class="message-video" controls style="max-width: 100%; max-height: 400px; border-radius: 8px;">
+                            <source src="{{ asset('assets/media/conversation/' . $message->media_path) }}" type="video/{{ pathinfo($message->media_path, PATHINFO_EXTENSION) }}">
+                            Your browser does not support the video tag.
+                        </video>
+                        <div class="mt-2 d-flex align-items-center justify-content-between">
+                            <span class="text-muted small">{{ @$message->media_filename ?? 'video' }}</span>
+                            <a href="{{ asset('assets/media/conversation/' . $message->media_path) }}"
+                                class="btn btn-sm btn--primary"
+                                download="{{ @$message->media_filename ?? 'video' }}">
+                                <i class="las la-download"></i> Download
+                            </a>
+                        </div>
                     </div>
                 @endif
                 @if (@$message->message_type == Status::DOCUMENT_TYPE_MESSAGE)
