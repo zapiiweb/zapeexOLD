@@ -594,22 +594,33 @@ class WhatsAppLib
         if($userAiSetting->status == Status::ENABLE){
             $systemPrompt    = $userAiSetting->system_prompt;
             $aiResponse      = $aiAssistant->getAiReply($systemPrompt, $message);
+            \Log::info('sendAutoReply - Resposta da IA', ['aiResponse' => $aiResponse]);
+            
             $whatsappAccount = $user->currentWhatsapp();
             
-            if($aiResponse['success'] == true)
-            {
-                if($aiResponse['response'] == null && $userAiSetting->fallback_response != null) {
+            // Se IA falhou (success=false) ou retornou null, usar fallback
+            if($aiResponse['success'] == false || $aiResponse['response'] == null) {
+                \Log::info('sendAutoReply - IA falhou ou retornou null, usando fallback');
+                if($userAiSetting->fallback_response != null) {
                     $request = new Request([
                         'message' => $userAiSetting->fallback_response,
                     ]);
                     $conversation->needs_human_reply = Status::YES;
-                    $conversation->save();    
-                }else {
-                    $request = new Request([
-                        'message' => $aiResponse['response'],
-                    ]);
+                    $conversation->save();
+                } else {
+                    \Log::info('sendAutoReply - Sem fallback configurado, saindo');
+                    return; // Não tem fallback, então não faz nada
                 }
-
+            } else {
+                // IA funcionou e retornou resposta
+                \Log::info('sendAutoReply - IA retornou resposta válida');
+                $request = new Request([
+                    'message' => $aiResponse['response'],
+                ]);
+            }
+            
+            if($aiResponse['success'] == true || $userAiSetting->fallback_response != null)
+            {
                 $messageSend = $this->messageSend($request,$contact->mobileNumber, $whatsappAccount);
                 extract($messageSend);
 
