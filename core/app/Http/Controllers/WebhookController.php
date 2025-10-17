@@ -379,8 +379,28 @@ class WebhookController extends Controller
             $profilePicUrl = $request->input('profilePicUrl');
 
             // Parse phone number using libphonenumber (same as Meta webhook)
+            // Remove @s.whatsapp.net if present
+            $phoneNumber = str_replace('@s.whatsapp.net', '', $from);
+            
             $phoneUtil = PhoneNumberUtil::getInstance();
-            $parseNumber = $phoneUtil->parse('+' . $from, '');
+            
+            try {
+                // Try parsing with + prefix
+                $parseNumber = $phoneUtil->parse('+' . $phoneNumber, '');
+            } catch (\Exception $e) {
+                // If fails, try without + prefix (number might already have it)
+                try {
+                    $parseNumber = $phoneUtil->parse($phoneNumber, '');
+                } catch (\Exception $e2) {
+                    \Log::error('Baileys webhook: Failed to parse phone number', [
+                        'from' => $from,
+                        'phoneNumber' => $phoneNumber,
+                        'error' => $e2->getMessage()
+                    ]);
+                    return response()->json(['error' => 'Invalid phone number format'], 400);
+                }
+            }
+            
             $countryCode = $parseNumber->getCountryCode();
             $nationalNumber = $parseNumber->getNationalNumber();
             $newContact = false;
@@ -448,7 +468,7 @@ class WebhookController extends Controller
                 $message->conversation_id = $conversation->id;
                 $message->type = Status::MESSAGE_RECEIVED;
                 $message->message = $messageType === 'text' ? $messageText : ($caption ?? '');
-                $message->message_type = $this->getIntMessageType($messageType);
+                $message->message_type = getIntMessageType($messageType);
                 $message->media_caption = $caption;
                 $message->media_filename = $messageType === 'document' ? basename($fileName) : null; // Only basename for documents
                 $message->media_path = $fileName; // Full path with user_id/year/month/day/filename
