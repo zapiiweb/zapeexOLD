@@ -332,7 +332,7 @@ class CronController extends Controller
             $message->conversation_id     = $conversation->id;
             $message->template_id         = $template->id;
             $message->type                = Status::MESSAGE_SENT;
-            $message->ordering            = Carbon::now();
+            $message->ordering            = Carbon::now()->format('Y-m-d H:i:s.u');
 
             $conversation->last_message_at = Carbon::now();
             $conversation->save();

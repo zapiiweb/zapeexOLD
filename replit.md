@@ -8,6 +8,30 @@ OvoWpp is a comprehensive cross-platform SaaS-based WhatsApp CRM and marketing s
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+### 2025-10-17: Fixed Message Display Bug in Chat
+**Problem**: Messages were appearing as notifications in the contact bar but not displaying in the chat conversation window.
+
+**Root Cause**: 
+1. Weak comparison (`==`) instead of strict comparison (`===`) when matching conversation IDs
+2. Message ordering field used `Carbon::now()` which could produce identical timestamps for messages arriving in the same second, causing inconsistent ordering
+
+**Solution Implemented**:
+- Changed conversation ID comparison from `==` to strict `===` with `parseInt()` to ensure proper type matching
+- Updated all message `ordering` fields to use microseconds: `Carbon::now()->format('Y-m-d H:i:s.u')` for unique ordering
+- Added automatic conversation reordering: moves conversations with new messages to the top of the list
+- Reset message pagination flags when switching conversations to ensure fresh message loads
+
+**Files Modified**:
+- `core/resources/views/templates/basic/user/inbox/list.blade.php` - Pusher event handler
+- `core/resources/views/templates/basic/user/inbox/conversation.blade.php` - Conversation click handler
+- `core/app/Http/Controllers/WebhookController.php` - Message ordering on webhook receive
+- `core/app/Traits/InboxManager.php` - Message ordering on send/resend
+- `core/app/Traits/WhatsappManager.php` - Message ordering for welcome messages and chatbot
+- `core/app/Lib/WhatsApp/WhatsAppLib.php` - Message ordering for AI responses
+- `core/app/Http/Controllers/CronController.php` - Message ordering for campaign messages
+
 ## System Architecture
 
 ### Backend Framework

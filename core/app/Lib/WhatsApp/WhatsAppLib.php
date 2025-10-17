@@ -83,7 +83,7 @@ class WhatsAppLib
 
     public function messageSend($request, $toNumber, $whatsappAccount)
     {
-	// Check if Baileys is connected and use it instead of Meta API
+        // Check if Baileys is connected and use it instead of Meta API
         if ($whatsappAccount->baileys_connected && $whatsappAccount->baileys_session_id) {
             return $this->messageSendViaBaileys($request, $toNumber, $whatsappAccount);
         }
@@ -618,7 +618,7 @@ class WhatsAppLib
                 $message->mime_type           = $mimeType;
                 $message->media_type          = $mediaType;
                 $message->status              = Status::MESSAGE_SENT;
-                $message->ordering            = Carbon::now();
+                $message->ordering            = Carbon::now()->format('Y-m-d H:i:s.u');
                 $message->ai_reply            = Status::YES;
                 $message->save();
 

@@ -203,7 +203,7 @@ class WebhookController extends Controller
                 $message->media_type          = $mediaType;
                 $message->media_caption       = $messageCaption;
                 $message->mime_type           = $mediaMimeType;
-                $message->ordering            = Carbon::now();
+                $message->ordering            = Carbon::now()->format('Y-m-d H:i:s.u');
                 $message->save();
 
                 $conversation->last_message_at = Carbon::now();
@@ -474,7 +474,7 @@ class WebhookController extends Controller
                 $message->media_path = $fileName; // Full path with user_id/year/month/day/filename
                 $message->mime_type = $mimetype;
                 $message->media_type = $messageType !== 'text' ? $messageType : null;
-                $message->ordering = Carbon::now();
+                $message->ordering = Carbon::now()->format('Y-m-d H:i:s.u');
                 $message->save();
 
                 // Update conversation

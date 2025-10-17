@@ -211,8 +211,13 @@
             $('.chat-list').on('click', '.chat-list__item', function() {
                 $(".empty-conversation").remove();
                 $(".chatbox-area__body").removeClass('d-none');
-                window.conversation_id = $(this).data('id');
+                const newConversationId = $(this).data('id');
+                
+                const isConversationChange = window.conversation_id !== newConversationId;
+                window.conversation_id = newConversationId;
                 messagePage = 1;
+                moreMessageList = true;
+                
                 loadMessages();
                 loadContact();
 

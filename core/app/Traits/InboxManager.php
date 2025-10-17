@@ -336,7 +336,7 @@ trait InboxManager
             $message->media_type          = $mediaType;
             $message->agent_id            = $agentId;
             $message->status              = Status::MESSAGE_SENT;
-            $message->ordering            = Carbon::now();
+            $message->ordering            = Carbon::now()->format('Y-m-d H:i:s.u');
             $message->save();
 
             $conversation->last_message_at = Carbon::now();
@@ -390,7 +390,7 @@ trait InboxManager
 
             $message->whatsapp_message_id = $messageResend['whatsAppMessage'][0]['id'];
             $message->status              = Status::MESSAGE_SENT;
-            $message->ordering            = Carbon::now();
+            $message->ordering            = Carbon::now()->format('Y-m-d H:i:s.u');
             $message->agent_id            = $agentId;
             $message->save();
 

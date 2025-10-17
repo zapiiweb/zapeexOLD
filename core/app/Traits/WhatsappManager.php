@@ -78,7 +78,7 @@ trait WhatsappManager
         $message->conversation_id     = $conversation->id;
         $message->type                = Status::MESSAGE_SENT;
         $message->message             = $welcomeMessage->message;
-        $message->ordering            = Carbon::now();
+        $message->ordering            = Carbon::now()->format('Y-m-d H:i:s.u');
         $message->save();
 
         $conversation->last_message_at = Carbon::now();
@@ -128,7 +128,7 @@ trait WhatsappManager
         $message->type                = Status::MESSAGE_SENT;
         $message->message             = $matchedChatbot->text;
         $message->chatbot_id          = $matchedChatbot->id;
-        $message->ordering            = Carbon::now();
+        $message->ordering            = Carbon::now()->format('Y-m-d H:i:s.u');
         $message->save();
 
         $conversation->last_message_at = Carbon::now();

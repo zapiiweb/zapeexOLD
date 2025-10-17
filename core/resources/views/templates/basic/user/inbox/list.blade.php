@@ -348,7 +348,7 @@
                                     .find('.message-status').html(data.data.statusHtml);
                             } else {
 
-                                if (data.data.conversationId == window.conversation_id) {
+                                if (parseInt(data.data.conversationId) === parseInt(window.conversation_id)) {
                                     $messageBody.append(data.data.html);
                                     setTimeout(() => {
                                         $messageBody.scrollTop($messageBody[0]
@@ -373,6 +373,8 @@
                                         );
                                         targetConversation.find('.last-message-at').text(
                                             data.data.lastMessageAt);
+                                        
+                                        targetConversation.prependTo('#chat-list');
                                     }
                                 }
                             }
