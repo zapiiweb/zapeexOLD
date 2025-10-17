@@ -61,10 +61,9 @@
             @endif
             @if (@$message->media_path)
                 @if (@$message->message_type == Status::IMAGE_TYPE_MESSAGE)
-                    <img class="message-image"
+                    <img class="message-image message-image-preview"
                         src="{{ asset('assets/media/conversation/' . @$message->media_path) }}"
-                        alt="image" style="cursor: pointer;" 
-                        onclick="window.open(this.src, '_blank')">
+                        alt="image" style="cursor: pointer;">
                 @endif
                 @if (@$message->message_type == Status::VIDEO_TYPE_MESSAGE)
                     <div class="text-dark d-flex align-items-center justify-content-between">

@@ -14,6 +14,20 @@
                 alt="img">
         </div>
     </div>
+
+    <!-- Modal de Preview de Imagem -->
+    <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content bg-transparent border-0">
+                <div class="modal-header border-0 pb-0">
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0 text-center">
+                    <img id="previewImage" src="" alt="Preview" class="img-fluid" style="max-height: 80vh; width: auto;">
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('script-lib')
@@ -437,6 +451,14 @@
                         $messageInput.attr('readonly', false).attr('placeholder', '@lang("Type your message here message...")');
                     }
                 });
+            });
+
+            // Função para abrir modal de preview de imagem
+            $(document).on('click', '.message-image-preview', function(e) {
+                e.preventDefault();
+                const imageSrc = $(this).attr('src');
+                $('#previewImage').attr('src', imageSrc);
+                $('#imagePreviewModal').modal('show');
             });
 
         })(jQuery);
