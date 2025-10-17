@@ -473,7 +473,6 @@ class WebhookController extends Controller
                 $message->media_filename = $messageType === 'document' ? basename($fileName) : null; // Only basename for documents
                 $message->media_path = $fileName; // Full path with user_id/year/month/day/filename
                 $message->mime_type = $mimetype;
-                $message->media_id = $messageType !== 'text' ? $messageId : null; // Set media_id for media messages
                 $message->media_type = $messageType !== 'text' ? $messageType : null;
                 $message->ordering = Carbon::now()->format('Y-m-d H:i:s.u');
                 $message->save();
