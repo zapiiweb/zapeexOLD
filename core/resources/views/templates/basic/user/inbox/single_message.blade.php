@@ -63,7 +63,7 @@
                  @if (@$message->message_type == Status::IMAGE_TYPE_MESSAGE)
                      <a href="{{ route('user.inbox.media.download', $message->media_id) }}">
                          <img class="message-image"
-                             src="{{ route('user.inbox.media.download', $message->media_id) }}"
+                             src="{{ getImage(getFilePath('conversation') . '/' . @$message->media_path) }}"
                              alt="image">
                      </a>
                  @endif
