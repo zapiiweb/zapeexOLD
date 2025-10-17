@@ -469,7 +469,6 @@ class WebhookController extends Controller
                 $message->type = Status::MESSAGE_RECEIVED;
                 $message->message = $messageType === 'text' ? $messageText : ($caption ?? '');
                 $message->message_type = getIntMessageType($messageType);
-                $message->media_id = $messageType !== 'text' ? $messageId : null;
                 $message->media_caption = $caption;
                 $message->media_filename = $messageType === 'document' ? basename($fileName) : null; // Only basename for documents
                 $message->media_path = $fileName; // Full path with user_id/year/month/day/filename
