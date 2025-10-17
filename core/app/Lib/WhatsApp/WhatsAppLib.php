@@ -519,9 +519,8 @@ class WhatsAppLib
         $fileExtension = $file->getClientOriginalExtension();
         $fileName = uniqid() . '.' . $fileExtension;
         
-        $parentFolder = getFilePath('conversation');
         $subFolder = "{$userId}/" . date('Y/m/d');
-        $folderPath = $parentFolder . "/" . $subFolder;
+        $folderPath = public_path('assets/media/conversation/' . $subFolder);
         
         if (!file_exists($folderPath)) {
             mkdir($folderPath, 0755, true);
