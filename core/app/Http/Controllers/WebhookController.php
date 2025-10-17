@@ -515,11 +515,6 @@ class WebhookController extends Controller
                 if ($matchedChatbot) {
                     $this->chatbotResponse($whatsappAccount, $user, $contact, $conversation, $matchedChatbot);
                 } else {
-                    \Log::info('Baileys Webhook - Vai chamar sendAutoReply', [
-                        'user_id' => $user->id,
-                        'user_ai_assistance' => $user->ai_assistance,
-                        'conversation_id' => $conversation->id
-                    ]);
                     $whatsappLib = new WhatsAppLib();
                     $whatsappLib->sendAutoReply($user, $conversation, $messageText);
                 }
