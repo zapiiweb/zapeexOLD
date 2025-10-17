@@ -59,9 +59,9 @@
              @else
                  <p class="message-text">{!! nl2br($messageText) !!}</p>
              @endif
-             @if (@$message->media_id)
+             @if (@$message->media_path)
                  @if (@$message->message_type == Status::IMAGE_TYPE_MESSAGE)
-                     <a href="{{ route('user.inbox.media.download', $message->media_id) }}">
+                     <a href="{{ asset('assets/media/conversation/' . $message->media_path) }}">
                          <img class="message-image"
             src="{{ @$message->media_path ? asset('assets/media/conversation/' . @$message->media_path) : asset('assets/images/default.png') }}"
                              alt="image">
@@ -69,7 +69,7 @@
                  @endif
                  @if (@$message->message_type == Status::VIDEO_TYPE_MESSAGE)
                      <div class="text-dark d-flex align-items-center justify-content-between">
-                         <a href="{{ route('user.inbox.media.download', $message->media_id) }}"
+                         <a href="{{ asset('assets/media/conversation/' . $message->media_path) }}"
                              class="text--primary download-document">
                              <img class="message-image" src="{{ asset('assets/images/video_preview.png') }}"
                                  alt="image">
@@ -78,7 +78,7 @@
                  @endif
                  @if (@$message->message_type == Status::DOCUMENT_TYPE_MESSAGE)
                      <div class="text-dark d-flex justify-content-between flex-column">
-                         <a href="{{ route('user.inbox.media.download', $message->media_id) }}"
+                         <a href="{{ asset('assets/media/conversation/' . $message->media_path) }}"
                              class="text--primary download-document">
                              <img class="message-image" src="{{ asset('assets/images/document_preview.png') }}"
                                  alt="image">
@@ -88,7 +88,7 @@
                  @endif
                  @if (@$message->message_type == Status::AUDIO_TYPE_MESSAGE)
                      <div class="text-dark d-flex justify-content-between flex-column">
-                         <a href="{{ route('user.inbox.media.download', $message->media_id) }}"
+                         <a href="{{ asset('assets/media/conversation/' . $message->media_path) }}"
                              class="text--primary download-document">
                              <img class="message-image audio-image"
                                  src="{{ asset('assets/images/audio_preview.png') }}" alt="image">
