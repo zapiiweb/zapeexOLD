@@ -418,6 +418,8 @@ trait InboxManager
             return apiResponse("message_not_found", "error", ["Message not found"]);
         }
 
+        $accessToken = $user->currentWhatsapp()->access_token;
+
         try {
             if ($message->message_type == Status::IMAGE_TYPE_MESSAGE) {
                 $filePath = getFilePath('conversation') . "/" . $message->media_path;
@@ -428,13 +430,6 @@ trait InboxManager
                     return responseManager('exception', "Failed to load the media");
                 }
             }
-
-            $whatsapp = $user->currentWhatsapp();
-            if (!$whatsapp) {
-                return responseManager('exception', "WhatsApp account not found");
-            }
-
-            $accessToken = $whatsapp->access_token;
 
             $mediaUrl = (new WhatsAppLib())
                 ->getMediaUrl($mediaId, $accessToken)['url'];
