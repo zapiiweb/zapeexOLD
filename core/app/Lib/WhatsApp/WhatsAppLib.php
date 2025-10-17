@@ -556,13 +556,21 @@ class WhatsAppLib
 
     public function sendAutoReply($user, $conversation,$message)
     {
+        \Log::info('=== sendAutoReply INICIADO ===', ['user_id' => $user->id, 'conversation_id' => $conversation->id]);
+        
         $this->checkConversationLastMessage($conversation);
 
         $contact  = $conversation->contact;
         $userAiSetting = $user->aiSetting;
 
+        \Log::info('sendAutoReply - Check 1: userAiSetting', ['exists' => !is_null($userAiSetting)]);
         if (!$userAiSetting) return;
 
+        \Log::info('sendAutoReply - Check 2: Status/Contact/NeedsHuman', [
+            'aiSetting_status' => $userAiSetting->status,
+            'has_contact' => !is_null($contact),
+            'needs_human_reply' => $conversation->needs_human_reply
+        ]);
         if($userAiSetting->status == Status::DISABLE || !$contact || $conversation->needs_human_reply == Status::YES) return;
 
         $provider = [
@@ -572,14 +580,17 @@ class WhatsAppLib
 
         $activeProvider   = AiAssistant::active()->first();
         
+        \Log::info('sendAutoReply - Check 3: activeProvider', ['exists' => !is_null($activeProvider), 'provider' => $activeProvider?->provider ?? 'null']);
         if(!$activeProvider) return;
 
+        \Log::info('sendAutoReply - Check 4: user.ai_assistance', ['ai_assistance' => $user->ai_assistance]);
         if($user->ai_assistance == 0) return;
 
         $aiAssistantClass = $provider[$activeProvider->provider];
 
         $aiAssistant = new $aiAssistantClass();
 
+        \Log::info('sendAutoReply - Vai chamar IA', ['class' => $aiAssistantClass]);
         if($userAiSetting->status == Status::ENABLE){
             $systemPrompt    = $userAiSetting->system_prompt;
             $aiResponse      = $aiAssistant->getAiReply($systemPrompt, $message);
