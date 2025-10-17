@@ -314,6 +314,8 @@ trait InboxManager
             }
 
             extract($messageSend);
+            
+            $jobIdValue = $messageSend['jobId'] ?? null;
 
             $agentId = 0;
             if (auth()->user()->is_agent) $agentId = auth()->id();
@@ -322,14 +324,14 @@ trait InboxManager
             $message->user_id             = $user->id;
             $message->whatsapp_account_id = $whatsappAccount->id;
             
-            if (isset($jobId) && $jobId) {
-                $message->job_id              = $jobId;
+            if ($jobIdValue) {
+                $message->job_id              = $jobIdValue;
                 $message->whatsapp_message_id = null;
-                $message->status              = Status::PENDING;
+                $message->status              = Status::SCHEDULED;
             } else {
                 $message->job_id              = null;
                 $message->whatsapp_message_id = $whatsAppMessage[0]['id'];
-                $message->status              = Status::MESSAGE_SENT;
+                $message->status              = Status::SENT;
             }
             
             $message->conversation_id     = $conversation->id;

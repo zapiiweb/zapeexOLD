@@ -623,12 +623,23 @@ class WhatsAppLib
             {
                 $messageSend = $this->messageSend($request,$contact->mobileNumber, $whatsappAccount);
                 extract($messageSend);
+                
+                $jobIdValue = $messageSend['jobId'] ?? null;
 
                 $message                      = new Message();
                 $message->user_id             = $user->id;
                 $message->whatsapp_account_id = $whatsappAccount->id;
-                $message->job_id              = $whatsAppMessage[0]['id'];
-                $message->whatsapp_message_id = null;
+                
+                if ($jobIdValue) {
+                    $message->job_id              = $jobIdValue;
+                    $message->whatsapp_message_id = null;
+                    $message->status              = Status::SCHEDULED;
+                } else {
+                    $message->job_id              = null;
+                    $message->whatsapp_message_id = $whatsAppMessage[0]['id'];
+                    $message->status              = Status::SENT;
+                }
+                
                 $message->conversation_id     = $conversation->id;
                 $message->type                = Status::MESSAGE_SENT;
                 $message->message             = $request->message;
@@ -640,7 +651,6 @@ class WhatsAppLib
                 $message->media_path          = $mediaPath;
                 $message->mime_type           = $mimeType;
                 $message->media_type          = $mediaType;
-                $message->status              = Status::PENDING;
                 $message->ordering            = Carbon::now()->format('Y-m-d H:i:s.u');
                 $message->ai_reply            = Status::YES;
                 $message->save();
