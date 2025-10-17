@@ -506,16 +506,33 @@ class WebhookController extends Controller
                 ]));
             }
 
-            // Handle chatbot response
-            $this->chatbotResponse($whatsappAccount, $user, $contact, $conversation, $messageText);
-
-            // Handle welcome message for first message
+            // Handle welcome message, chatbot, and auto-reply
             $messagesInConversation = Message::where('conversation_id', $conversation->id)
                 ->where('type', Status::MESSAGE_RECEIVED)
                 ->count();
 
-            if ($messagesInConversation == 1) {
+            if ($messagesInConversation == 1 && @$whatsappAccount->welcomeMessage) {
                 $this->sendWelcomeMessage($whatsappAccount, $user, $contact, $conversation);
+            } else {
+                // Only check chatbot if message has text content
+                $matchedChatbot = null;
+                
+                if ($messageText) {
+                    $matchedChatbot = $whatsappAccount->chatbots()
+                        ->where('status', Status::ENABLE)
+                        ->where('keywords', 'like', "%{$messageText}%")
+                        ->first();
+                }
+                
+                if ($matchedChatbot) {
+                    $this->chatbotResponse($whatsappAccount, $user, $contact, $conversation, $matchedChatbot);
+                } else {
+                    // Send auto-reply only for non-first messages with text
+                    if ($messagesInConversation > 1 && $messageText) {
+                        $whatsappLib = new WhatsAppLib();
+                        $whatsappLib->sendAutoReply($user, $conversation, $messageText);
+                    }
+                }
             }
 
             return response()->json(['success' => true]);
