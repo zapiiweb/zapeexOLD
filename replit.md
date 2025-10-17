@@ -73,6 +73,33 @@ Preferred communication style: Simple, everyday language.
 **Files Modified**:
 - `core/app/Services/BaileysService.php` - Line 157: Fixed callback URL generation
 
+### 2025-10-17: Fixed AI Assistant Not Responding
+**Problem**: User activated AI assistant but received no AI responses and no fallback messages.
+
+**Root Cause**: The AI assistant requires TWO separate activations to work:
+1. AI configuration (`ai_user_settings` table with `status = 1`) ✅ Already configured
+2. User flag (`users.ai_assistance = 1`) ❌ Was set to 0
+
+Even with AI settings configured and provider active, the system checks `if($user->ai_assistance == 0) return;` (line 577 in WhatsAppLib.php) and exits before processing any AI response.
+
+**Solution Implemented**:
+- Activated the `ai_assistance` flag for user ID 1 (arlemlage): `UPDATE users SET ai_assistance = 1 WHERE id = 1`
+- Verified all prerequisites are met:
+  - ✅ OpenAI provider active (status = 1)
+  - ✅ API key configured
+  - ✅ User has AI settings with fallback message
+  - ✅ User flag `ai_assistance` now enabled
+
+**How AI Assistant Works**:
+1. Message received → Webhook calls `sendAutoReply()` when no chatbot keywords match
+2. `sendAutoReply()` checks multiple conditions (user.ai_assistance, provider active, aiSetting status, etc.)
+3. If all conditions pass, calls OpenAI/Gemini API for response
+4. If API returns null response, sends configured fallback message
+5. If API fails (success=false), sends nothing (needs improvement)
+
+**Files Modified**:
+- Database: `users` table, set `ai_assistance = 1` for user ID 1
+
 ## System Architecture
 
 ### Backend Framework
