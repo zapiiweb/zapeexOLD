@@ -222,13 +222,7 @@ function getPageSections($arr = false)
 function getImage($image, $size = null, $isAvatar = false)
 {
     $clean = '';
-    // Convert URL path to filesystem path for checking existence
-    $fsPath = $image;
-    if (strpos($image, 'assets/') === 0) {
-        $fsPath = '../' . $image;
-    }
-    
-    if (file_exists($fsPath) && is_file($fsPath)) {
+    if (file_exists($image) && is_file($image)) {
         return asset($image) . $clean;
     }
     if ($isAvatar) {
@@ -352,17 +346,6 @@ function fileManager()
 function getFilePath($key)
 {
     return fileManager()->$key()->path;
-}
-
-function getFileSystemPath($key)
-{
-    $path = fileManager()->$key()->path;
-    // Convert URL path to filesystem path
-    // If path starts with 'assets/', prepend '../' for filesystem access from /core
-    if (strpos($path, 'assets/') === 0) {
-        return '../' . $path;
-    }
-    return $path;
 }
 
 function getFileSize($key)

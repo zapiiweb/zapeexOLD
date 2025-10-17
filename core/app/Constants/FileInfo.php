@@ -101,7 +101,7 @@ class FileInfo
             'size'      => '',
         ];
         $data['conversation'] = [
-            'path'      => 'assets/media/conversation',
+            'path'      => '../assets/media/conversation',
             'size'      => '',
         ];
         $data['preloader'] = [
