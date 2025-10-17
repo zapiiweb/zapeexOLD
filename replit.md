@@ -45,6 +45,21 @@ Preferred communication style: Simple, everyday language.
 **Files Modified**:
 - `core/resources/views/templates/basic/user/inbox/single_message.blade.php` - Line 116: Message timestamp display
 
+### 2025-10-17: Fixed Webhook Message Reception Bug
+**Problem**: System stopped receiving incoming messages. Webhooks returned 500 errors with "Attempt to read property 'text' on string".
+
+**Root Cause**: The `baileysWebhook` method was incorrectly passing `$messageText` (string) to `chatbotResponse()` which expects a chatbot object with a `->text` property. This happened when the code for chatbot responses was updated but the Baileys webhook implementation wasn't aligned.
+
+**Solution Implemented**:
+- Updated Baileys webhook to match the Meta webhook behavior
+- Now properly searches for matching chatbot by keywords first
+- Passes the chatbot object (not string) to `chatbotResponse()`
+- Added auto-reply fallback when no chatbot matches
+- Improved message handling flow consistency between Meta and Baileys webhooks
+
+**Files Modified**:
+- `core/app/Http/Controllers/WebhookController.php` - Lines 505-524: Fixed baileysWebhook chatbot handling
+
 ## System Architecture
 
 ### Backend Framework
