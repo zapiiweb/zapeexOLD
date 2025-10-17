@@ -275,7 +275,7 @@ trait InboxManager
             'conversation_id' => 'required',
             'image'           => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:25600'],
             'document'        => ['nullable', 'file', 'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar', 'max:102400'],
-            'video'           => ['nullable', 'file', 'mimes:mp4', 'max:51200'],
+            'video'           => ['nullable', 'file', 'mimes:mp4,mov,avi', 'max:51200'],
             'audio'           => 'nullable|file|max:20480',
             'cta_url_id'      => 'nullable|int',
         ], [
