@@ -81,7 +81,7 @@
                 <label for="image" class="btn-item image-upload-btn media_selector"
                     data-media-type="{{ Status::IMAGE_TYPE_MESSAGE }}">
                     <i class="fa-solid fa-image"></i>
-                    <input hidden class="image-input" name="image" type="file" accept=".jpg, .jpeg, .png">
+                    <input hidden class="image-input" name="image" type="file" accept=".jpg, .jpeg, .png, .webp">
                 </label>
             </div>
 
