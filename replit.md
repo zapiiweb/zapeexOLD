@@ -76,29 +76,43 @@ Preferred communication style: Simple, everyday language.
 ### 2025-10-17: Fixed AI Assistant Not Responding
 **Problem**: User activated AI assistant but received no AI responses and no fallback messages.
 
-**Root Cause**: The AI assistant requires TWO separate activations to work:
+**Root Cause Analysis**:
+The AI assistant requires TWO separate activations to work:
 1. AI configuration (`ai_user_settings` table with `status = 1`) ✅ Already configured
 2. User flag (`users.ai_assistance = 1`) ❌ Was set to 0
 
-Even with AI settings configured and provider active, the system checks `if($user->ai_assistance == 0) return;` (line 577 in WhatsAppLib.php) and exits before processing any AI response.
+Additionally, the system had an OpenAI API quota issue where responses were failing with "You exceeded your current quota, please check your plan and billing details."
+
+**Critical Behavior**: When the fallback message is sent (due to AI failure), the system sets `needs_human_reply = 1` on the conversation. This BLOCKS all subsequent AI responses until manually reset, causing new messages to be ignored.
 
 **Solution Implemented**:
-- Activated the `ai_assistance` flag for user ID 1 (arlemlage): `UPDATE users SET ai_assistance = 1 WHERE id = 1`
-- Verified all prerequisites are met:
-  - ✅ OpenAI provider active (status = 1)
-  - ✅ API key configured
-  - ✅ User has AI settings with fallback message
-  - ✅ User flag `ai_assistance` now enabled
+1. **Activated user AI flag**: `UPDATE users SET ai_assistance = 1 WHERE id = 1`
+2. **Verified OpenAI credits**: Added billing credits to OpenAI account to resolve quota errors
+3. **Reset conversation block**: `UPDATE conversations SET needs_human_reply = 0 WHERE id = 7` to allow AI to respond again
 
 **How AI Assistant Works**:
 1. Message received → Webhook calls `sendAutoReply()` when no chatbot keywords match
-2. `sendAutoReply()` checks multiple conditions (user.ai_assistance, provider active, aiSetting status, etc.)
+2. `sendAutoReply()` checks multiple conditions:
+   - User has `aiSetting` configured (not null)
+   - AI setting is enabled (`status = 1`)
+   - Contact exists and conversation doesn't need human reply (`needs_human_reply = 0`)
+   - Active provider exists (OpenAI/Gemini)
+   - User AI assistance flag is enabled (`ai_assistance = 1`)
 3. If all conditions pass, calls OpenAI/Gemini API for response
-4. If API returns null response, sends configured fallback message
-5. If API fails (success=false), sends nothing (needs improvement)
+4. **If API fails** (`success = false`):
+   - Sends configured fallback message
+   - Sets `needs_human_reply = 1` (BLOCKS future AI responses!)
+5. **If API succeeds** (`success = true`):
+   - Sends AI-generated response
+   - Conversation remains open for AI
+
+**Important Notes**:
+- The `needs_human_reply` flag prevents infinite loops when AI fails, but requires manual reset
+- OpenAI quota errors return `success = false`, triggering fallback behavior
+- After 24 hours, the system automatically resets `needs_human_reply` to allow AI again
 
 **Files Modified**:
-- Database: `users` table, set `ai_assistance = 1` for user ID 1
+- Database: `users` table (ai_assistance flag), `conversations` table (needs_human_reply reset)
 
 ## System Architecture
 
