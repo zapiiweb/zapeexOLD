@@ -64,11 +64,6 @@
                                     .find('.last-message').html(response.data.lastMessageHtml);
                             }
 
-                            // Update message counter after sending
-                            if (typeof window.resetMessageCounter === 'function') {
-                                window.resetMessageCounter();
-                            }
-
                             setTimeout(() => {
                                 $messageBody.scrollTop($messageBody[0].scrollHeight);
                             }, 50);
@@ -388,74 +383,7 @@
             };
 
 
-            // Auto-refresh messages every 5 seconds when conversation is open
-            window.lastMessageCount = 0;
-            window.autoRefreshInterval = null;
-            
-            window.resetMessageCounter = function() {
-                window.lastMessageCount = $messageBody.find('.msg-item').length;
-            };
-            
-            window.stopAutoRefresh = function() {
-                if (window.autoRefreshInterval) {
-                    clearInterval(window.autoRefreshInterval);
-                    window.autoRefreshInterval = null;
-                }
-            };
-            
-            window.startAutoRefresh = function() {
-                window.stopAutoRefresh();
-                
-                window.autoRefreshInterval = setInterval(function() {
-                    if (!window.conversation_id || window.conversation_id == 0) {
-                        window.stopAutoRefresh();
-                        return;
-                    }
-                    
-                    // Silently check for new messages
-                    let url = "{{ route('user.inbox.conversation.message', ':id') }}" + `?page=1`;
-                    $.ajax({
-                        url: url.replace(':id', window.conversation_id),
-                        method: 'GET',
-                        data: { status: 0, search: '' },
-                        success: function(response) {
-                            if (response.status == 'success' && response.data.html) {
-                                // Count messages from fresh data
-                                const $freshHTML = $(response.data.html);
-                                const freshMessageCount = $freshHTML.filter('.msg-item').length + $freshHTML.find('.msg-item').length;
-                                
-                                // Initialize on first load
-                                if (window.lastMessageCount === 0) {
-                                    window.lastMessageCount = $messageBody.find('.msg-item').length;
-                                    return;
-                                }
-                                
-                                // New message detected, reload
-                                if (freshMessageCount > window.lastMessageCount) {
-                                    $messageBody.html(response.data.html);
-                                    scrollToBottom($messageBody);
-                                    window.lastMessageCount = freshMessageCount;
-                                    
-                                    // Also refresh conversation list
-                                    window.fetchChatList("", true);
-                                }
-                            }
-                        }
-                    });
-                }, 5000); // Check every 5 seconds
-            };
-            
-            // Start auto-refresh when page loads
-            if (window.conversation_id && window.conversation_id != 0) {
-                window.startAutoRefresh();
-            }
-            
-            // Try Pusher connection (will fail gracefully if not configured)
-            try {
-                pusherConnection('receive-message', "{{ $whatsappAccount->id }}");
-            } catch(e) {
-                console.log('Pusher not available, using polling instead');
-            }
+            pusherConnection('receive-message', "{{ $whatsappAccount->id }}");
 
             $('.chat-media__btn, .chat-media__list').on('click', function() {
                 $('.chat-media__list').toggleClass('show');

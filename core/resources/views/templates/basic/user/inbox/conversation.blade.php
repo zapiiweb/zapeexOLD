@@ -213,15 +213,6 @@
                 $(".chatbox-area__body").removeClass('d-none');
                 window.conversation_id = $(this).data('id');
                 messagePage = 1;
-                
-                // Reset auto-refresh for new conversation
-                if (typeof window.resetMessageCounter === 'function') {
-                    window.lastMessageCount = 0;
-                }
-                if (typeof window.startAutoRefresh === 'function') {
-                    window.startAutoRefresh();
-                }
-                
                 loadMessages();
                 loadContact();
 

@@ -377,7 +377,6 @@ class WebhookController extends Controller
             $fileName = $request->input('fileName');
             $mimetype = $request->input('mimetype');
             $profilePicUrl = $request->input('profilePicUrl');
-            $timestamp = $request->input('timestamp'); // Unix timestamp from Baileys
 
             // Parse phone number using libphonenumber (same as Meta webhook)
             // Remove @s.whatsapp.net if present
@@ -461,11 +460,6 @@ class WebhookController extends Controller
             $messageExists = Message::where('whatsapp_message_id', $messageId)->exists();
 
             if (!$messageExists) {
-                // Convert Unix timestamp to Carbon with correct timezone
-                $messageDateTime = $timestamp 
-                    ? Carbon::createFromTimestamp($timestamp, config('app.timezone'))
-                    : Carbon::now();
-                
                 // Store message
                 $message = new Message();
                 $message->user_id = $user->id;
@@ -480,12 +474,11 @@ class WebhookController extends Controller
                 $message->media_path = $fileName; // Full path with user_id/year/month/day/filename
                 $message->mime_type = $mimetype;
                 $message->media_type = $messageType !== 'text' ? $messageType : null;
-                $message->ordering = $messageDateTime;
-                $message->created_at = $messageDateTime;
+                $message->ordering = Carbon::now();
                 $message->save();
 
                 // Update conversation
-                $conversation->last_message_at = $messageDateTime;
+                $conversation->last_message_at = Carbon::now();
                 $conversation->save();
 
                 // Render views for broadcast
@@ -500,39 +493,22 @@ class WebhookController extends Controller
                     'newContact' => $newContact,
                     'lastMessageHtml' => $lastConversationMessageHtml,
                     'unseenMessage' => $conversation->unseenMessages()->count() < 10 ? $conversation->unseenMessages()->count() : '9+',
-                    'lastMessageAt' => showDateTime($messageDateTime),
+                    'lastMessageAt' => showDateTime(Carbon::now()),
                     'conversationId' => $conversation->id,
                     'mediaPath' => getFilePath('conversation')
                 ]));
             }
 
-            // Handle welcome message, chatbot, and auto-reply
+            // Handle chatbot response
+            $this->chatbotResponse($whatsappAccount, $user, $contact, $conversation, $messageText);
+
+            // Handle welcome message for first message
             $messagesInConversation = Message::where('conversation_id', $conversation->id)
                 ->where('type', Status::MESSAGE_RECEIVED)
                 ->count();
 
-            if ($messagesInConversation == 1 && @$whatsappAccount->welcomeMessage) {
+            if ($messagesInConversation == 1) {
                 $this->sendWelcomeMessage($whatsappAccount, $user, $contact, $conversation);
-            } else {
-                // Only check chatbot if message has text content
-                $matchedChatbot = null;
-                
-                if ($messageText) {
-                    $matchedChatbot = $whatsappAccount->chatbots()
-                        ->where('status', Status::ENABLE)
-                        ->where('keywords', 'like', "%{$messageText}%")
-                        ->first();
-                }
-                
-                if ($matchedChatbot) {
-                    $this->chatbotResponse($whatsappAccount, $user, $contact, $conversation, $matchedChatbot);
-                } else {
-                    // Send auto-reply only for non-first messages with text
-                    if ($messagesInConversation > 1 && $messageText) {
-                        $whatsappLib = new WhatsAppLib();
-                        $whatsappLib->sendAutoReply($user, $conversation, $messageText);
-                    }
-                }
             }
 
             return response()->json(['success' => true]);

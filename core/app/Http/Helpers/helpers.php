@@ -366,7 +366,7 @@ function diffForHumans($date)
     }
     Carbon::setlocale($lang);
 
-    return Carbon::parse($date)->timezone(config('app.timezone'))->diffForHumans();
+    return Carbon::parse($date)->diffForHumans();
 }
 
 function checkSpecialRegex($string)
@@ -392,7 +392,7 @@ function showDateTime($date, $format = null, $lang = null)
     }
 
     Carbon::setlocale($lang);
-    return Carbon::parse($date)->timezone(config('app.timezone'))->translatedFormat($format);
+    return Carbon::parse($date)->translatedFormat($format);
 }
 
 function getDefaultLang()
