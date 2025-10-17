@@ -83,11 +83,27 @@
                     </div>
                 @endif
                 @if (@$message->message_type == Status::DOCUMENT_TYPE_MESSAGE)
+                    @php
+                        $extension = strtolower(pathinfo($message->media_path, PATHINFO_EXTENSION));
+                        $previewImage = 'document_preview.png'; // Padrão
+                        
+                        if ($extension == 'pdf') {
+                            $previewImage = 'document_pdf_preview.png';
+                        } elseif (in_array($extension, ['doc', 'docx'])) {
+                            $previewImage = 'document_doc_preview.png';
+                        } elseif (in_array($extension, ['xls', 'xlsx'])) {
+                            $previewImage = 'document_xls_preview.png';
+                        } elseif (in_array($extension, ['ppt', 'pptx'])) {
+                            $previewImage = 'document_ppt_preview.png';
+                        } elseif (in_array($extension, ['zip', 'rar'])) {
+                            $previewImage = 'document_zip_preview.png';
+                        }
+                    @endphp
                     <div class="text-dark d-flex justify-content-between flex-column">
                         <a href="{{ asset('assets/media/conversation/' . $message->media_path) }}"
                             class="text--primary download-document"
                             download="{{ @$message->media_filename ?? 'document' }}">
-                            <img class="message-image" src="{{ asset('assets/images/document_preview.png') }}"
+                            <img class="message-image" src="{{ asset('assets/images/' . $previewImage) }}"
                                 alt="image">
                         </a>
                         {{ @$message->media_filename ?? 'Document' }}
