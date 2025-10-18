@@ -12,4 +12,5 @@
 [x] 12. Fix inbox WhatsApp account selector to display selected number correctly
 [x] 13. Implement date separators in chat messages (Hoje, Ontem, day names)
 [x] 14. Fix media messages (images, documents, videos, audios) not displaying in chat when received via Meta API
-[x] 15. Import completed successfully - Both services running properly
+[x] 15. Create symbolic links for assets directories (images, global, templates, admin) to fix document preview icons
+[x] 16. Import completed successfully - Both services running properly
