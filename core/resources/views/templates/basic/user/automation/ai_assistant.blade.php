@@ -79,8 +79,9 @@
                                     </span>
                                 </label>
                                 <div class="form--switch">
+                                    <input type="hidden" name="auto_reactivate_ai" value="0">
                                     <input class="form-check-input" type="checkbox" role="switch" name="auto_reactivate_ai"
-                                        id="auto-reactivate-ai-switch" @checked(@$aiSetting->auto_reactivate_ai) />
+                                        id="auto-reactivate-ai-switch" value="1" @checked(@$aiSetting->auto_reactivate_ai) />
                                 </div>
                             </div>
                             
