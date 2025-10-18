@@ -110,9 +110,14 @@ class WhatsAppLib
 
         if ($request->hasFile('image')) {
             $file          = $request->file('image');
+            $mimeType      = mime_content_type($file->getPathname());
+            
+            // Upload to Meta API first
             $mediaUpload   = $this->uploadMedia($mediaLink, $file, $accessToken);
-
             $mediaId       = $mediaUpload['id'];
+            
+            // Store media locally after uploading
+            $mediaPath     = $this->storeMediaFile($file, $whatsappAccount->user_id);
             $mediaCaption  = $request->message;
             $data['type']  = 'image';
             $data['image'] = [
@@ -120,13 +125,18 @@ class WhatsAppLib
                 'caption' => $mediaCaption
             ];
             $mediaType     = 'image';
-            $mimeType      = mime_content_type($file->getPathname());
         } else if ($request->hasFile('document')) {
             $file             = $request->file('document');
+            $mimeType         = mime_content_type($file->getPathname());
+            $mediaFileName    = $file->getClientOriginalName();
+            
+            // Upload to Meta API first
             $mediaUpload      = $this->uploadMedia($mediaLink, $file, $accessToken);
             $mediaId          = $mediaUpload['id'];
+            
+            // Store media locally after uploading
+            $mediaPath        = $this->storeMediaFile($file, $whatsappAccount->user_id);
             $mediaCaption     = $request->message;
-            $mediaFileName    = $request->file('document')->getClientOriginalName();
             $data['type']     = 'document';
             $data['document'] = [
                 'id'       => $mediaId,
@@ -134,11 +144,16 @@ class WhatsAppLib
                 'filename' => $mediaFileName
             ];
             $mediaType        = 'document';
-            $mimeType         = mime_content_type($file->getPathname());
         } else if ($request->hasFile('video')) {
             $file          = $request->file('video');
+            $mimeType      = mime_content_type($file->getPathname());
+            
+            // Upload to Meta API first
             $mediaUpload   = $this->uploadMedia($mediaLink, $file, $accessToken);
             $mediaId       = $mediaUpload['id'];
+            
+            // Store media locally after uploading
+            $mediaPath     = $this->storeMediaFile($file, $whatsappAccount->user_id);
             $mediaCaption  = $request->message;
             $data['type']  = 'video';
             $data['video'] = [
@@ -146,18 +161,22 @@ class WhatsAppLib
                 'caption' => $mediaCaption
             ];
             $mediaType     = 'video';
-            $mimeType      = mime_content_type($file->getPathname());
         } else if ($request->hasFile('audio')) {
             $file          = $request->file('audio');
+            $mimeType      = mime_content_type($file->getPathname());
+            
+            // Upload to Meta API first
             $mediaUpload   = $this->uploadMedia($mediaLink, $file, $accessToken);
             $mediaId       = $mediaUpload['id'];
+            
+            // Store media locally after uploading
+            $mediaPath     = $this->storeMediaFile($file, $whatsappAccount->user_id);
             $mediaCaption  = $request->message;
             $data['type']  = 'audio';
             $data['audio'] = [
                 'id'      => $mediaId
             ];
             $mediaType     = 'audio';
-            $mimeType      = mime_content_type($file->getPathname());
         } else {
             $data['type'] = 'text';
             $data['text'] = [
@@ -171,9 +190,6 @@ class WhatsAppLib
                 $mediaUrl = $this->getMediaUrl($mediaId, $accessToken)['url'];
             }
 
-            if ($mediaId && $mediaUrl && ($request->hasFile('image') || $request->hasFile('audio'))) {
-                $mediaPath = $this->storedMediaToLocal($mediaUrl, $mediaId, $accessToken, $whatsappAccount->user_id);
-            }
             $response = Http::withHeaders([
                 'Authorization' => "Bearer {$accessToken}"
             ])->post($url, $data);

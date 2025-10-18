@@ -13,4 +13,5 @@
 [x] 13. Implement date separators in chat messages (Hoje, Ontem, day names)
 [x] 14. Fix media messages (images, documents, videos, audios) not displaying in chat when received via Meta API
 [x] 15. Create symbolic links for assets directories (images, global, templates, admin) to fix document preview icons
-[x] 16. Import completed successfully - Both services running properly
+[x] 16. Fix Meta API messageSend to save media files locally when sending (images, documents, videos, audios)
+[x] 17. Import completed successfully - Both services running properly
