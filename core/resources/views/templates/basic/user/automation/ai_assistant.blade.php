@@ -362,11 +362,22 @@ Note: if the question/query is out of the box e-commerce, then please respond em
                 // Controle do campo de reativação
                 function toggleReactivateDelayField() {
                     var isChecked = $('#auto-reactivate-switch').is(':checked');
+                    var delayInput = $('#reactivate-delay-input');
+                    
+                    console.log('Toggle called. Switch checked:', isChecked);
                     
                     if (isChecked) {
-                        $('#reactivate-delay-input').prop('disabled', false);
+                        delayInput.prop('disabled', false);
+                        delayInput.prop('readonly', false);
+                        delayInput.css('opacity', '1');
+                        delayInput.css('cursor', 'text');
+                        console.log('Field enabled');
                     } else {
-                        $('#reactivate-delay-input').prop('disabled', true);
+                        delayInput.prop('disabled', true);
+                        delayInput.prop('readonly', true);
+                        delayInput.css('opacity', '0.6');
+                        delayInput.css('cursor', 'not-allowed');
+                        console.log('Field disabled');
                     }
                 }
 
