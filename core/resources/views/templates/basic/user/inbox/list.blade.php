@@ -45,6 +45,60 @@
             const $messageForm = $('#message-form');
             let isSubmitting = false;
 
+            // Função para obter o separador de data em português
+            function getDateSeparator(dateString) {
+                const messageDate = new Date(dateString);
+                const today = new Date();
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+
+                // Comparar apenas as datas, ignorando as horas
+                const isToday = messageDate.toDateString() === today.toDateString();
+                const isYesterday = messageDate.toDateString() === yesterday.toDateString();
+
+                if (isToday) {
+                    return 'Hoje';
+                } else if (isYesterday) {
+                    return 'Ontem';
+                } else {
+                    // Verificar se está na semana atual
+                    const weekStart = new Date(today);
+                    weekStart.setDate(today.getDate() - today.getDay()); // Domingo da semana atual
+                    
+                    if (messageDate >= weekStart && messageDate < today) {
+                        const diasSemana = ['Domingo', 'Segunda-Feira', 'Terça-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira', 'Sábado'];
+                        return diasSemana[messageDate.getDay()];
+                    } else {
+                        // Para datas mais antigas, mostrar data completa
+                        const dia = String(messageDate.getDate()).padStart(2, '0');
+                        const mes = String(messageDate.getMonth() + 1).padStart(2, '0');
+                        const ano = messageDate.getFullYear();
+                        return `${dia}/${mes}/${ano}`;
+                    }
+                }
+            }
+
+            // Função para verificar se precisa inserir separador de data
+            function checkAndInsertDateSeparator(newMessageHtml) {
+                const $tempDiv = $('<div>').html(newMessageHtml);
+                const $newMessage = $tempDiv.find('.single-message').first();
+                
+                if ($newMessage.length === 0) return newMessageHtml;
+
+                // Extrair data da nova mensagem do atributo data-message-id ou da mensagem
+                const messageTimeText = $newMessage.find('.message-time').first().text().trim();
+                const lastMessage = $messageBody.find('.single-message').last();
+                
+                if (lastMessage.length === 0) {
+                    // Primeira mensagem, não precisa de separador
+                    return newMessageHtml;
+                }
+
+                // Comparar datas (simplificado - assumindo que a data está disponível)
+                // Como não temos a data completa facilmente acessível, vamos deixar o servidor cuidar disso
+                return newMessageHtml;
+            }
+
 
             $messageForm.on('submit', function(e) {
                 e.preventDefault();
@@ -647,6 +701,47 @@
             }
         }
 
+        /* Date Separator Styles */
+        .date-separator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .date-separator::before,
+        .date-separator::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #d1d5db 50%, transparent);
+        }
+
+        .date-separator__text {
+            padding: 5px 15px;
+            background-color: #e5e7eb;
+            color: #6b7280;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0 10px;
+            white-space: nowrap;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        @media screen and (max-width: 575px) {
+            .date-separator {
+                margin: 15px 0;
+            }
+
+            .date-separator__text {
+                font-size: 11px;
+                padding: 4px 12px;
+            }
+        }
     
     </style>
 @endpush
