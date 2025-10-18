@@ -93,7 +93,8 @@
                                 </label>
                                 <input type="number" name="reactivate_delay_minutes" id="reactivate-delay-input" class="form--control form-two" min="0"
                                     placeholder="@lang('Deixe vazio para reativar imediatamente')"
-                                    value="{{ old('reactivate_delay_minutes', @$aiSetting->reactivate_delay_minutes) }}">
+                                    value="{{ old('reactivate_delay_minutes', @$aiSetting->reactivate_delay_minutes) }}"
+                                    @if(!old('auto_reactivate_after_fallback', @$aiSetting->auto_reactivate_after_fallback)) disabled @endif>
                             </div>
                             
                             <div class="form-group">
@@ -362,22 +363,11 @@ Note: if the question/query is out of the box e-commerce, then please respond em
                 // Controle do campo de reativação
                 function toggleReactivateDelayField() {
                     var isChecked = $('#auto-reactivate-switch').is(':checked');
-                    var delayInput = $('#reactivate-delay-input');
-                    
-                    console.log('Toggle called. Switch checked:', isChecked);
                     
                     if (isChecked) {
-                        delayInput.prop('disabled', false);
-                        delayInput.prop('readonly', false);
-                        delayInput.css('opacity', '1');
-                        delayInput.css('cursor', 'text');
-                        console.log('Field enabled');
+                        $('#reactivate-delay-input').prop('disabled', false);
                     } else {
-                        delayInput.prop('disabled', true);
-                        delayInput.prop('readonly', true);
-                        delayInput.css('opacity', '0.6');
-                        delayInput.css('cursor', 'not-allowed');
-                        console.log('Field disabled');
+                        $('#reactivate-delay-input').prop('disabled', true);
                     }
                 }
 
