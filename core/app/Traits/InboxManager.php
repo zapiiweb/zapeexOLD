@@ -350,15 +350,6 @@ trait InboxManager
             $message->ordering            = Carbon::now()->format('Y-m-d H:i:s.u');
             $message->save();
 
-            // Se um agente humano respondeu, reativa as respostas automáticas da IA
-            if ($conversation->needs_human_reply == Status::YES) {
-                \Log::info('InboxManager - Agente respondeu, reativando IA', [
-                    'conversation_id' => $conversation->id,
-                    'agent_id' => $agentId
-                ]);
-                $conversation->needs_human_reply = Status::NO;
-            }
-
             $conversation->last_message_at = Carbon::now();
             $conversation->save();
 
