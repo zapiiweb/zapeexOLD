@@ -966,18 +966,22 @@ button .spinner-border {
     }
 }
 
-/* Adjust main content when sidebar is collapsed */
-body.sidebar-collapsed .dashboard-container {
-    margin-left: 80px;
+/* Adjust main content area when sidebar is collapsed */
+.dashboard__right {
+    transition: padding-left 0.3s ease;
+}
+
+body.sidebar-collapsed .dashboard__right {
+    padding-left: 80px !important;
 }
 
 @media (max-width: 991px) {
     .sidebar-collapse-btn {
-        display: none;
+        display: none !important;
     }
     
-    body.sidebar-collapsed .dashboard-container {
-        margin-left: 0;
+    body.sidebar-collapsed .dashboard__right {
+        padding-left: 0 !important;
     }
 }
 /* ==================== Sidebar Collapse Styles End ==================== */
