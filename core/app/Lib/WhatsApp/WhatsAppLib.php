@@ -112,24 +112,12 @@ class WhatsAppLib
             $file          = $request->file('image');
             $mimeType      = mime_content_type($file->getPathname());
             
-            // Convert WEBP to PNG if needed (Meta API doesn't support WEBP for regular images)
-            $fileToUpload  = $this->convertWebpToPng($file);
-            $wasConverted  = ($fileToUpload !== $file);
+            // Upload to Meta API first
+            $mediaUpload   = $this->uploadMedia($mediaLink, $file, $accessToken);
+            $mediaId       = $mediaUpload['id'];
             
-            try {
-                // Upload to Meta API first
-                $mediaUpload   = $this->uploadMedia($mediaLink, $fileToUpload, $accessToken);
-                $mediaId       = $mediaUpload['id'];
-                
-                // Store original file locally after uploading
-                $mediaPath     = $this->storeMediaFile($file, $whatsappAccount->user_id);
-            } finally {
-                // Clean up temporary converted file if it was created
-                if ($wasConverted && file_exists($fileToUpload->getPathname())) {
-                    @unlink($fileToUpload->getPathname());
-                }
-            }
-            
+            // Store media locally after uploading
+            $mediaPath     = $this->storeMediaFile($file, $whatsappAccount->user_id);
             $mediaCaption  = $request->message;
             $data['type']  = 'image';
             $data['image'] = [
@@ -305,57 +293,6 @@ class WhatsAppLib
             ];
         } catch (Exception $ex) {
             throw new Exception($ex->getMessage());
-        }
-    }
-
-    /**
-     * Convert WEBP to PNG for Meta API compatibility
-     * Meta WhatsApp Business API only supports JPEG and PNG for regular images
-     */
-    private function convertWebpToPng($file)
-    {
-        try {
-            $mimeType = mime_content_type($file->getPathname());
-            
-            // Only convert if it's a WEBP file
-            if ($mimeType !== 'image/webp') {
-                return $file;
-            }
-
-            // Use GD library to convert WEBP to PNG
-            $image = imagecreatefromwebp($file->getPathname());
-            
-            if ($image === false) {
-                \Log::error('WEBP conversion failed: Could not create image from WEBP');
-                return $file;
-            }
-            
-            // Create a temporary PNG file
-            $tempPath = sys_get_temp_dir() . '/' . uniqid() . '_converted.png';
-            
-            // Save as PNG with full quality
-            imagepng($image, $tempPath, 0); // 0 = no compression (best quality)
-            imagedestroy($image);
-            
-            // Create a new UploadedFile instance with the converted file
-            $convertedFile = new \Illuminate\Http\UploadedFile(
-                $tempPath,
-                pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.png',
-                'image/png',
-                null,
-                true
-            );
-            
-            \Log::info('WEBP converted to PNG successfully', [
-                'original' => $file->getClientOriginalName(),
-                'converted' => $convertedFile->getClientOriginalName()
-            ]);
-            
-            return $convertedFile;
-        } catch (\Exception $e) {
-            // If conversion fails, return original file
-            \Log::error('WEBP conversion failed: ' . $e->getMessage());
-            return $file;
         }
     }
 
