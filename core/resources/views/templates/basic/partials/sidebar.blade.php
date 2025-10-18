@@ -3,7 +3,7 @@
         <span class="sidebar-menu__close d-lg-none d-block">
             <i class="fas fa-times"></i>
         </span>
-        <a href="javascript:void(0)" class="sidebar-collapse-btn d-none d-lg-flex" title="Colapsar Menu">
+        <a href="javascript:void(0)" class="sidebar-collapse-btn d-none d-lg-flex" title="Ocultar Menu">
             <i class="fas fa-chevron-left"></i>
         </a>
         <div class="sidebar-logo">

@@ -355,6 +355,9 @@
     if (localStorage.getItem('sidebar-collapsed') === 'true') {
         $('.sidebar-menu').addClass('collapsed');
         $('body').addClass('sidebar-collapsed');
+        $('.sidebar-collapse-btn').attr('title', 'Exibir Menu');
+    } else {
+        $('.sidebar-collapse-btn').attr('title', 'Ocultar Menu');
     }
     
     // Toggle sidebar collapse
@@ -366,18 +369,14 @@
         // Save state to localStorage
         const isCollapsed = $('.sidebar-menu').hasClass('collapsed');
         localStorage.setItem('sidebar-collapsed', isCollapsed);
-    });
-    
-    // On large screens, allow hover to show full menu when collapsed
-    if ($(window).width() > 991) {
-        $('.sidebar-menu.collapsed').on('mouseenter', function() {
-            $(this).addClass('hover-expanded');
-        });
         
-        $('.sidebar-menu.collapsed').on('mouseleave', function() {
-            $(this).removeClass('hover-expanded');
-        });
-    }
+        // Update button title
+        if (isCollapsed) {
+            $(this).attr('title', 'Exibir Menu');
+        } else {
+            $(this).attr('title', 'Ocultar Menu');
+        }
+    });
     // ==================== Sidebar Collapse Js End ==================
 
 })(jQuery);
