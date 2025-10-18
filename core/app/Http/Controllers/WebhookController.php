@@ -213,12 +213,18 @@ class WebhookController extends Controller
                 if ($mediaId) {
                     $accessToken = $whatsappAccount->access_token;
                     try {
+                        \Log::info('Meta API webhook: Downloading media', [
+                            'mediaId' => $mediaId,
+                            'mediaType' => $mediaType,
+                            'mimetype' => $mediaMimeType
+                        ]);
+                        
                         $mediaUrl = $whatsappLib->getMediaUrl($mediaId, $accessToken);
 
-                        if ($mediaUrl) {
+                        if ($mediaUrl && isset($mediaUrl['url'])) {
                             // Download and store all media types: image, document, video, audio
                             $mediaPath           = $whatsappLib->storedMediaToLocal($mediaUrl['url'], $mediaId, $accessToken, $user->id);
-                            $message->media_url  = $mediaUrl;
+                            $message->media_url  = json_encode($mediaUrl);
                             $message->media_path = $mediaPath;
                             
                             // Set filename for documents
@@ -227,9 +233,19 @@ class WebhookController extends Controller
                             }
 
                             $message->save();
+                            
+                            \Log::info('Meta API webhook: Media downloaded successfully', [
+                                'mediaPath' => $mediaPath,
+                                'filename' => $message->media_filename
+                            ]);
                         }
                     } catch (Exception $ex) {
-                        \Log::error('Error downloading media from Meta API: ' . $ex->getMessage());
+                        \Log::error('Error downloading media from Meta API', [
+                            'mediaId' => $mediaId,
+                            'mediaType' => $mediaType,
+                            'error' => $ex->getMessage(),
+                            'trace' => $ex->getTraceAsString()
+                        ]);
                     }
                 }
 
