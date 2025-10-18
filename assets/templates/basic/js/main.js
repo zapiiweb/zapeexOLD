@@ -374,10 +374,16 @@
     $(document).on('click', '.sidebar-collapse-btn', function(e) {
         e.preventDefault();
         
-        // Hide tooltip before making changes
+        var $btn = $(this);
+        
+        // Hide and dispose tooltip immediately
         if (tooltipInstance) {
             tooltipInstance.hide();
+            tooltipInstance.dispose();
         }
+        
+        // Remove focus from button to prevent tooltip from showing
+        $btn.blur();
         
         $('.sidebar-menu').toggleClass('collapsed');
         $('body').toggleClass('sidebar-collapsed');
@@ -388,13 +394,12 @@
         
         // Update tooltip text
         var newTitle = isCollapsed ? 'Exibir Menu' : 'Ocultar Menu';
-        $(this).attr('data-bs-title', newTitle);
+        $btn.attr('data-bs-title', newTitle);
         
-        // Recreate tooltip with new title
-        if (tooltipInstance) {
-            tooltipInstance.dispose();
-            tooltipInstance = new bootstrap.Tooltip(this);
-        }
+        // Recreate tooltip with new title after a short delay
+        setTimeout(function() {
+            tooltipInstance = new bootstrap.Tooltip($btn[0]);
+        }, 100);
     });
     // ==================== Sidebar Collapse Js End ==================
 
