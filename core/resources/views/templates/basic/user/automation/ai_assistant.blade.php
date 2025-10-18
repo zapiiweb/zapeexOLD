@@ -342,40 +342,40 @@ Note: if the question/query is out of the box e-commerce, then please respond em
     <script>
         "use strict";
         (function($) {
-            $('.system-prompt-btn').on('click', function() {
-                $('#systemPromptModal').modal('show');
-            });
+            $(document).ready(function() {
+                $('.system-prompt-btn').on('click', function() {
+                    $('#systemPromptModal').modal('show');
+                });
 
+                $('.copy-button').on('click', function() {
+                    var textarea = $(this).closest('.prompt-content').find('textarea')[0];
+                    textarea.select();
+                    textarea.setSelectionRange(0, 99999);
+                    document.execCommand("copy");
+                    textarea.blur();
 
-            $('.copy-button').on('click', function() {
-                var textarea = $(this).closest('.prompt-content').find('textarea')[0];
-                textarea.select();
-                textarea.setSelectionRange(0, 99999);
-                document.execCommand("copy");
-                textarea.blur();
+                    $(this).removeClass('las la-copy').addClass('las la-check-double');
+                    notify('success', "@lang('Copied to clipboard')");
+                    setTimeout(() => $(this).removeClass('las la-check-double').addClass('las la-copy'), 1500);
+                });
 
-                $(this).removeClass('las la-copy').addClass('las la-check-double');
-                notify('success', "@lang('Copied to clipboard')");
-                setTimeout(() => $(this).removeClass('las la-check-double').addClass('las la-copy'), 1500);
-            });
-
-            // Controle do campo de reativação
-            function toggleReactivateDelayField() {
-                if ($('#auto-reactivate-switch').is(':checked')) {
-                    $('#reactivate-delay-group').slideDown();
-                } else {
-                    $('#reactivate-delay-group').slideUp();
+                // Controle do campo de reativação
+                function toggleReactivateDelayField() {
+                    if ($('#auto-reactivate-switch').is(':checked')) {
+                        $('#reactivate-delay-group').show();
+                    } else {
+                        $('#reactivate-delay-group').hide();
+                    }
                 }
-            }
 
-            // Executar ao carregar a página
-            toggleReactivateDelayField();
-
-            // Executar ao mudar o switch
-            $('#auto-reactivate-switch').on('change', function() {
+                // Executar ao carregar a página
                 toggleReactivateDelayField();
-            });
 
+                // Executar ao mudar o switch
+                $('#auto-reactivate-switch').on('change', function() {
+                    toggleReactivateDelayField();
+                });
+            });
         })(jQuery);
     </script>
 @endpush
