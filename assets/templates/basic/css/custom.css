@@ -976,7 +976,7 @@ button .spinner-border {
     }
     
     .sidebar-menu.collapsed.hover-expanded .has-dropdown > a::after {
-        display: block;
+        display: block !important;
     }
 }
 
