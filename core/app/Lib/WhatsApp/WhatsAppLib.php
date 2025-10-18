@@ -587,6 +587,43 @@ class WhatsAppLib
             'has_contact' => !is_null($contact),
             'needs_human_reply' => $conversation->needs_human_reply
         ]);
+        
+        // Verificar se deve reativar IA automaticamente após delay
+        if ($conversation->needs_human_reply == Status::YES && $userAiSetting->auto_reactivate_ai) {
+            // Se não há delay ou delay é 0, reativa imediatamente
+            if (!$userAiSetting->reactivation_delay_minutes || $userAiSetting->reactivation_delay_minutes == 0) {
+                $conversation->needs_human_reply = Status::NO;
+                $conversation->save();
+                \Log::info('sendAutoReply - IA reativada automaticamente (sem delay)', [
+                    'conversation_id' => $conversation->id
+                ]);
+            }
+            // Se há delay configurado e > 0, verifica se já passou o tempo
+            else if ($userAiSetting->reactivation_delay_minutes > 0) {
+                // Busca a última mensagem de fallback (ai_reply = 1)
+                $lastAiMessage = Message::where('conversation_id', $conversation->id)
+                    ->where('ai_reply', Status::YES)
+                    ->where('type', Status::MESSAGE_SENT)
+                    ->latest('id')
+                    ->first();
+                
+                if ($lastAiMessage) {
+                    $minutesSinceFallback = $lastAiMessage->created_at->diffInMinutes(Carbon::now());
+                    
+                    // Se já passou o tempo configurado, reativa a IA
+                    if ($minutesSinceFallback >= $userAiSetting->reactivation_delay_minutes) {
+                        $conversation->needs_human_reply = Status::NO;
+                        $conversation->save();
+                        \Log::info('sendAutoReply - IA reativada automaticamente após delay', [
+                            'conversation_id' => $conversation->id,
+                            'delay_minutes' => $userAiSetting->reactivation_delay_minutes,
+                            'minutes_passed' => $minutesSinceFallback
+                        ]);
+                    }
+                }
+            }
+        }
+        
         if($userAiSetting->status == Status::DISABLE || !$contact || $conversation->needs_human_reply == Status::YES) return;
 
         $provider = [

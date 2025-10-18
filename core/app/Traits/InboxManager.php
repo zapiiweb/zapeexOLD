@@ -352,6 +352,48 @@ trait InboxManager
 
             $conversation->last_message_at = Carbon::now();
             $conversation->save();
+            
+            // Reativar IA automaticamente após mensagem manual (se configurado)
+            if ($conversation->needs_human_reply == Status::YES && $user->aiSetting) {
+                $aiSetting = $user->aiSetting;
+                
+                // Se a reativação automática está habilitada
+                if ($aiSetting->auto_reactivate_ai) {
+                    // Se não há delay ou delay é 0, reativa imediatamente
+                    if (!$aiSetting->reactivation_delay_minutes || $aiSetting->reactivation_delay_minutes == 0) {
+                        $conversation->needs_human_reply = Status::NO;
+                        $conversation->save();
+                        \Log::info('AI reativada imediatamente após resposta manual', [
+                            'conversation_id' => $conversation->id,
+                            'user_id' => $user->id
+                        ]);
+                    }
+                    // Se há delay configurado, verificamos se já passou o tempo
+                    else {
+                        // Busca a última mensagem de fallback (ai_reply = 1)
+                        $lastAiMessage = Message::where('conversation_id', $conversation->id)
+                            ->where('ai_reply', Status::YES)
+                            ->where('type', Status::MESSAGE_SENT)
+                            ->latest('id')
+                            ->first();
+                        
+                        if ($lastAiMessage) {
+                            $minutesSinceFallback = $lastAiMessage->created_at->diffInMinutes(Carbon::now());
+                            
+                            if ($minutesSinceFallback >= $aiSetting->reactivation_delay_minutes) {
+                                $conversation->needs_human_reply = Status::NO;
+                                $conversation->save();
+                                \Log::info('AI reativada após tempo de delay', [
+                                    'conversation_id' => $conversation->id,
+                                    'user_id' => $user->id,
+                                    'delay_minutes' => $aiSetting->reactivation_delay_minutes,
+                                    'minutes_passed' => $minutesSinceFallback
+                                ]);
+                            }
+                        }
+                    }
+                }
+            }
 
             $notify[] =  "Message sent successfully";
 
