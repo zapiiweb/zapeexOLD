@@ -84,16 +84,17 @@
                                 </div>
                             </div>
                             
-                            <div class="form-group" id="reactivation-delay-group" style="display: none;">
+                            <div class="form-group">
                                 <label>
                                     @lang('Tempo para Reativação (minutos)')
-                                    <span data-bs-toggle="tooltip" data-bs-placement="top" title="@lang('Tempo em minutos para reativar as respostas automáticas de IA. Deixe vazio para reativar imediatamente após uma resposta manual.')">
+                                    <span data-bs-toggle="tooltip" data-bs-placement="top" title="@lang('Tempo em minutos para reativar as respostas automáticas de IA. Deixe vazio ou 0 para reativar imediatamente após uma resposta manual.')">
                                         <i class="fas fa-info-circle"></i>
                                     </span>
                                 </label>
-                                <input type="number" name="reactivation_delay_minutes" class="form--control form-two" min="0"
+                                <input type="number" name="reactivation_delay_minutes" id="reactivation-delay-input" class="form--control form-two" min="0"
                                     value="{{ old('reactivation_delay_minutes', @$aiSetting->reactivation_delay_minutes) }}" 
-                                    placeholder="@lang('Deixe vazio para reativação imediata')">
+                                    placeholder="@lang('Deixe vazio ou 0 para reativação imediata')"
+                                    @if(!@$aiSetting->auto_reactivate_ai) disabled @endif>
                             </div>
                             
                             <div class="form-group">
@@ -362,9 +363,9 @@ Note: if the question/query is out of the box e-commerce, then please respond em
             // Toggle reactivation delay field based on auto reactivate switch
             function toggleReactivationDelay() {
                 if ($('#auto-reactivate-ai-switch').is(':checked')) {
-                    $('#reactivation-delay-group').slideDown();
+                    $('#reactivation-delay-input').prop('disabled', false);
                 } else {
-                    $('#reactivation-delay-group').slideUp();
+                    $('#reactivation-delay-input').prop('disabled', true);
                 }
             }
             
