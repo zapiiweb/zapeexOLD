@@ -15,6 +15,7 @@ class WhatsappAccount extends Model
     protected $casts = [
         'baileys_connected' => 'boolean',
         'baileys_connected_at' => 'datetime',
+        'connection_type' => 'integer',
     ];
 
     public function user()

@@ -7,6 +7,7 @@ OvoWpp is a comprehensive cross-platform SaaS-based WhatsApp CRM and marketing s
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Primary Language: Portuguese (pt-BR) for user-facing messages and error handling.
 
 ## System Architecture
 
@@ -30,7 +31,13 @@ Preferred communication style: Simple, everyday language.
 - **WhatsApp Integration**:
     - **Meta WhatsApp Business API**: Official API for business messaging with synchronous message delivery.
     - **Baileys (@whiskeysockets/baileys)**: Node.js service for direct WhatsApp Web connection, QR code authentication, session management, and webhook handling with asynchronous job-based delivery.
-    - **Unified Flow**: Both integrations utilize a common database schema and message processing logic with automatic switching based on account connection status.
+    - **Connection Type Selection**: Users explicitly choose their preferred connection method via UI toggle:
+        - `connection_type` field in `whatsapp_accounts` table (1=Meta API, 2=Baileys, default=1)
+        - UI toggle in WhatsApp Account settings page syncs with database via AJAX
+        - Message sending logic validates connection status based on user's selected type
+    - **Error Handling**: Context-aware error messages:
+        - Meta API (connection_type=1): "Token de acesso da Meta API está expirado ou inválido" when token issues occur
+        - Baileys (connection_type=2): "WhatsApp está desconectado. Por favor, reconecte sua conta" when not connected
     - **Message Status Tracking**: 
         - Baileys: Messages saved with `job_id` and Status::SCHEDULED, updated to Status::SENT via webhook when delivery confirms.
         - Meta API: Messages saved with `whatsapp_message_id` and Status::SENT immediately upon synchronous response.
