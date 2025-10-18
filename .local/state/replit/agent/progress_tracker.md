@@ -8,4 +8,5 @@
 [x] 8. Restart both workflows and verify they are running
 [x] 9. Fix WhatsApp Account settings page - restore Meta API credentials form
 [x] 10. Create toggle switch to alternate between Meta API and Baileys configuration
-[x] 11. Import completed successfully - Both services running properly
+[x] 11. Apply same card layout with header to Meta API section
+[x] 12. Import completed successfully - Both services running properly
