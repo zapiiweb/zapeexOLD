@@ -865,3 +865,119 @@ button .spinner-border {
     background-color: hsl(var(--danger)) !important;
     color: hsl(var(--white)) !important;
 }
+
+/* ==================== Sidebar Collapse Styles Start ==================== */
+.sidebar-collapse-btn {
+    position: absolute;
+    top: 20px;
+    right: -15px;
+    width: 30px;
+    height: 30px;
+    background: hsl(var(--base));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar-collapse-btn:hover {
+    background: hsl(var(--base) / 0.9);
+    transform: scale(1.1);
+}
+
+.sidebar-collapse-btn i {
+    color: #fff;
+    font-size: 14px;
+    transition: transform 0.3s ease;
+}
+
+.sidebar-menu.collapsed .sidebar-collapse-btn i {
+    transform: rotate(180deg);
+}
+
+/* Collapsed sidebar styles */
+.sidebar-menu {
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.sidebar-menu.collapsed {
+    width: 80px !important;
+}
+
+.sidebar-menu.collapsed .sidebar-logo img {
+    width: 40px;
+    margin: 0 auto;
+    display: block;
+}
+
+.sidebar-menu.collapsed .sidebar-menu-list__link .text,
+.sidebar-menu.collapsed .sidebar-menu-list__title,
+.sidebar-menu.collapsed .sidebar-submenu {
+    display: none;
+}
+
+.sidebar-menu.collapsed .sidebar-menu-list__link {
+    justify-content: center;
+    padding: 12px 10px;
+}
+
+.sidebar-menu.collapsed .sidebar-menu-list__link .icon {
+    margin-right: 0;
+    font-size: 20px;
+}
+
+.sidebar-menu.collapsed .has-dropdown > a::after {
+    display: none;
+}
+
+/* Hover expansion on large screens */
+@media (min-width: 992px) {
+    .sidebar-menu.collapsed.hover-expanded {
+        width: 280px !important;
+    }
+    
+    .sidebar-menu.collapsed.hover-expanded .sidebar-logo img {
+        width: auto;
+    }
+    
+    .sidebar-menu.collapsed.hover-expanded .sidebar-menu-list__link .text,
+    .sidebar-menu.collapsed.hover-expanded .sidebar-menu-list__title,
+    .sidebar-menu.collapsed.hover-expanded .sidebar-submenu {
+        display: block;
+    }
+    
+    .sidebar-menu.collapsed.hover-expanded .sidebar-menu-list__link {
+        justify-content: flex-start;
+        padding: 12px 20px;
+    }
+    
+    .sidebar-menu.collapsed.hover-expanded .sidebar-menu-list__link .icon {
+        margin-right: 15px;
+        font-size: inherit;
+    }
+    
+    .sidebar-menu.collapsed.hover-expanded .has-dropdown > a::after {
+        display: block;
+    }
+}
+
+/* Adjust main content when sidebar is collapsed */
+body.sidebar-collapsed .dashboard-container {
+    margin-left: 80px;
+}
+
+@media (max-width: 991px) {
+    .sidebar-collapse-btn {
+        display: none;
+    }
+    
+    body.sidebar-collapsed .dashboard-container {
+        margin-left: 0;
+    }
+}
+/* ==================== Sidebar Collapse Styles End ==================== */
