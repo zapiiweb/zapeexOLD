@@ -322,12 +322,20 @@ class WhatsAppLib
                 return $file;
             }
 
-            // Use Intervention Image to convert WEBP to PNG
-            $image = \Intervention\Image\Facades\Image::make($file->getPathname());
+            // Use GD library to convert WEBP to PNG
+            $image = imagecreatefromwebp($file->getPathname());
+            
+            if ($image === false) {
+                \Log::error('WEBP conversion failed: Could not create image from WEBP');
+                return $file;
+            }
             
             // Create a temporary PNG file
             $tempPath = sys_get_temp_dir() . '/' . uniqid() . '_converted.png';
-            $image->save($tempPath, 100, 'png');
+            
+            // Save as PNG with full quality
+            imagepng($image, $tempPath, 0); // 0 = no compression (best quality)
+            imagedestroy($image);
             
             // Create a new UploadedFile instance with the converted file
             $convertedFile = new \Illuminate\Http\UploadedFile(
@@ -337,6 +345,11 @@ class WhatsAppLib
                 null,
                 true
             );
+            
+            \Log::info('WEBP converted to PNG successfully', [
+                'original' => $file->getClientOriginalName(),
+                'converted' => $convertedFile->getClientOriginalName()
+            ]);
             
             return $convertedFile;
         } catch (\Exception $e) {
