@@ -15,4 +15,5 @@
 [x] 15. Create symbolic links for assets directories (images, global, templates, admin) to fix document preview icons
 [x] 16. Fix Meta API messageSend to save media files locally when sending (images, documents, videos, audios)
 [x] 17. Implement intelligent fallback detection for AI assistant when it doesn't know the answer
-[x] 18. Import completed successfully - Both services running properly
+[x] 18. Implement configurable AI auto-reactivation after fallback with delay option
+[x] 19. Import completed successfully - Both services running properly

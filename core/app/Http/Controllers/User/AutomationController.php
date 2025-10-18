@@ -204,9 +204,10 @@ class AutomationController extends Controller
         }
 
         $request->validate([
-            'max_length'        => 'required|integer|gte:0',
-            'system_prompt'     => 'required|string',
-            'fallback_response' => 'nullable|string',
+            'max_length'                      => 'required|integer|gte:0',
+            'system_prompt'                   => 'required|string',
+            'fallback_response'               => 'nullable|string',
+            'reactivate_delay_minutes'        => 'nullable|integer|min:0',
         ]);
 
         $user = getParentUser();
@@ -215,11 +216,13 @@ class AutomationController extends Controller
             createAiSetting($user);
         }
 
-        $aiSetting                    = $user->aiSetting;
-        $aiSetting->max_length        = $request->max_length;
-        $aiSetting->system_prompt     = $request->system_prompt;
-        $aiSetting->fallback_response = $request->fallback_response;
-        $aiSetting->status            = $request->status ? Status::ENABLE : Status::DISABLE;
+        $aiSetting                                = $user->aiSetting;
+        $aiSetting->max_length                    = $request->max_length;
+        $aiSetting->system_prompt                 = $request->system_prompt;
+        $aiSetting->fallback_response             = $request->fallback_response;
+        $aiSetting->status                        = $request->status ? Status::ENABLE : Status::DISABLE;
+        $aiSetting->auto_reactivate_after_fallback = $request->has('auto_reactivate_after_fallback') ? true : false;
+        $aiSetting->reactivate_delay_minutes      = $request->reactivate_delay_minutes;
         $aiSetting->save();
 
         $notify[] = ['success', 'AI Assistant settings updated successfully'];

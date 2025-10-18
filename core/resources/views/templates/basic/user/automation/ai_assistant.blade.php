@@ -70,6 +70,32 @@
                                 </label>
                                 <textarea name="fallback_response" cols="30" rows="10" class="form--control form-two" required>{{ old('fallback_response', @$aiSetting->fallback_response) }}</textarea>
                             </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label fw-semibold mb-1">
+                                    @lang('Reativar Respostas Automáticas Após Fallback')
+                                    <span data-bs-toggle="tooltip" data-bs-placement="top" title="@lang('Quando habilitado, as respostas automáticas da IA voltarão a funcionar após uma mensagem de fallback ser enviada.')">
+                                        <i class="fas fa-info-circle"></i>
+                                    </span>
+                                </label>
+                                <div class="form--switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" name="auto_reactivate_after_fallback"
+                                        id="auto-reactivate-switch" @checked(old('auto_reactivate_after_fallback', @$aiSetting->auto_reactivate_after_fallback)) />
+                                </div>
+                            </div>
+                            
+                            <div class="form-group" id="reactivate-delay-group" style="display: none;">
+                                <label>
+                                    @lang('Tempo para Reativação (minutos)')
+                                    <span data-bs-toggle="tooltip" data-bs-placement="top" title="@lang('Defina quantos minutos após o envio de uma mensagem manual a IA voltará a responder automaticamente. Deixe vazio para reativar imediatamente.')">
+                                        <i class="fas fa-info-circle"></i>
+                                    </span>
+                                </label>
+                                <input type="number" name="reactivate_delay_minutes" class="form--control form-two" min="0"
+                                    placeholder="@lang('Deixe vazio para reativar imediatamente')"
+                                    value="{{ old('reactivate_delay_minutes', @$aiSetting->reactivate_delay_minutes) }}">
+                            </div>
+                            
                             <div class="form-group">
                                 <label>@lang('Max Length')</label>
                                 <input type="number" name="max_length" class="form--control form-two"
@@ -331,6 +357,23 @@ Note: if the question/query is out of the box e-commerce, then please respond em
                 $(this).removeClass('las la-copy').addClass('las la-check-double');
                 notify('success', "@lang('Copied to clipboard')");
                 setTimeout(() => $(this).removeClass('las la-check-double').addClass('las la-copy'), 1500);
+            });
+
+            // Controle do campo de reativação
+            function toggleReactivateDelayField() {
+                if ($('#auto-reactivate-switch').is(':checked')) {
+                    $('#reactivate-delay-group').slideDown();
+                } else {
+                    $('#reactivate-delay-group').slideUp();
+                }
+            }
+
+            // Executar ao carregar a página
+            toggleReactivateDelayField();
+
+            // Executar ao mudar o switch
+            $('#auto-reactivate-switch').on('change', function() {
+                toggleReactivateDelayField();
             });
 
         })(jQuery);
