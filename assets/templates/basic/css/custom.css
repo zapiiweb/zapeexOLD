@@ -909,10 +909,19 @@ button .spinner-border {
     width: 80px !important;
 }
 
-.sidebar-menu.collapsed .sidebar-logo img {
+/* Logo image switching */
+.sidebar-logo .logo-collapsed {
+    display: none;
+}
+
+.sidebar-menu.collapsed .sidebar-logo .logo-expanded {
+    display: none;
+}
+
+.sidebar-menu.collapsed .sidebar-logo .logo-collapsed {
+    display: block;
     width: 40px;
     margin: 0 auto;
-    display: block;
 }
 
 .sidebar-menu.collapsed .sidebar-menu-list__link .text,
@@ -941,8 +950,13 @@ button .spinner-border {
         width: 280px !important;
     }
     
-    .sidebar-menu.collapsed.hover-expanded .sidebar-logo img {
+    .sidebar-menu.collapsed.hover-expanded .sidebar-logo .logo-expanded {
+        display: block;
         width: auto;
+    }
+    
+    .sidebar-menu.collapsed.hover-expanded .sidebar-logo .logo-collapsed {
+        display: none;
     }
     
     .sidebar-menu.collapsed.hover-expanded .sidebar-menu-list__link .text,
