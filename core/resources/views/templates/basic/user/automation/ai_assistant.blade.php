@@ -84,7 +84,7 @@
                                 </div>
                             </div>
                             
-                            <div class="form-group" id="reactivate-delay-group" style="display: none;">
+                            <div class="form-group reactivate-delay-field">
                                 <label>
                                     @lang('Tempo para Reativação (minutos)')
                                     <span data-bs-toggle="tooltip" data-bs-placement="top" title="@lang('Defina quantos minutos após o envio de uma mensagem manual a IA voltará a responder automaticamente. Deixe vazio para reativar imediatamente.')">
@@ -361,18 +361,25 @@ Note: if the question/query is out of the box e-commerce, then please respond em
 
                 // Controle do campo de reativação
                 function toggleReactivateDelayField() {
-                    if ($('#auto-reactivate-switch').is(':checked')) {
-                        $('#reactivate-delay-group').show();
+                    var isChecked = $('#auto-reactivate-switch').is(':checked');
+                    console.log('Toggle reativação - Switch está:', isChecked ? 'ATIVADO' : 'DESATIVADO');
+                    
+                    if (isChecked) {
+                        $('.reactivate-delay-field').show();
+                        console.log('Mostrando campo de minutos');
                     } else {
-                        $('#reactivate-delay-group').hide();
+                        $('.reactivate-delay-field').hide();
+                        console.log('Escondendo campo de minutos');
                     }
                 }
 
                 // Executar ao carregar a página
+                console.log('AI Assistant - JavaScript carregado');
                 toggleReactivateDelayField();
 
                 // Executar ao mudar o switch
                 $('#auto-reactivate-switch').on('change', function() {
+                    console.log('Switch mudou!');
                     toggleReactivateDelayField();
                 });
             });
@@ -382,6 +389,10 @@ Note: if the question/query is out of the box e-commerce, then please respond em
 
 @push('style')
     <style>
+        .reactivate-delay-field {
+            display: none;
+        }
+        
         .pre-like {
             color: hsl(var(--black)) !important;
             width: 100%;
