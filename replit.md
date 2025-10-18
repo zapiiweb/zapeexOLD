@@ -24,6 +24,7 @@ Primary Language: Portuguese (pt-BR) for user-facing messages and error handling
 - **JavaScript**: jQuery 3.7.1 for DOM manipulation.
 - **Styling**: Custom HSL-based CSS architecture with CSS custom properties for theming (light/dark mode support, modular color system).
 - **Components**: Slick Carousel, WOW.js for animations, Flatpickr for date selection, iziToast for notifications, and a custom Markdown parser.
+- **UI Features**: Collapsible sidebar menu with localStorage persistence, smooth transitions, and hover-expand functionality on desktop (visible only on screens >991px).
 
 ### Real-time & Messaging
 - **Real-time**: Pusher for WebSocket communication and Laravel's broadcasting system.
@@ -42,6 +43,11 @@ Primary Language: Portuguese (pt-BR) for user-facing messages and error handling
         - Baileys: Messages saved with `job_id` and Status::SCHEDULED, updated to Status::SENT via webhook when delivery confirms.
         - Meta API: Messages saved with `whatsapp_message_id` and Status::SENT immediately upon synchronous response.
     - **Media Support**: Handles various media types (text, images, documents, video, audio) with inline previews (images up to 25MB, videos up to 50MB with HTML5 player, audio up to 20MB with HTML5 player), download buttons, and real-time status updates.
+    - **AI Auto-Response**: Both Meta API and Baileys connection types support AI-powered automatic responses identically:
+        - AI responses sent via same connection method that received the message (`conversation->whatsappAccount`)
+        - Auto-reactivation feature allows IA to resume after manual fallback response (configurable delay or immediate)
+        - Fallback mechanism when AI cannot answer: sends customizable fallback message and marks conversation for human intervention
+        - UI configuration available in AI Assistant page for fallback messages and auto-reactivation settings
 
 ### File Processing
 - **Image Manipulation**: Intervention Image.
