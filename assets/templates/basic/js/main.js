@@ -351,40 +351,18 @@
     // ==================== account switch Dropdown End ==================
     
     // ==================== Sidebar Collapse Js Start ==================
-    // Initialize tooltip for collapse button
-    var collapseBtn = $('.sidebar-collapse-btn');
-    if (collapseBtn.length) {
-        var tooltipInstance = new bootstrap.Tooltip(collapseBtn[0]);
-    }
-    
     // Check localStorage for saved state
     if (localStorage.getItem('sidebar-collapsed') === 'true') {
         $('.sidebar-menu').addClass('collapsed');
         $('body').addClass('sidebar-collapsed');
-        collapseBtn.attr('data-bs-title', 'Exibir Menu');
-        if (tooltipInstance) {
-            tooltipInstance.dispose();
-            tooltipInstance = new bootstrap.Tooltip(collapseBtn[0]);
-        }
+        $('.sidebar-collapse-btn').attr('title', 'Exibir Menu');
     } else {
-        collapseBtn.attr('data-bs-title', 'Ocultar Menu');
+        $('.sidebar-collapse-btn').attr('title', 'Ocultar Menu');
     }
     
     // Toggle sidebar collapse
     $(document).on('click', '.sidebar-collapse-btn', function(e) {
         e.preventDefault();
-        
-        var $btn = $(this);
-        
-        // Hide and dispose tooltip immediately
-        if (tooltipInstance) {
-            tooltipInstance.hide();
-            tooltipInstance.dispose();
-        }
-        
-        // Remove focus from button to prevent tooltip from showing
-        $btn.blur();
-        
         $('.sidebar-menu').toggleClass('collapsed');
         $('body').toggleClass('sidebar-collapsed');
         
@@ -392,14 +370,12 @@
         const isCollapsed = $('.sidebar-menu').hasClass('collapsed');
         localStorage.setItem('sidebar-collapsed', isCollapsed);
         
-        // Update tooltip text
-        var newTitle = isCollapsed ? 'Exibir Menu' : 'Ocultar Menu';
-        $btn.attr('data-bs-title', newTitle);
-        
-        // Recreate tooltip with new title after a short delay
-        setTimeout(function() {
-            tooltipInstance = new bootstrap.Tooltip($btn[0]);
-        }, 100);
+        // Update button title
+        if (isCollapsed) {
+            $(this).attr('title', 'Exibir Menu');
+        } else {
+            $(this).attr('title', 'Ocultar Menu');
+        }
     });
     // ==================== Sidebar Collapse Js End ==================
 
