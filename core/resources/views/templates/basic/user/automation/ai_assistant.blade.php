@@ -84,14 +84,14 @@
                                 </div>
                             </div>
                             
-                            <div class="form-group reactivate-delay-field">
+                            <div class="form-group">
                                 <label>
                                     @lang('Tempo para Reativação (minutos)')
                                     <span data-bs-toggle="tooltip" data-bs-placement="top" title="@lang('Defina quantos minutos após o envio de uma mensagem manual a IA voltará a responder automaticamente. Deixe vazio para reativar imediatamente.')">
                                         <i class="fas fa-info-circle"></i>
                                     </span>
                                 </label>
-                                <input type="number" name="reactivate_delay_minutes" class="form--control form-two" min="0"
+                                <input type="number" name="reactivate_delay_minutes" id="reactivate-delay-input" class="form--control form-two" min="0"
                                     placeholder="@lang('Deixe vazio para reativar imediatamente')"
                                     value="{{ old('reactivate_delay_minutes', @$aiSetting->reactivate_delay_minutes) }}">
                             </div>
@@ -362,24 +362,19 @@ Note: if the question/query is out of the box e-commerce, then please respond em
                 // Controle do campo de reativação
                 function toggleReactivateDelayField() {
                     var isChecked = $('#auto-reactivate-switch').is(':checked');
-                    console.log('Toggle reativação - Switch está:', isChecked ? 'ATIVADO' : 'DESATIVADO');
                     
                     if (isChecked) {
-                        $('.reactivate-delay-field').show();
-                        console.log('Mostrando campo de minutos');
+                        $('#reactivate-delay-input').prop('disabled', false);
                     } else {
-                        $('.reactivate-delay-field').hide();
-                        console.log('Escondendo campo de minutos');
+                        $('#reactivate-delay-input').prop('disabled', true);
                     }
                 }
 
                 // Executar ao carregar a página
-                console.log('AI Assistant - JavaScript carregado');
                 toggleReactivateDelayField();
 
                 // Executar ao mudar o switch
                 $('#auto-reactivate-switch').on('change', function() {
-                    console.log('Switch mudou!');
                     toggleReactivateDelayField();
                 });
             });
@@ -389,10 +384,6 @@ Note: if the question/query is out of the box e-commerce, then please respond em
 
 @push('style')
     <style>
-        .reactivate-delay-field {
-            display: none;
-        }
-        
         .pre-like {
             color: hsl(var(--black)) !important;
             width: 100%;
