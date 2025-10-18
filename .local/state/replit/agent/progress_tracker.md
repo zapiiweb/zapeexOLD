@@ -6,4 +6,5 @@
 [x] 6. Install Node.js dependencies for Baileys WhatsApp Service
 [x] 7. Install PHP Composer dependencies (164 packages)
 [x] 8. Restart both workflows and verify they are running
-[x] 9. Import completed successfully - Both services running properly
+[x] 9. Fix WhatsApp Account settings page - restore Meta API credentials form
+[x] 10. Import completed successfully - Both services running properly
