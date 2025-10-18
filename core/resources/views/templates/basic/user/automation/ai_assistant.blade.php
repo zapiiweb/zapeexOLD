@@ -93,8 +93,7 @@
                                 </label>
                                 <input type="number" name="reactivate_delay_minutes" id="reactivate-delay-input" class="form--control form-two" min="0"
                                     placeholder="@lang('Deixe vazio para reativar imediatamente')"
-                                    value="{{ old('reactivate_delay_minutes', @$aiSetting->reactivate_delay_minutes) }}"
-                                    @if(!old('auto_reactivate_after_fallback', @$aiSetting->auto_reactivate_after_fallback)) disabled @endif>
+                                    value="{{ old('reactivate_delay_minutes', @$aiSetting->reactivate_delay_minutes) }}">
                             </div>
                             
                             <div class="form-group">
