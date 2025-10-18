@@ -85,7 +85,12 @@ class WhatsAppLib
     {
         // Check if Baileys is connected and use it instead of Meta API
         if ($whatsappAccount->baileys_connected && $whatsappAccount->baileys_session_id) {
-            return $this->messageSendViaBaileys($request, $toNumber, $whatsappAccount);
+            try {
+                return $this->messageSendViaBaileys($request, $toNumber, $whatsappAccount);
+            } catch (Exception $ex) {
+                // Baileys failed (service not running), fall back to Meta API
+                \Log::warning('Baileys send failed, falling back to Meta API', ['error' => $ex->getMessage()]);
+            }
         }
 
         $phoneNumberId    = $whatsappAccount->phone_number_id;
