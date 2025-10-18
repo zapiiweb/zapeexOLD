@@ -53,15 +53,15 @@ class WhatsAppLib
             $responseData = $response->json();
 
             if (!is_array($responseData) || !count($responseData)) {
-                throw new Exception("Erro ao enviar mensagem. Resposta inválida da API do WhatsApp.");
+                throw new Exception(__("Error sending message. Invalid response from WhatsApp API."));
             }
 
             if (isset($responseData['error']) || !isset($responseData['messages'])) {
-                throw new Exception(@$responseData['error']['error_data']['details'] ?? @$responseData['error']['message'] ?? "Erro ao enviar mensagem pelo WhatsApp.");
+                throw new Exception(@$responseData['error']['error_data']['details'] ?? @$responseData['error']['message'] ?? __("Error sending message via WhatsApp."));
             }
 
             if ($response->failed()) {
-                throw new Exception("Message sending failed");
+                throw new Exception(__("Message sending failed"));
             }
 
             return [
@@ -89,14 +89,14 @@ class WhatsAppLib
         if ($connectionType == 2) {
             // User prefers Baileys - check if it's connected
             if (!$whatsappAccount->baileys_connected || !$whatsappAccount->baileys_session_id) {
-                throw new Exception("WhatsApp está desconectado. Por favor, reconecte sua conta escaneando o QR Code na página de configurações.");
+                throw new Exception(__("WhatsApp is disconnected. Please reconnect your account by scanning the QR code in the settings page."));
             }
             return $this->messageSendViaBaileys($request, $toNumber, $whatsappAccount);
         }
 
         // User prefers Meta API - validate access token exists
         if (empty($whatsappAccount->access_token)) {
-            throw new Exception("Token de acesso da Meta API está vazio ou expirado. Por favor, atualize seu token de acesso na página de configurações.");
+            throw new Exception(__("Meta API access token is empty or expired. Please update your access token in the settings page."));
         }
 
         $phoneNumberId    = $whatsappAccount->phone_number_id;
@@ -208,25 +208,25 @@ class WhatsAppLib
             $responseData = $response->json();
 
             if (!is_array($responseData) || !count($responseData)) {
-                throw new Exception("Erro ao enviar mensagem. Resposta inválida da API do WhatsApp.");
+                throw new Exception(__("Error sending message. Invalid response from WhatsApp API."));
             }
 
             if (isset($responseData['error']) || !isset($responseData['messages'])) {
-                $errorMessage = @$responseData['error']['message'] ?? "Erro ao enviar mensagem pelo WhatsApp.";
+                $errorMessage = @$responseData['error']['message'] ?? __("Error sending message via WhatsApp.");
                 
                 // Check for token-related errors
                 if (stripos($errorMessage, 'token') !== false || 
                     stripos($errorMessage, 'expired') !== false ||
                     stripos($errorMessage, 'invalid') !== false ||
                     stripos($errorMessage, 'authentication') !== false) {
-                    throw new Exception("Token de acesso da Meta API está expirado ou inválido. Por favor, atualize seu token de acesso na página de configurações.");
+                    throw new Exception(__("Meta API access token is expired or invalid. Please update your access token in the settings page."));
                 }
                 
                 throw new Exception($errorMessage);
             }
 
             if ($response->failed()) {
-                throw new Exception("Falha ao enviar mensagem. Verifique suas credenciais da Meta API.");
+                throw new Exception(__("Failed to resend message."));
             }
 
             return [
@@ -298,15 +298,15 @@ class WhatsAppLib
             $responseData = $response->json();
 
             if (!is_array($responseData) || !count($responseData)) {
-                throw new Exception("Erro ao enviar mensagem. Resposta inválida da API do WhatsApp.");
+                throw new Exception(__("Error sending message. Invalid response from WhatsApp API."));
             }
 
             if (isset($responseData['error']) || !isset($responseData['messages'])) {
-                throw new Exception(@$responseData['error']['message'] ?? "Erro ao reenviar mensagem pelo WhatsApp.");
+                throw new Exception(@$responseData['error']['message'] ?? __("Error resending message via WhatsApp."));
             }
 
             if ($response->failed()) {
-                throw new Exception("Falha ao reenviar mensagem.");
+                throw new Exception(__("Failed to resend message."));
             }
 
             return [
@@ -342,7 +342,7 @@ class WhatsAppLib
         $data = json_decode($response, true);
 
         if (!is_array($data) || isset($data['error']) || !isset($data['id'])) {
-            $errorMessage = "Failed to upload media";
+            $errorMessage = __("Failed to upload media");
             if (isset($data['error']['error_user_msg'])) {
                 $errorMessage = $data['error']['error_user_msg'];
             }
@@ -368,11 +368,11 @@ class WhatsAppLib
             ]);
             $data = $response->json();
             if ($response->failed() || !is_array($data) || !isset($data['id'])) {
-                throw new Exception(@$data['error']['message'] ?? "Couldn\'t upload your header image! Please try again later.");
+                throw new Exception(@$data['error']['message'] ?? __("Could not upload your header image! Please try again later."));
             }
             return $data;
         } catch (Exception $ex) {
-            throw new Exception($ex->getMessage() ?? "Couldn\'t upload your header image! Please try again later.");
+            throw new Exception($ex->getMessage() ?? __("Could not upload your header image! Please try again later."));
         }
     }
 
@@ -396,7 +396,7 @@ class WhatsAppLib
             }
             return $data['h'];
         } catch (Exception $ex) {
-            throw new Exception($ex->getMessage() ?? "Failed to get the media handle! Please try again later.");
+            throw new Exception($ex->getMessage() ?? __("Failed to get the media handle! Please try again later."));
         }
     }
 
@@ -411,7 +411,7 @@ class WhatsAppLib
         $data = json_decode($response, true);
 
         if (!is_array($data) || isset($data['error']) || !isset($data['url'])) {
-            throw new Exception(@$data['error']['error_user_msg'] ?? @$data['error']['message'] ?? "Failed to load the media URL. Please try again later.");
+            throw new Exception(@$data['error']['error_user_msg'] ?? @$data['error']['message'] ?? __("Failed to load the media URL. Please try again later."));
         }
 
         return $data;
@@ -430,7 +430,7 @@ class WhatsAppLib
             ])->get($mediaUrl);
 
             if ($response->failed()) {
-                throw new Exception("Message sending fail for the download media");
+                throw new Exception(__("Message sending fail for the download media"));
             }
 
             $fileContent = $response->body();
@@ -583,11 +583,11 @@ class WhatsAppLib
             $data     = json_decode($response, true);
 
             if (!is_array($data) || isset($data['error'])) {
-                throw new Exception(@$data['error']['error_user_msg'] ?? @$data['error']['message'] ?? "Erro ao processar mídia do WhatsApp.");
+                throw new Exception(@$data['error']['error_user_msg'] ?? @$data['error']['message'] ?? __("Error processing WhatsApp media."));
             }
             return $data;
         } catch (Exception $ex) {
-            throw new Exception($ex->getMessage() ?? "Erro ao processar mídia do WhatsApp.");
+            throw new Exception($ex->getMessage() ?? __("Error processing WhatsApp media."));
         }
     }
 

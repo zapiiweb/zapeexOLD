@@ -1,1 +1,16 @@
-{}
+{
+    "Meta API access token is empty or expired. Please update your access token in the settings page.": "Token de acesso da Meta API está vazio ou expirado. Por favor, atualize seu token de acesso na página de configurações.",
+    "Meta API access token is expired or invalid. Please update your access token in the settings page.": "Token de acesso da Meta API está expirado ou inválido. Por favor, atualize seu token de acesso na página de configurações.",
+    "WhatsApp is disconnected. Please reconnect your account by scanning the QR code in the settings page.": "WhatsApp está desconectado. Por favor, reconecte sua conta escaneando o QR Code na página de configurações.",
+    "Error sending message. Invalid response from WhatsApp API.": "Erro ao enviar mensagem. Resposta inválida da API do WhatsApp.",
+    "Error sending message via WhatsApp.": "Erro ao enviar mensagem pelo WhatsApp.",
+    "Error resending message via WhatsApp.": "Erro ao reenviar mensagem pelo WhatsApp.",
+    "Failed to resend message.": "Falha ao reenviar mensagem.",
+    "Error processing WhatsApp media.": "Erro ao processar mídia do WhatsApp.",
+    "Message sending failed": "Falha ao enviar mensagem.",
+    "Could not upload your header image! Please try again later.": "Não foi possível fazer upload da imagem de cabeçalho! Por favor, tente novamente mais tarde.",
+    "Failed to get the media handle! Please try again later.": "Falha ao obter o identificador de mídia! Por favor, tente novamente mais tarde.",
+    "Failed to load the media URL. Please try again later.": "Falha ao carregar a URL da mídia. Por favor, tente novamente mais tarde.",
+    "Failed to upload media": "Falha ao fazer upload da mídia",
+    "Message sending fail for the download media": "Falha ao enviar mensagem para download da mídia"
+}
