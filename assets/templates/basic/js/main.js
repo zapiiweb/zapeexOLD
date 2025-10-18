@@ -350,43 +350,4 @@
     });
     // ==================== account switch Dropdown End ==================
 
-    // ==================== Sidebar Collapse/Expand Start ==================
-    // Check localStorage and apply collapsed state on page load
-    if (localStorage.getItem('sidebarCollapsed') === 'true') {
-        $('.sidebar-menu').addClass('collapsed');
-    }
-
-    // Add data-tooltip attributes to sidebar links for tooltips
-    $('.sidebar-menu-list__link').each(function() {
-        const text = $(this).find('.text').text().trim();
-        if (text) {
-            $(this).attr('data-tooltip', text);
-        }
-    });
-
-    // Toggle sidebar collapse/expand
-    $('.sidebar-toggle-btn').on('click', function() {
-        $('.sidebar-menu').toggleClass('collapsed');
-        
-        // Save state to localStorage
-        const isCollapsed = $('.sidebar-menu').hasClass('collapsed');
-        localStorage.setItem('sidebarCollapsed', isCollapsed);
-        
-        // Close all dropdown menus when collapsing
-        if (isCollapsed) {
-            $('.has-dropdown').removeClass('active');
-            $('.sidebar-submenu').slideUp(200);
-        }
-    });
-
-    // Prevent dropdown toggle when sidebar is collapsed
-    $('.sidebar-menu').on('click', '.has-dropdown > a', function(e) {
-        if ($('.sidebar-menu').hasClass('collapsed')) {
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
-        }
-    });
-    // ==================== Sidebar Collapse/Expand End ==================
-
 })(jQuery);
