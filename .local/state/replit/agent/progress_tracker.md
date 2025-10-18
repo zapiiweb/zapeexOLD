@@ -15,8 +15,4 @@
 [x] 15. Create symbolic links for assets directories (images, global, templates, admin) to fix document preview icons
 [x] 16. Fix Meta API messageSend to save media files locally when sending (images, documents, videos, audios)
 [x] 17. Implement intelligent fallback detection for AI assistant when it doesn't know the answer
-[x] 18. Implement configurable AI auto-reactivation after fallback with delay option (static field with enabled/disabled control)
-[x] 19. Import completed successfully - Both services running properly
-[x] 20. Fix AI auto-reply field visibility - Always visible, enabled/disabled based on toggle state
-[x] 21. Fix AI auto-reply to use same method that received the message (Meta API or Baileys) - No cross-method fallback
-[x] 22. Fix AI auto-reply fallback logic - Incorrect condition was preventing message sending
+[x] 18. Import completed successfully - Both services running properly

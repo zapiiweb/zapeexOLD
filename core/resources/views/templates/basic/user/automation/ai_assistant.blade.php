@@ -70,33 +70,6 @@
                                 </label>
                                 <textarea name="fallback_response" cols="30" rows="10" class="form--control form-two" required>{{ old('fallback_response', @$aiSetting->fallback_response) }}</textarea>
                             </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label fw-semibold mb-1">
-                                    @lang('Reativar Respostas Automáticas Após Fallback')
-                                    <span data-bs-toggle="tooltip" data-bs-placement="top" title="@lang('Quando habilitado, as respostas automáticas da IA voltarão a funcionar após uma mensagem de fallback ser enviada.')">
-                                        <i class="fas fa-info-circle"></i>
-                                    </span>
-                                </label>
-                                <div class="form--switch">
-                                    <input class="form-check-input" type="checkbox" role="switch" name="auto_reactivate_after_fallback"
-                                        id="auto-reactivate-switch" @checked(old('auto_reactivate_after_fallback', @$aiSetting->auto_reactivate_after_fallback)) />
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label>
-                                    @lang('Tempo para Reativação (minutos)')
-                                    <span data-bs-toggle="tooltip" data-bs-placement="top" title="@lang('Defina quantos minutos após o envio de uma mensagem manual a IA voltará a responder automaticamente. Deixe vazio para reativar imediatamente.')">
-                                        <i class="fas fa-info-circle"></i>
-                                    </span>
-                                </label>
-                                <input type="number" name="reactivate_delay_minutes" id="reactivate-delay-input" class="form--control form-two" min="0"
-                                    placeholder="@lang('Deixe vazio para reativar imediatamente')"
-                                    value="{{ old('reactivate_delay_minutes', @$aiSetting->reactivate_delay_minutes) }}"
-                                    @if(!old('auto_reactivate_after_fallback', @$aiSetting->auto_reactivate_after_fallback)) disabled @endif>
-                            </div>
-                            
                             <div class="form-group">
                                 <label>@lang('Max Length')</label>
                                 <input type="number" name="max_length" class="form--control form-two"
@@ -343,42 +316,23 @@ Note: if the question/query is out of the box e-commerce, then please respond em
     <script>
         "use strict";
         (function($) {
-            $(document).ready(function() {
-                $('.system-prompt-btn').on('click', function() {
-                    $('#systemPromptModal').modal('show');
-                });
-
-                $('.copy-button').on('click', function() {
-                    var textarea = $(this).closest('.prompt-content').find('textarea')[0];
-                    textarea.select();
-                    textarea.setSelectionRange(0, 99999);
-                    document.execCommand("copy");
-                    textarea.blur();
-
-                    $(this).removeClass('las la-copy').addClass('las la-check-double');
-                    notify('success', "@lang('Copied to clipboard')");
-                    setTimeout(() => $(this).removeClass('las la-check-double').addClass('las la-copy'), 1500);
-                });
-
-                // Controle do campo de reativação
-                function toggleReactivateDelayField() {
-                    var isChecked = $('#auto-reactivate-switch').is(':checked');
-                    
-                    if (isChecked) {
-                        $('#reactivate-delay-input').prop('disabled', false);
-                    } else {
-                        $('#reactivate-delay-input').prop('disabled', true);
-                    }
-                }
-
-                // Executar ao carregar a página
-                toggleReactivateDelayField();
-
-                // Executar ao mudar o switch
-                $('#auto-reactivate-switch').on('change', function() {
-                    toggleReactivateDelayField();
-                });
+            $('.system-prompt-btn').on('click', function() {
+                $('#systemPromptModal').modal('show');
             });
+
+
+            $('.copy-button').on('click', function() {
+                var textarea = $(this).closest('.prompt-content').find('textarea')[0];
+                textarea.select();
+                textarea.setSelectionRange(0, 99999);
+                document.execCommand("copy");
+                textarea.blur();
+
+                $(this).removeClass('las la-copy').addClass('las la-check-double');
+                notify('success', "@lang('Copied to clipboard')");
+                setTimeout(() => $(this).removeClass('las la-check-double').addClass('las la-copy'), 1500);
+            });
+
         })(jQuery);
     </script>
 @endpush

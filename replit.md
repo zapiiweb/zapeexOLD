@@ -30,15 +30,11 @@ Preferred communication style: Simple, everyday language.
 - **WhatsApp Integration**:
     - **Meta WhatsApp Business API**: Official API for business messaging with synchronous message delivery.
     - **Baileys (@whiskeysockets/baileys)**: Node.js service for direct WhatsApp Web connection, QR code authentication, session management, and webhook handling with asynchronous job-based delivery.
-    - **Unified Flow**: Both integrations utilize a common database schema and message processing logic. Each WhatsApp account uses exclusively one method (Meta API OR Baileys), and AI auto-replies are sent using the same method that received the incoming message.
+    - **Unified Flow**: Both integrations utilize a common database schema and message processing logic with automatic switching based on account connection status.
     - **Message Status Tracking**: 
         - Baileys: Messages saved with `job_id` and Status::SCHEDULED, updated to Status::SENT via webhook when delivery confirms.
         - Meta API: Messages saved with `whatsapp_message_id` and Status::SENT immediately upon synchronous response.
     - **Media Support**: Handles various media types (text, images, documents, video, audio) with inline previews (images up to 25MB, videos up to 50MB with HTML5 player, audio up to 20MB with HTML5 player), download buttons, and real-time status updates.
-    - **AI Assistant Integration**:
-        - **3-Tier Fallback Detection**: Detects when AI doesn't know the answer via special keyword (FALLBACK_RESPONSE), common phrases (PT/EN like "não sei", "i don't know"), or API failures.
-        - **Configurable Auto-Reactivation**: When AI triggers fallback and human sends manual message, system can automatically reactivate AI responses either immediately or after a configurable delay (in minutes).
-        - **Method Consistency**: AI responses are always sent using the same delivery method (Meta API or Baileys) that received the original message.
 
 ### File Processing
 - **Image Manipulation**: Intervention Image.

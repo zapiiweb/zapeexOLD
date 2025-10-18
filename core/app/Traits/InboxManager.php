@@ -353,9 +353,6 @@ trait InboxManager
             $conversation->last_message_at = Carbon::now();
             $conversation->save();
 
-            // Verificar se deve reativar respostas automáticas da IA
-            $this->checkAndReactivateAI($conversation, $user);
-
             $notify[] =  "Message sent successfully";
 
             if (!isApiRequest()) {
@@ -515,79 +512,6 @@ trait InboxManager
             }
         } else {
             return responseManager('error', 'Unable to generate AI response. Please try again.');
-        }
-    }
-
-    /**
-     * Verifica e reativa respostas automáticas da IA conforme configurações do usuário
-     * @param Conversation $conversation
-     * @param User $user
-     * @return void
-     */
-    private function checkAndReactivateAI($conversation, $user)
-    {
-        // Verificar se a conversa precisa de resposta humana
-        if ($conversation->needs_human_reply != Status::YES) {
-            return;
-        }
-
-        // Verificar se o usuário tem configurações de IA
-        $aiSetting = $user->aiSetting;
-        if (!$aiSetting) {
-            return;
-        }
-
-        // Verificar se a reativação automática está habilitada
-        if (!$aiSetting->auto_reactivate_after_fallback) {
-            \Log::info('checkAndReactivateAI - Auto-reativação desabilitada', ['conversation_id' => $conversation->id]);
-            return;
-        }
-
-        \Log::info('checkAndReactivateAI - Verificando se deve reativar IA', [
-            'conversation_id' => $conversation->id,
-            'reactivate_delay_minutes' => $aiSetting->reactivate_delay_minutes
-        ]);
-
-        // Se não tem delay ou delay = 0, reativar imediatamente
-        if (!$aiSetting->reactivate_delay_minutes || $aiSetting->reactivate_delay_minutes == 0) {
-            \Log::info('checkAndReactivateAI - Reativando IA imediatamente');
-            $conversation->needs_human_reply = Status::NO;
-            $conversation->save();
-            return;
-        }
-
-        // Se tem delay, verificar se já passou o tempo necessário
-        $delayMinutes = $aiSetting->reactivate_delay_minutes;
-        
-        // Pegar a última mensagem AI reply (fallback) da conversa
-        $lastAiMessage = Message::where('conversation_id', $conversation->id)
-            ->where('ai_reply', Status::YES)
-            ->latest('id')
-            ->first();
-
-        if (!$lastAiMessage) {
-            \Log::info('checkAndReactivateAI - Nenhuma mensagem de IA encontrada, reativando');
-            $conversation->needs_human_reply = Status::NO;
-            $conversation->save();
-            return;
-        }
-
-        // Verificar se já passou o tempo configurado
-        $minutesSinceLastAi = $lastAiMessage->created_at->diffInMinutes(Carbon::now());
-        
-        \Log::info('checkAndReactivateAI - Verificando tempo desde última IA', [
-            'minutes_since_last_ai' => $minutesSinceLastAi,
-            'delay_required' => $delayMinutes
-        ]);
-
-        if ($minutesSinceLastAi >= $delayMinutes) {
-            \Log::info('checkAndReactivateAI - Tempo decorrido, reativando IA');
-            $conversation->needs_human_reply = Status::NO;
-            $conversation->save();
-        } else {
-            \Log::info('checkAndReactivateAI - Ainda não passou o tempo necessário', [
-                'minutes_remaining' => $delayMinutes - $minutesSinceLastAi
-            ]);
         }
     }
 }
