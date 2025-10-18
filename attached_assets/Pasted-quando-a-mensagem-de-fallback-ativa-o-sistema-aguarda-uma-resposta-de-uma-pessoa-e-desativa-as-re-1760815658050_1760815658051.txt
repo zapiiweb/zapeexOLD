@@ -1,0 +1,191 @@
+quando a mensagem de fallback é ativa o sistema aguarda uma resposta de uma pessoa, e desativa as respostas por AI na conversa. se o agent responde a mensagem as proximas mensagens do não voltam a ser respondidas pela AI. Implemente uma regra configuravel para habilitar via seletor se as respostas por IA serão reativadas após a mensagem de fallback com as opções habilitado para as respostas por AI voltarem imediatamente após alguma pessoas enviar uma resposta manual após o fallback ou desabilitado para que as respostas por AI continuem desativadas após a mensagem de fallback mesmo que seja enviada alguma resposta manual. inclua também um campo para opção de inserir um valor em minutos para definir um counter para as respostas automaticas pela AI voltar a ficar ativa.
+insira essas configurações na pagina AI Assistant logo abaixo do campo de preenchimento da Fallback Response. ou seja
+deve aparecer um botão seletor do tipo on off para habilitar ou desabilitar o retorno das respostas automaticas após fallback, e se a opção estiver habilitada exiba o campo para inserir o tempo desejado para retorno das respostas automaticas da AI em minutos. se o campo tempo nao for informado nenhum valor, por padrão as respostas automaticas por AI devem ser reativadas de forma imediata após a conversa receber uma mensagem enviada de forma manual por humano.
+
+
+o campo "Tempo para Reativação (minutos)" não está sendo exibido mesmo ao ativar Reativar Respostas Automáticas Após Fallback. faça o seguinte, exiba o campo de forma estatica logo abaixo do botão de habilitar, assim como já é exibido o campo Max Length, mas só habilite para ser preenchido se o botão Reativar Respostas Automáticas Após Fallback estiver Habilitado.
+
+não precisa implementar o fallback automático para a Meta API quando o Baileys falha. cada conta do whastapp usará apenas um metodo ou META API ou Baileys. so corrigir para que a resposta automatica da AI seja sempre enviada pelo mesmo método que recebeu a mensagem.
+
+precisamos criar uma solução de que o usuario escolha qual das formas de conexão será a utilizada META API ou Bayleis, na pagina WhatsApp Account ja temos um botão seletor para escolher entre META API chamado de Meta WhatsApp Business Account ou pela Baileys chamado de WhatsApp Direct Connectio, o que precisamos fazer é verifiacar o status desse campo e se estiver ativo META API e o token exiprado exiba a mensagem informando sobre validate acess token expirado, se o status desse campo estiver ativo para user acesso via Baileys e a estiver desconectada informe a mensagem de informando que a conta está desconetada na baileys. sugestão se preciso for crie um campo na tabela whatsapp_accounts chamado connection type com os valores 1 para META API e 2 para Baileys, usando como valor padrão 1. e sempre que o botão seletor estiver na posiçã da META API o valor do campo connection type será 1 e sempre que ele for alterado para posição da Baileys o valor campo connection type será alterado para 2. assim conseguimos verificar qual metodo o usuario esta utilizando e enviar a mensagem correta se o token estiver expirado ou se a baileys estiver desconectada baseado no connection type.
+
+
+Colapsar MENU
+
+implemente o colpsar para o menu lateral que fica ao lado esquerdo da pagina de usuario, o atualmente o menu não possui essa função.
+Siga essa passa a passo para implementar a função.
+para alterar a estrutura da sidebar. É Preciso:
+Encontrei o arquivo da sidebar.
+Opened core/resources/views/templates/basic/partials/sidebar.blade.php
+Perfeito! Encontrei o arquivo da sidebar. Vou ler o sidebar.blade.php
+Agora vejo a estrutura da sidebar. Preciso:
+Adicionar um botão de toggle para colapsar/expandir
+Adicionar CSS para o estado colapsado
+Adicionar JavaScript para controlar o toggle
+Armazenar o estado no localStorage
+Vou ler o main.js para ver o código JavaScript existente e adicionar a funcionalidade lá.
+Perfeito! Encontrei o arquivo main.js. Agora vou ler ele para ver o código existente e adicionar a funcionalidade de collapse.
+Opened assets/templates/basic/js/main.js
+Agora vou implementar a funcionalidade de colapsar o menu lateral. Vou criar as mudanças necessárias:
+Edited assets/templates/basic/js/main.js
+altere o bloco 
+
+linha 350 });
+linha 351 // ==================== account switch Dropdown End ==================
+linha 352 // ==================== Sidebar Collapse Js Start ==================
+    // Check localStorage for saved state
+    if (localStorage.getItem('sidebar-collapsed') === 'true') {
+        $('.sidebar-menu').addClass('collapsed');
+        $('body').addClass('sidebar-collapsed');
+    }
+    // Toggle sidebar collapsea
+    $(document).on('click', '.sidebar-collapse-btn', function(e) {
+        e.preventDefault();
+        $('.sidebar-menu').toggleClass('collapsed');
+        $('body').toggleClass('sidebar-collapsed');
+        
+        // Save state to localStorage
+        const isCollapsed = $('.sidebar-menu').hasClass('collapsed');
+        localStorage.setItem('sidebar-collapsed', isCollapsed);
+    });
+    // On large screens, allow hover to show full menu when collapsed
+    if ($(window).width() > 991) {
+        $('.sidebar-menu.collapsed').on('mouseenter', function() {
+            $(this).addClass('hover-expanded');
+        });
+        $('.sidebar-menu.collapsed').on('mouseleave', function() {
+            $(this).removeClass('hover-expanded');
+linha 378 });
+linha 379 }
+linha 380 // ==================== Sidebar Collapse Js End ==================
+linha 381 
+linha 382 })(jQuery);
+
+Agora vou adicionar o CSS para o estado colapsado. Vou ler o arquivo custom.css para adicionar os estilos
+Agora vou adicionar o CSS para o menu colapsado. Primeiro, vou ler o arquivo CSS personalizado:
+
+
+Opened assets/templates/basic/css/custom.css
+
+Decided on sidebar CSS placement
+Vou adicionar o CSS no final do arquivo custom.css para controlar o estado colapsado da sidebar
+Decided on CSS placement
+
+Edited assets/templates/basic/css/custom.css
+
+ linha 836  .select2+.select2-container:has(.select2-selection.select2-selection--multiple) {
+ linha 83           height: auto;
+ linha 838       }
+/* ==================== Sidebar Collapse Styles Start ==================== */
+.sidebar-collapse-btn {
+    position: absolute;
+    top: 20px;
+    right: -15px;
+    width: 30px;
+    height: 30px;
+    background: hsl(var(--base));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.sidebar-collapse-btn:hover {
+    background: hsl(var(--base) / 0.9);
+    transform: scale(1.1);
+}
+.sidebar-collapse-btn i {
+    color: #fff;
+    font-size: 14px;
+    transition: transform 0.3s ease;
+}
+.sidebar-menu.collapsed .sidebar-collapse-btn i {
+    transform: rotate(180deg);
+}
+/* Collapsed sidebar styles */
+.sidebar-menu {
+    transition: all 0.3s ease;
+    position: relative;
+}
+.sidebar-menu.collapsed {
+    width: 80px !important;
+}
+.sidebar-menu.collapsed .sidebar-logo img {
+    width: 40px;
+    margin: 0 auto;
+    display: block;
+}
+.sidebar-menu.collapsed .sidebar-menu-list__link .text,
+.sidebar-menu.collapsed .sidebar-menu-list__title,
+.sidebar-menu.collapsed .sidebar-submenu {
+    display: none;
+}
+.sidebar-menu.collapsed .sidebar-menu-list__link {
+    justify-content: center;
+    padding: 12px 10px;
+}
+.sidebar-menu.collapsed .sidebar-menu-list__link .icon {
+    margin-right: 0;
+    font-size: 20px;
+}
+.sidebar-menu.collapsed .has-dropdown > a::after {
+    display: none;
+}
+/* Hover expansion on large screens */
+@media (min-width: 992px) {
+    .sidebar-menu.collapsed.hover-expanded {
+        width: 280px !important;
+    }
+    .sidebar-menu.collapsed.hover-expanded .sidebar-logo img {
+        width: auto;
+    }
+    .sidebar-menu.collapsed.hover-expanded .sidebar-menu-list__link .text,
+    .sidebar-menu.collapsed.hover-expanded .sidebar-menu-list__title,
+    .sidebar-menu.collapsed.hover-expanded .sidebar-submenu {
+        display: block;
+    }
+    .sidebar-menu.collapsed.hover-expanded .sidebar-menu-list__link {
+        justify-content: flex-start;
+        padding: 12px 20px;
+    }
+    .sidebar-menu.collapsed.hover-expanded .sidebar-menu-list__link .icon {
+        margin-right: 15px;
+        font-size: inherit;
+    }
+    .sidebar-menu.collapsed.hover-expanded .has-dropdown > a::after {
+        display: block;
+    }
+}
+/* Adjust main content when sidebar is collapsed */
+body.sidebar-collapsed .dashboard-container {
+    margin-left: 80px;
+}
+@media (max-width: 991px) {
+    .sidebar-collapse-btn {
+        display: none;
+    }
+    body.sidebar-collapsed .dashboard-container {
+        margin-left: 0;
+linha 952 }
+linha 953 }
+linha 954 /* ==================== Sidebar Collapse Styles End ==================== */
+
+Agora vou adicionar o botão de toggle no menu lateral:
+
+
+Agora vou adicionar o botão de toggle no menu lateral:
+
+Edited core/resources/views/templates/basic/partials/sidebar.blade.php
+ 
+linha 3 <span class="sidebar-menu__close d-lg-none d-block">
+linha 4 <i class="fas fa-times"></i>
+linha 5 </span>
+linha 6 <a href="javascript:void(0)" class="sidebar-collapse-btn d-none d-lg-flex" title="Colapsar Menu">
+linha 7 <i class="fas fa-chevron-left"></i>
+linha 8 </a>
+linha 9 <div class="sidebar-logo">
+linha 10 <a href="{{ route('user.home') }}" class="sidebar-logo__link">
+linha 11 <img src="{{ siteLogo('dark') }}" alt="logo">
