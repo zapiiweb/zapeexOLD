@@ -940,8 +940,9 @@ button .spinner-border {
     font-size: 20px;
 }
 
-.sidebar-menu.collapsed .has-dropdown > a::after {
-    display: none;
+.dashboard .sidebar-menu.collapsed .has-dropdown > a::after,
+.dashboard .sidebar-menu.collapsed .has-dropdown > a:after {
+    display: none !important;
 }
 
 /* Hover expansion on large screens */
@@ -975,7 +976,8 @@ button .spinner-border {
         font-size: inherit;
     }
     
-    .sidebar-menu.collapsed.hover-expanded .has-dropdown > a::after {
+    .dashboard .sidebar-menu.collapsed.hover-expanded .has-dropdown > a::after,
+    .dashboard .sidebar-menu.collapsed.hover-expanded .has-dropdown > a:after {
         display: block !important;
     }
 }
