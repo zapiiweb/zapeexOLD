@@ -373,6 +373,12 @@
     // Toggle sidebar collapse
     $(document).on('click', '.sidebar-collapse-btn', function(e) {
         e.preventDefault();
+        
+        // Hide tooltip before making changes
+        if (tooltipInstance) {
+            tooltipInstance.hide();
+        }
+        
         $('.sidebar-menu').toggleClass('collapsed');
         $('body').toggleClass('sidebar-collapsed');
         
