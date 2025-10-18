@@ -48,7 +48,7 @@ trait WhatsappAccountManager
         $user = getParentUser();
 
         if (!featureAccessLimitCheck($user->account_limit)) {
-            $message = "You have reached the maximum limit of WhatsApp account. Please upgrade your plan.";
+            $message = __("You have reached the maximum limit of WhatsApp account. Please upgrade your plan.");
             return responseManager("whatsapp_error", $message, "error");
         }
 
@@ -57,7 +57,7 @@ trait WhatsappAccountManager
             ->exists();
 
         if ($accountExists) {
-            $message = 'This account already has been registered to our system';
+            $message = __('This account already has been registered to our system');
             return responseManager("whatsapp_error", $message, "error");
         }
 
@@ -70,9 +70,9 @@ trait WhatsappAccountManager
         $whatsAccountData = $whatsappData['data'];
 
         if ($whatsAccountData['code_verification_status'] != 'APPROVED') {
-            $notify[] = ['info', 'Your whatsapp business account is not approved. Please create a permanent access token.'];
+            $notify[] = ['info', __('Your whatsapp business account is not approved. Please create a permanent access token.')];
             if (isApiRequest()) {
-                $notify[] = 'Your whatsapp business account is not approved. Please create a permanent access token.';
+                $notify[] = __('Your whatsapp business account is not approved. Please create a permanent access token.');
             }
         }
 
@@ -91,13 +91,13 @@ trait WhatsappAccountManager
         decrementFeature($user, 'account_limit');
 
         if (isApiRequest()) {
-            $notify[] = "WhatsApp account added successfully";
+            $notify[] = __("WhatsApp account added successfully");
             return apiResponse("whatsapp_success", "success", $notify, [
                 'whatsappAccount' => $whatsappAccount
             ]);
         }
 
-        $notify[] = ["success", "WhatsApp account added successfully"];
+        $notify[] = ["success", __("WhatsApp account added successfully")];
         return to_route('user.whatsapp.account.index')->withNotify($notify);
     }
 
@@ -120,7 +120,7 @@ trait WhatsappAccountManager
         $whatsappAccount->code_verification_status = $whatsappData['data']['code_verification_status'];
         $whatsappAccount->save();
 
-        $message = "WhatsApp account verification status updated successfully";
+        $message = __("WhatsApp account verification status updated successfully");
         return responseManager("verification_status", $message, "success");
     }
 
@@ -133,7 +133,7 @@ trait WhatsappAccountManager
 
         WhatsappAccount::where('user_id', $user->id)->where('id', '!=', $whatsappAccount->id)->update(['is_default' => Status::NO]);
 
-        $message = "WhatsApp account connected successfully";
+        $message = __("WhatsApp account connected successfully");
         return responseManager("whatsapp_success", $message, "success");
     }
 
@@ -156,7 +156,7 @@ trait WhatsappAccountManager
         $whatsappAccount->code_verification_status = $whatsappData['data']['code_verification_status'];
         $whatsappAccount->save();
 
-        $message = "WhatsApp account credentials updated successfully";
+        $message = __("WhatsApp account credentials updated successfully");
         return responseManager("whatsapp_success", $message, "success");
     }
 
@@ -175,7 +175,7 @@ trait WhatsappAccountManager
         $user  = auth()->user();
 
         if (!featureAccessLimitCheck($user->account_limit)) {
-            return apiResponse("error", "error", ["You have reached your account limit"]);
+            return apiResponse("error", "error", [__("You have reached your account limit")]);
         }
 
         $accountExists = WhatsappAccount::where('phone_number_id', $request->phone_number_id)
@@ -183,7 +183,7 @@ trait WhatsappAccountManager
             ->exists();
 
         if ($accountExists) {
-            $notify[] = 'This account already has been registered to our system';
+            $notify[] = __('This account already has been registered to our system');
             return apiResponse("whatsapp_error", "error", $notify, [
                 'success' => false
             ]);
@@ -207,7 +207,7 @@ trait WhatsappAccountManager
 
         decrementFeature($user, 'account_limit');
 
-        $notify[] = 'WhatsApp account added successfully';
+        $notify[] = __('WhatsApp account added successfully');
         return apiResponse("success", "success", $notify, [
             'success' => true
         ]);
@@ -249,7 +249,7 @@ trait WhatsappAccountManager
 
         $whatsappAccount->save();
 
-        $notify[] = 'Access token updated successfully';
+        $notify[] = __('Access token updated successfully');
         return apiResponse("success", "success", $notify, [
             'success' => true,
             'access_token' => $data['access_token']

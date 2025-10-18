@@ -1685,5 +1685,18 @@
     "Failed to get the media handle! Please try again later.": "Failed to get the media handle! Please try again later.",
     "Failed to load the media URL. Please try again later.": "Failed to load the media URL. Please try again later.",
     "Failed to upload media": "Failed to upload media",
-    "Message sending fail for the download media": "Message sending fail for the download media"
+    "Message sending fail for the download media": "Message sending fail for the download media",
+    "WhatsApp account credentials updated successfully": "WhatsApp account credentials updated successfully",
+    "Access token updated successfully": "Access token updated successfully",
+    "WhatsApp account verification status updated successfully": "WhatsApp account verification status updated successfully",
+    "WhatsApp account connected successfully": "WhatsApp account connected successfully",
+    "WhatsApp account added successfully": "WhatsApp account added successfully",
+    "This account already has been registered to our system": "This account already has been registered to our system",
+    "Your whatsapp business account is not approved. Please create a permanent access token.": "Your whatsapp business account is not approved. Please create a permanent access token.",
+    "You have reached your account limit": "You have reached your account limit",
+    "Session started successfully": "Session started successfully",
+    "Session not started": "Session not started",
+    "Session not found": "Session not found",
+    "Disconnected successfully": "Disconnected successfully",
+    "Connection type updated successfully": "Connection type updated successfully"
 }

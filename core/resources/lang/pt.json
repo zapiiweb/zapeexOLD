@@ -12,5 +12,18 @@
     "Failed to get the media handle! Please try again later.": "Falha ao obter o identificador de mídia! Por favor, tente novamente mais tarde.",
     "Failed to load the media URL. Please try again later.": "Falha ao carregar a URL da mídia. Por favor, tente novamente mais tarde.",
     "Failed to upload media": "Falha ao fazer upload da mídia",
-    "Message sending fail for the download media": "Falha ao enviar mensagem para download da mídia"
+    "Message sending fail for the download media": "Falha ao enviar mensagem para download da mídia",
+    "WhatsApp account credentials updated successfully": "Credenciais da conta WhatsApp atualizadas com sucesso",
+    "Access token updated successfully": "Token de acesso atualizado com sucesso",
+    "WhatsApp account verification status updated successfully": "Status de verificação da conta WhatsApp atualizado com sucesso",
+    "WhatsApp account connected successfully": "Conta WhatsApp conectada com sucesso",
+    "WhatsApp account added successfully": "Conta WhatsApp adicionada com sucesso",
+    "This account already has been registered to our system": "Esta conta já foi registrada em nosso sistema",
+    "Your whatsapp business account is not approved. Please create a permanent access token.": "Sua conta comercial do WhatsApp não foi aprovada. Por favor, crie um token de acesso permanente.",
+    "You have reached your account limit": "Você atingiu o limite de sua conta",
+    "Session started successfully": "Sessão iniciada com sucesso",
+    "Session not started": "Sessão não iniciada",
+    "Session not found": "Sessão não encontrada",
+    "Disconnected successfully": "Desconectado com sucesso",
+    "Connection type updated successfully": "Tipo de conexão atualizado com sucesso"
 }

@@ -60,7 +60,7 @@ class WhatsappAccountController extends Controller
         $webhookUrl = route('webhook.baileys');
         $this->baileysService->setWebhook($whatsappAccount->baileys_session_id, $webhookUrl);
 
-        return apiResponse('success', 'success', ['Session started successfully']);
+        return apiResponse('success', 'success', [__('Session started successfully')]);
     }
 
     /**
@@ -73,7 +73,7 @@ class WhatsappAccountController extends Controller
         if (!$whatsappAccount->baileys_session_id) {
             return response()->json([
                 'success' => false,
-                'message' => 'Session not started',
+                'message' => __('Session not started'),
             ]);
         }
 
@@ -93,7 +93,7 @@ class WhatsappAccountController extends Controller
             return response()->json([
                 'success' => false,
                 'connected' => false,
-                'message' => 'Session not started',
+                'message' => __('Session not started'),
             ]);
         }
 
@@ -127,7 +127,7 @@ class WhatsappAccountController extends Controller
         $whatsappAccount = WhatsappAccount::where('user_id', auth()->id())->findOrFail($accountId);
 
         if (!$whatsappAccount->baileys_session_id) {
-            return apiResponse('error', 'error', ['Session not found']);
+            return apiResponse('error', 'error', [__('Session not found')]);
         }
 
         $result = $this->baileysService->deleteSession($whatsappAccount->baileys_session_id);
@@ -138,7 +138,7 @@ class WhatsappAccountController extends Controller
             $whatsappAccount->baileys_phone_number = null;
             $whatsappAccount->save();
 
-            return apiResponse('success', 'success', ['Disconnected successfully']);
+            return apiResponse('success', 'success', [__('Disconnected successfully')]);
         }
 
         return apiResponse('error', 'error', [$result['message']]);
@@ -160,7 +160,7 @@ class WhatsappAccountController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Connection type updated successfully',
+            'message' => __('Connection type updated successfully'),
             'connection_type' => $whatsappAccount->connection_type
         ]);
     }
