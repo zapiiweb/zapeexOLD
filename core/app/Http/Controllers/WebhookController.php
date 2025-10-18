@@ -401,6 +401,12 @@ class WebhookController extends Controller
             $mimetype = $request->input('mimetype');
             $profilePicUrl = $request->input('profilePicUrl');
 
+            // Ignore WhatsApp Status and Group messages
+            if (str_contains($from, 'status@broadcast') || str_contains($from, '@g.us')) {
+                \Log::info('Baileys webhook: Ignoring status/group message', ['from' => $from]);
+                return response()->json(['success' => true, 'ignored' => true]);
+            }
+
             // Parse phone number using libphonenumber (same as Meta webhook)
             // Remove @s.whatsapp.net if present
             $phoneNumber = str_replace('@s.whatsapp.net', '', $from);
