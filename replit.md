@@ -30,7 +30,7 @@ Primary Language: Portuguese (pt-BR) for user-facing messages and error handling
 - **Push Notifications**: Firebase Cloud Messaging (FCM) with service worker implementation.
 - **WhatsApp Integration**:
     - **Meta WhatsApp Business API**: Official API for business messaging with synchronous message delivery.
-    - **Baileys (@whiskeysockets/baileys)**: Node.js service for direct WhatsApp Web connection, QR code authentication, session management, and webhook handling with asynchronous job-based delivery.
+    - **Baileys (@whiskeysockets/baileys)**: Node.js service for direct WhatsApp Web connection, QR code authentication, session management, and webhook handling with asynchronous job-based delivery. Webhook automatically filters out WhatsApp Status broadcasts (`status@broadcast`) and group messages (`@g.us`) to process only individual conversations.
     - **Connection Type Selection**: Users explicitly choose their preferred connection method via UI toggle:
         - `connection_type` field in `whatsapp_accounts` table (1=Meta API, 2=Baileys, default=1)
         - UI toggle in WhatsApp Account settings page syncs with database via AJAX
