@@ -351,13 +351,23 @@
     // ==================== account switch Dropdown End ==================
     
     // ==================== Sidebar Collapse Js Start ==================
+    // Initialize tooltip for collapse button
+    var collapseBtn = $('.sidebar-collapse-btn');
+    if (collapseBtn.length) {
+        var tooltipInstance = new bootstrap.Tooltip(collapseBtn[0]);
+    }
+    
     // Check localStorage for saved state
     if (localStorage.getItem('sidebar-collapsed') === 'true') {
         $('.sidebar-menu').addClass('collapsed');
         $('body').addClass('sidebar-collapsed');
-        $('.sidebar-collapse-btn').attr('title', 'Exibir Menu');
+        collapseBtn.attr('data-bs-title', 'Exibir Menu');
+        if (tooltipInstance) {
+            tooltipInstance.dispose();
+            tooltipInstance = new bootstrap.Tooltip(collapseBtn[0]);
+        }
     } else {
-        $('.sidebar-collapse-btn').attr('title', 'Ocultar Menu');
+        collapseBtn.attr('data-bs-title', 'Ocultar Menu');
     }
     
     // Toggle sidebar collapse
@@ -370,11 +380,14 @@
         const isCollapsed = $('.sidebar-menu').hasClass('collapsed');
         localStorage.setItem('sidebar-collapsed', isCollapsed);
         
-        // Update button title
-        if (isCollapsed) {
-            $(this).attr('title', 'Exibir Menu');
-        } else {
-            $(this).attr('title', 'Ocultar Menu');
+        // Update tooltip text
+        var newTitle = isCollapsed ? 'Exibir Menu' : 'Ocultar Menu';
+        $(this).attr('data-bs-title', newTitle);
+        
+        // Recreate tooltip with new title
+        if (tooltipInstance) {
+            tooltipInstance.dispose();
+            tooltipInstance = new bootstrap.Tooltip(this);
         }
     });
     // ==================== Sidebar Collapse Js End ==================
