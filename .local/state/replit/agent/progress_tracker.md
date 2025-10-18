@@ -19,3 +19,4 @@
 [x] 19. Import completed successfully - Both services running properly
 [x] 20. Fix AI auto-reply field visibility - Always visible, enabled/disabled based on toggle state
 [x] 21. Fix AI auto-reply to use same method that received the message (Meta API or Baileys) - No cross-method fallback
+[x] 22. Fix AI auto-reply fallback logic - Incorrect condition was preventing message sending

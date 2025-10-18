@@ -656,7 +656,7 @@ class WhatsAppLib
             
             if($shouldUseFallback) {
                 \Log::info('sendAutoReply - Usando fallback response');
-                if($userAiSetting->fallback_response != null) {
+                if($userAiSetting->fallback_response != null && trim($userAiSetting->fallback_response) != '') {
                     $request = new Request([
                         'message' => $userAiSetting->fallback_response,
                     ]);
@@ -674,7 +674,8 @@ class WhatsAppLib
                 ]);
             }
             
-            if($aiResponse['success'] == true || $userAiSetting->fallback_response != null)
+            // Envia mensagem apenas se chegou até aqui (tem $request criado)
+            if(isset($request))
             {
                 // Envia resposta usando o mesmo método que recebeu a mensagem
                 $messageSend = $this->messageSend($request, $contact->mobileNumber, $whatsappAccount, $useBaileys);
