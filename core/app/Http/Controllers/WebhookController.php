@@ -280,7 +280,13 @@ class WebhookController extends Controller
                         $this->chatbotResponse($whatsappAccount, $user, $contact, $conversation, $matchedChatbot);
                     }else
                     {
-                        $whatsappLib->sendAutoReply($user, $conversation, $messageText);
+                        // Busca a última mensagem recebida para detectar o método usado
+                        $lastReceivedMessage = Message::where('conversation_id', $conversation->id)
+                            ->where('type', Status::MESSAGE_RECEIVED)
+                            ->latest('id')
+                            ->first();
+                        
+                        $whatsappLib->sendAutoReply($user, $conversation, $messageText, $lastReceivedMessage);
                     }
             }
         }
@@ -543,8 +549,15 @@ class WebhookController extends Controller
                         'user_ai_assistance' => $user->ai_assistance,
                         'conversation_id' => $conversation->id
                     ]);
+                    
+                    // Busca a última mensagem recebida para detectar o método usado
+                    $lastReceivedMessage = Message::where('conversation_id', $conversation->id)
+                        ->where('type', Status::MESSAGE_RECEIVED)
+                        ->latest('id')
+                        ->first();
+                    
                     $whatsappLib = new WhatsAppLib();
-                    $whatsappLib->sendAutoReply($user, $conversation, $messageText);
+                    $whatsappLib->sendAutoReply($user, $conversation, $messageText, $lastReceivedMessage);
                 }
             }
 

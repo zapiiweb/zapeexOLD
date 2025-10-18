@@ -81,16 +81,15 @@ class WhatsAppLib
         }
     }
 
-    public function messageSend($request, $toNumber, $whatsappAccount)
+    public function messageSend($request, $toNumber, $whatsappAccount, $forceBaileys = null)
     {
-        // Check if Baileys is connected and use it instead of Meta API
-        if ($whatsappAccount->baileys_connected && $whatsappAccount->baileys_session_id) {
-            try {
-                return $this->messageSendViaBaileys($request, $toNumber, $whatsappAccount);
-            } catch (Exception $ex) {
-                // Baileys failed (service not running), fall back to Meta API
-                \Log::warning('Baileys send failed, falling back to Meta API', ['error' => $ex->getMessage()]);
-            }
+        // Determine which method to use:
+        // - If forceBaileys is explicitly set, use that value
+        // - Otherwise, use baileys_connected status
+        $useBaileys = $forceBaileys !== null ? $forceBaileys : ($whatsappAccount->baileys_connected && $whatsappAccount->baileys_session_id);
+        
+        if ($useBaileys) {
+            return $this->messageSendViaBaileys($request, $toNumber, $whatsappAccount);
         }
 
         $phoneNumberId    = $whatsappAccount->phone_number_id;
@@ -575,7 +574,7 @@ class WhatsAppLib
         }
     }
 
-    public function sendAutoReply($user, $conversation,$message)
+    public function sendAutoReply($user, $conversation, $message, $receivedMessage = null)
     {
         \Log::info('=== sendAutoReply INICIADO ===', ['user_id' => $user->id, 'conversation_id' => $conversation->id]);
         
@@ -623,6 +622,19 @@ class WhatsAppLib
             
             $whatsappAccount = $user->currentWhatsapp();
             
+            // Detecta qual método foi usado para receber a mensagem
+            $useBaileys = false;
+            if ($receivedMessage) {
+                // Se tem job_id, veio do Baileys
+                // Se tem whatsapp_message_id sem job_id, veio da Meta API
+                $useBaileys = !empty($receivedMessage->job_id);
+                \Log::info('sendAutoReply - Método detectado', [
+                    'use_baileys' => $useBaileys,
+                    'has_job_id' => !empty($receivedMessage->job_id),
+                    'has_whatsapp_message_id' => !empty($receivedMessage->whatsapp_message_id)
+                ]);
+            }
+            
             // Verifica se a IA não sabe a resposta
             $shouldUseFallback = false;
             
@@ -664,7 +676,8 @@ class WhatsAppLib
             
             if($aiResponse['success'] == true || $userAiSetting->fallback_response != null)
             {
-                $messageSend = $this->messageSend($request,$contact->mobileNumber, $whatsappAccount);
+                // Envia resposta usando o mesmo método que recebeu a mensagem
+                $messageSend = $this->messageSend($request, $contact->mobileNumber, $whatsappAccount, $useBaileys);
                 extract($messageSend);
                 
                 $jobIdValue = $messageSend['jobId'] ?? null;

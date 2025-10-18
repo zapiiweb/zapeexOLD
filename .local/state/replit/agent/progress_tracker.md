@@ -18,4 +18,4 @@
 [x] 18. Implement configurable AI auto-reactivation after fallback with delay option (static field with enabled/disabled control)
 [x] 19. Import completed successfully - Both services running properly
 [x] 20. Fix AI auto-reply field visibility - Always visible, enabled/disabled based on toggle state
-[x] 21. Fix Meta API messages generating AI responses but failing to send to WhatsApp contacts - Implemented Baileys-to-Meta API fallback
+[x] 21. Fix AI auto-reply to use same method that received the message (Meta API or Baileys) - No cross-method fallback
