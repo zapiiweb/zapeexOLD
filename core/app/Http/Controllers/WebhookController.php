@@ -215,14 +215,21 @@ class WebhookController extends Controller
                     try {
                         $mediaUrl = $whatsappLib->getMediaUrl($mediaId, $accessToken);
 
-                        if ($mediaUrl && $mediaType == 'image') {
+                        if ($mediaUrl) {
+                            // Download and store all media types: image, document, video, audio
                             $mediaPath           = $whatsappLib->storedMediaToLocal($mediaUrl['url'], $mediaId, $accessToken, $user->id);
                             $message->media_url  = $mediaUrl;
                             $message->media_path = $mediaPath;
+                            
+                            // Set filename for documents
+                            if ($mediaType == 'document' && isset($metaMessage[0][$mediaType]['filename'])) {
+                                $message->media_filename = $metaMessage[0][$mediaType]['filename'];
+                            }
 
                             $message->save();
                         }
                     } catch (Exception $ex) {
+                        \Log::error('Error downloading media from Meta API: ' . $ex->getMessage());
                     }
                 }
 

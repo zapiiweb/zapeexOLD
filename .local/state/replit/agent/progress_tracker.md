@@ -11,4 +11,5 @@
 [x] 11. Apply same card layout with header to Meta API section
 [x] 12. Fix inbox WhatsApp account selector to display selected number correctly
 [x] 13. Implement date separators in chat messages (Hoje, Ontem, day names)
-[x] 14. Import completed successfully - Both services running properly
+[x] 14. Fix media messages (images, documents, videos, audios) not displaying in chat when received via Meta API
+[x] 15. Import completed successfully - Both services running properly
