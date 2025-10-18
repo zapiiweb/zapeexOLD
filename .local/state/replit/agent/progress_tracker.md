@@ -7,4 +7,5 @@
 [x] 7. Install PHP Composer dependencies (164 packages)
 [x] 8. Restart both workflows and verify they are running
 [x] 9. Fix WhatsApp Account settings page - restore Meta API credentials form
-[x] 10. Import completed successfully - Both services running properly
+[x] 10. Create toggle switch to alternate between Meta API and Baileys configuration
+[x] 11. Import completed successfully - Both services running properly

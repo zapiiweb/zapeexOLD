@@ -5,24 +5,64 @@
         <div class="container-top">
             <div class="container-top__left">
                 <h5 class="container-top__title">{{ __(@$pageTitle) }}</h5>
-                <p class="container-top__desc">@lang('On this page you'll able to change access token for the WhatsApp Business Account. Make sure you have taken the access token from your')
-                    <a target="_blank" href="https://developers.facebook.com/apps/">
-                        <i class="la la-external-link"></i> @lang('Meta Dashboard')
-                    </a>
+                <p class="container-top__desc">@lang('Configure your WhatsApp Business Account using Meta API or direct connection')
                 </p>
             </div>
             <div class="container-top__right">
                 <div class="btn--group">
                     <a href="{{ route('user.whatsapp.account.index') }}" class="btn btn--dark"><i class="las la-undo"></i>
                         @lang('Back')</a>
-                    <button type="submit" form="whatsapp-meta-form" class="btn btn--base btn-shadow">
+                    <button type="submit" form="whatsapp-meta-form" class="btn btn--base btn-shadow" id="updateTokenBtn">
                         <i class="lab la-telegram"></i>
                         @lang('Update Token')
                     </button>
                 </div>
             </div>
         </div>
+
+        <!-- Connection Type Selector -->
         <div class="dashboard-container__body">
+            <div class="connection-type-selector">
+                <div class="selector-container">
+                    <div class="selector-option" data-type="meta">
+                        <div class="option-icon">
+                            <i class="lab la-facebook"></i>
+                        </div>
+                        <div class="option-content">
+                            <h6 class="option-title">@lang('Meta WhatsApp Business Account')</h6>
+                            <p class="option-desc">@lang('Use Meta API with access token')</p>
+                        </div>
+                    </div>
+                    
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="connectionTypeToggle" class="toggle-input">
+                        <label for="connectionTypeToggle" class="toggle-label">
+                            <span class="toggle-button"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="selector-option" data-type="baileys">
+                        <div class="option-icon">
+                            <i class="lab la-whatsapp"></i>
+                        </div>
+                        <div class="option-content">
+                            <h6 class="option-title">@lang('WhatsApp Direct Connection')</h6>
+                            <p class="option-desc">@lang('Scan QR code to connect directly')</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Meta API Configuration Section -->
+        <div class="dashboard-container__body meta-config-section">
+            <div class="alert alert-info mb-3">
+                <i class="las la-info-circle"></i>
+                @lang('Make sure you have taken the access token from your')
+                <a target="_blank" href="https://developers.facebook.com/apps/">
+                    <i class="la la-external-link"></i> @lang('Meta Dashboard')
+                </a>
+            </div>
             <form id="whatsapp-meta-form" method="POST"
                 action="{{ route('user.whatsapp.account.setting.confirm', @$whatsappAccount->id) }}">
                 @csrf
@@ -76,7 +116,7 @@
         </div>
 
         <!-- Baileys WhatsApp Connection Section -->
-        <div class="dashboard-container__body mt-4">
+        <div class="dashboard-container__body baileys-config-section" style="display: none;">
             <div class="card">
                 <div class="card-header bg--light">
                     <h5 class="mb-0">
@@ -144,6 +184,124 @@
     @include('Template::partials.profile_tab')
 @endpush
 
+@push('style')
+<style>
+.connection-type-selector {
+    background: #fff;
+    border-radius: 10px;
+    padding: 30px;
+    margin-bottom: 20px;
+}
+
+.selector-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.selector-option {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    border-radius: 10px;
+    border: 2px solid #e5e7eb;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    min-width: 250px;
+}
+
+.selector-option.active {
+    border-color: #{{ gs('base_color') }};
+    background: rgba({{ hexdec(substr(gs('base_color'), 0, 2)) }}, {{ hexdec(substr(gs('base_color'), 2, 2)) }}, {{ hexdec(substr(gs('base_color'), 4, 2)) }}, 0.1);
+}
+
+.selector-option:hover {
+    border-color: #{{ gs('base_color') }};
+}
+
+.option-icon {
+    font-size: 40px;
+    color: #{{ gs('base_color') }};
+    min-width: 50px;
+}
+
+.option-content {
+    flex: 1;
+}
+
+.option-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #1f2937;
+}
+
+.option-desc {
+    font-size: 13px;
+    color: #6b7280;
+    margin: 0;
+}
+
+.toggle-switch {
+    display: flex;
+    align-items: center;
+}
+
+.toggle-input {
+    display: none;
+}
+
+.toggle-label {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    background-color: #{{ gs('base_color') }};
+    border-radius: 34px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.toggle-button {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 28px;
+    height: 28px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+}
+
+.toggle-input:checked + .toggle-label {
+    background-color: #25d366;
+}
+
+.toggle-input:checked + .toggle-label .toggle-button {
+    transform: translateX(26px);
+}
+
+@media (max-width: 768px) {
+    .selector-container {
+        flex-direction: column;
+    }
+    
+    .selector-option {
+        width: 100%;
+    }
+    
+    .toggle-switch {
+        order: -1;
+        margin-bottom: 15px;
+    }
+}
+</style>
+@endpush
+
 @push('script-lib')
     <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
 @endpush
@@ -155,6 +313,53 @@
 
     const accountId = "{{ $whatsappAccount->id }}";
     let statusCheckInterval = null;
+
+    // Toggle between Meta and Baileys configurations
+    const toggleSwitch = $('#connectionTypeToggle');
+    const metaSection = $('.meta-config-section');
+    const baileysSection = $('.baileys-config-section');
+    const updateTokenBtn = $('#updateTokenBtn');
+    const metaOption = $('.selector-option[data-type="meta"]');
+    const baileysOption = $('.selector-option[data-type="baileys"]');
+
+    function switchToMeta() {
+        toggleSwitch.prop('checked', false);
+        metaSection.slideDown(300);
+        baileysSection.slideUp(300);
+        updateTokenBtn.show();
+        metaOption.addClass('active');
+        baileysOption.removeClass('active');
+    }
+
+    function switchToBaileys() {
+        toggleSwitch.prop('checked', true);
+        metaSection.slideUp(300);
+        baileysSection.slideDown(300);
+        updateTokenBtn.hide();
+        metaOption.removeClass('active');
+        baileysOption.addClass('active');
+    }
+
+    // Initialize - show Meta by default
+    switchToMeta();
+
+    // Toggle switch handler
+    toggleSwitch.on('change', function() {
+        if ($(this).is(':checked')) {
+            switchToBaileys();
+        } else {
+            switchToMeta();
+        }
+    });
+
+    // Click on options to toggle
+    metaOption.on('click', function() {
+        switchToMeta();
+    });
+
+    baileysOption.on('click', function() {
+        switchToBaileys();
+    });
 
     // Start session and generate QR code
     $('.btn-start-session').on('click', function() {
