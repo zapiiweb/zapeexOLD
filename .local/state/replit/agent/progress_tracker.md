@@ -15,4 +15,5 @@
 [x] 15. Create symbolic links for assets directories (images, global, templates, admin) to fix document preview icons
 [x] 16. Fix Meta API messageSend to save media files locally when sending (images, documents, videos, audios)
 [x] 17. Implement intelligent fallback detection for AI assistant when it doesn't know the answer
-[x] 18. Import completed successfully - Both services running properly
+[x] 18. Fix AI auto-reply to use same WhatsApp account that received the message (Meta API or Baileys)
+[x] 19. Import completed successfully - Both services running properly

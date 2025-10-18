@@ -616,7 +616,26 @@ class WhatsAppLib
             $aiResponse      = $aiAssistant->getAiReply($enhancedPrompt, $message);
             \Log::info('sendAutoReply - Resposta da IA', ['aiResponse' => $aiResponse]);
             
-            $whatsappAccount = $user->currentWhatsapp();
+            // Usar a mesma conta WhatsApp que recebeu a mensagem (via conversa)
+            $whatsappAccount = $conversation->whatsappAccount;
+            
+            // Se a conversa não tem conta associada (conversas antigas), usar a conta padrão do usuário
+            if (!$whatsappAccount) {
+                \Log::warning('sendAutoReply - Conversa sem whatsappAccount associado, usando conta padrão do usuário');
+                $whatsappAccount = $user->currentWhatsapp();
+                
+                // Se mesmo assim não tem conta, sair
+                if (!$whatsappAccount) {
+                    \Log::error('sendAutoReply - Usuário não tem conta WhatsApp disponível');
+                    return;
+                }
+            }
+            
+            \Log::info('sendAutoReply - Conta WhatsApp selecionada', [
+                'whatsapp_account_id' => $whatsappAccount->id,
+                'connection_type' => $whatsappAccount->connection_type,
+                'number' => $whatsappAccount->number
+            ]);
             
             // Verifica se a IA não sabe a resposta
             $shouldUseFallback = false;
