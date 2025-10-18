@@ -395,7 +395,7 @@ trait InboxManager
                 }
             }
 
-            $notify[] =  "Message sent successfully";
+            $notify[] =  __("Message sent successfully");
 
             if (!isApiRequest()) {
                 $lastMessageHtml = view("Template::user.inbox.conversation_last_message", compact('message'))->render();

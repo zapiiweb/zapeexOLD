@@ -25,5 +25,6 @@
     "Session not started": "Sessão não iniciada",
     "Session not found": "Sessão não encontrada",
     "Disconnected successfully": "Desconectado com sucesso",
-    "Connection type updated successfully": "Tipo de conexão atualizado com sucesso"
+    "Connection type updated successfully": "Tipo de conexão atualizado com sucesso",
+    "Message sent successfully": "Mensagem enviada com sucesso"
 }

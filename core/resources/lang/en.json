@@ -1698,5 +1698,6 @@
     "Session not started": "Session not started",
     "Session not found": "Session not found",
     "Disconnected successfully": "Disconnected successfully",
-    "Connection type updated successfully": "Connection type updated successfully"
+    "Connection type updated successfully": "Connection type updated successfully",
+    "Message sent successfully": "Message sent successfully"
 }
