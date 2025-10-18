@@ -143,5 +143,26 @@ class WhatsappAccountController extends Controller
 
         return apiResponse('error', 'error', [$result['message']]);
     }
+
+    /**
+     * Update connection type (Meta API = 1, Baileys = 2)
+     */
+    public function updateConnectionType(Request $request, $accountId)
+    {
+        $whatsappAccount = WhatsappAccount::where('user_id', auth()->id())->findOrFail($accountId);
+
+        $request->validate([
+            'connection_type' => 'required|in:1,2'
+        ]);
+
+        $whatsappAccount->connection_type = $request->connection_type;
+        $whatsappAccount->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Connection type updated successfully',
+            'connection_type' => $whatsappAccount->connection_type
+        ]);
+    }
     
 }

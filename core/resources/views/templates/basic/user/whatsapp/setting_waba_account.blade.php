@@ -348,25 +348,56 @@
         baileysOption.addClass('active');
     }
 
-    // Initialize - show Meta by default
-    switchToMeta();
+    // Initialize based on current connection_type
+    const currentConnectionType = {{ $whatsappAccount->connection_type ?? 1 }};
+    if (currentConnectionType === 2) {
+        switchToBaileys();
+    } else {
+        switchToMeta();
+    }
+
+    // Update connection_type in database
+    function updateConnectionType(connectionType) {
+        $.ajax({
+            url: "{{ route('user.whatsapp.account.update.connection.type', '') }}/" + accountId,
+            type: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            data: {
+                connection_type: connectionType
+            },
+            success: function(response) {
+                if (response.success) {
+                    console.log('Connection type updated successfully');
+                }
+            },
+            error: function(xhr) {
+                console.error('Failed to update connection type');
+            }
+        });
+    }
 
     // Toggle switch handler
     toggleSwitch.on('change', function() {
         if ($(this).is(':checked')) {
             switchToBaileys();
+            updateConnectionType(2);
         } else {
             switchToMeta();
+            updateConnectionType(1);
         }
     });
 
     // Click on options to toggle
     metaOption.on('click', function() {
         switchToMeta();
+        updateConnectionType(1);
     });
 
     baileysOption.on('click', function() {
         switchToBaileys();
+        updateConnectionType(2);
     });
 
     // Start session and generate QR code

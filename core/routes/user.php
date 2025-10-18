@@ -114,6 +114,9 @@ Route::middleware('auth')->name('user.')->group(function () {
                 Route::get('baileys/qr/{id}', 'baileysGetQR')->name('baileys.qr');
                 Route::get('baileys/status/{id}', 'baileysCheckStatus')->name('baileys.status');
                 Route::post('baileys/disconnect/{id}', 'baileysDisconnect')->name('baileys.disconnect');
+                
+                // Connection type update route
+                Route::post('update-connection-type/{id}', 'updateConnectionType')->name('update.connection.type');
             });
 
             // Whatsapp
