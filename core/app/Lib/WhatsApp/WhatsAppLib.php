@@ -609,14 +609,36 @@ class WhatsAppLib
         \Log::info('sendAutoReply - Vai chamar IA', ['class' => $aiAssistantClass]);
         if($userAiSetting->status == Status::ENABLE){
             $systemPrompt    = $userAiSetting->system_prompt;
-            $aiResponse      = $aiAssistant->getAiReply($systemPrompt, $message);
+            
+            // Adiciona instrução para usar palavra-chave FALLBACK_RESPONSE
+            $enhancedPrompt = $systemPrompt . "\n\nIMPORTANTE: Se você não souber a resposta ou não tiver informações suficientes na base de conhecimento fornecida, responda EXATAMENTE com a palavra: FALLBACK_RESPONSE";
+            
+            $aiResponse      = $aiAssistant->getAiReply($enhancedPrompt, $message);
             \Log::info('sendAutoReply - Resposta da IA', ['aiResponse' => $aiResponse]);
             
             $whatsappAccount = $user->currentWhatsapp();
             
-            // Se IA falhou (success=false) ou retornou null, usar fallback
-            if($aiResponse['success'] == false || $aiResponse['response'] == null) {
-                \Log::info('sendAutoReply - IA falhou ou retornou null, usando fallback');
+            // Verifica se a IA não sabe a resposta
+            $shouldUseFallback = false;
+            
+            // Caso 1: Erro técnico ou resposta vazia
+            if($aiResponse['success'] == false || $aiResponse['response'] == null || trim($aiResponse['response']) == '') {
+                \Log::info('sendAutoReply - IA falhou ou retornou null/vazio');
+                $shouldUseFallback = true;
+            }
+            // Caso 2: IA retornou a palavra-chave FALLBACK_RESPONSE
+            else if(stripos($aiResponse['response'], 'FALLBACK_RESPONSE') !== false) {
+                \Log::info('sendAutoReply - IA retornou palavra-chave FALLBACK_RESPONSE');
+                $shouldUseFallback = true;
+            }
+            // Caso 3: IA indica que não sabe a resposta (em português ou inglês)
+            else if($this->aiResponseIndicatesNoKnowledge($aiResponse['response'])) {
+                \Log::info('sendAutoReply - IA indicou que não sabe a resposta');
+                $shouldUseFallback = true;
+            }
+            
+            if($shouldUseFallback) {
+                \Log::info('sendAutoReply - Usando fallback response');
                 if($userAiSetting->fallback_response != null) {
                     $request = new Request([
                         'message' => $userAiSetting->fallback_response,
@@ -628,7 +650,7 @@ class WhatsAppLib
                     return; // Não tem fallback, então não faz nada
                 }
             } else {
-                // IA funcionou e retornou resposta
+                // IA funcionou e retornou resposta válida
                 \Log::info('sendAutoReply - IA retornou resposta válida');
                 $request = new Request([
                     'message' => $aiResponse['response'],
@@ -699,5 +721,73 @@ class WhatsAppLib
             $conversation->needs_human_reply = Status::NO;
             $conversation->save();
         }
+    }
+
+    /**
+     * Verifica se a resposta da IA indica que ela não tem conhecimento sobre o assunto
+     * @param string $response Resposta da IA
+     * @return bool True se a IA não sabe a resposta
+     */
+    private function aiResponseIndicatesNoKnowledge($response)
+    {
+        $response = strtolower(trim($response));
+        
+        // Frases em português que indicam falta de conhecimento
+        $noKnowledgePhrasesPt = [
+            'não tenho',
+            'não possuo',
+            'não sei',
+            'não consigo',
+            'não encontrei',
+            'não há informações',
+            'não há dados',
+            'não disponho',
+            'informação não disponível',
+            'sem informações',
+            'desculpe, não',
+            'lamento, não',
+            'infelizmente não',
+            'não estou apto',
+            'base de conhecimento não',
+            'base de dados não'
+        ];
+        
+        // Frases em inglês que indicam falta de conhecimento
+        $noKnowledgePhrasesEn = [
+            "i don't have",
+            "i don't know",
+            "i cannot",
+            "i can't",
+            "no information",
+            "not available",
+            "unable to",
+            "sorry, i",
+            "unfortunately",
+            "i do not have",
+            "information not found",
+            "no data",
+            "knowledge base does not"
+        ];
+        
+        $allPhrases = array_merge($noKnowledgePhrasesPt, $noKnowledgePhrasesEn);
+        
+        // Verifica se a resposta contém alguma das frases de "não sei"
+        foreach ($allPhrases as $phrase) {
+            if (stripos($response, $phrase) !== false) {
+                return true;
+            }
+        }
+        
+        // Se a resposta for muito curta (menos de 15 caracteres) e começar com não/no
+        if (strlen($response) < 15 && (
+            strpos($response, 'não') === 0 || 
+            strpos($response, 'no ') === 0 ||
+            $response === 'no' ||
+            $response === 'não'
+        )) {
+            return true;
+        }
+        
+        return false;
     }
 }
