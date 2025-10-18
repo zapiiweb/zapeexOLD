@@ -643,6 +643,10 @@ class WhatsAppLib
                     $request = new Request([
                         'message' => $userAiSetting->fallback_response,
                     ]);
+                    \Log::info('sendAutoReply - IA DESATIVADA para esta conversa - Aguardando resposta humana', [
+                        'conversation_id' => $conversation->id,
+                        'fallback_message' => $userAiSetting->fallback_response
+                    ]);
                     $conversation->needs_human_reply = Status::YES;
                     $conversation->save();
                 } else {
