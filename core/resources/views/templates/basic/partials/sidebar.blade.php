@@ -7,6 +7,9 @@
             <a href="{{ route('home') }}" class="sidebar-logo__link">
                 <img src="{{ siteLogo('dark') }}" alt="logo">
             </a>
+            <button class="sidebar-toggle-btn d-none d-lg-block" type="button" title="@lang('Toggle Sidebar')">
+                <i class="fas fa-bars"></i>
+            </button>
         </div>
         <ul class="sidebar-menu-list">
             <x-permission_check permission="view dashboard">

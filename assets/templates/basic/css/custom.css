@@ -865,3 +865,136 @@ button .spinner-border {
     background-color: hsl(var(--danger)) !important;
     color: hsl(var(--white)) !important;
 }
+
+/* ===================== Sidebar Collapse Styles Start ===================== */
+.sidebar-toggle-btn {
+    background: none;
+    border: none;
+    color: hsl(var(--base));
+    cursor: pointer;
+    padding: 8px 10px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+}
+
+.sidebar-toggle-btn:hover {
+    background-color: hsl(var(--base) / 0.1);
+}
+
+.sidebar-toggle-btn i {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+}
+
+/* Sidebar collapsed state */
+.sidebar-menu.collapsed {
+    width: 80px !important;
+    min-width: 80px !important;
+}
+
+.sidebar-menu.collapsed .sidebar-logo img {
+    opacity: 0;
+    visibility: hidden;
+    width: 0;
+    transition: all 0.3s ease;
+}
+
+.sidebar-menu.collapsed .sidebar-toggle-btn {
+    right: 50%;
+    transform: translate(50%, -50%);
+}
+
+.sidebar-menu.collapsed .sidebar-toggle-btn i {
+    transform: rotate(180deg);
+}
+
+.sidebar-menu.collapsed .sidebar-menu-list__link .text,
+.sidebar-menu.collapsed .sidebar-submenu-list__link .text,
+.sidebar-menu.collapsed .sidebar-menu-list__title {
+    opacity: 0;
+    visibility: hidden;
+    width: 0;
+    transition: all 0.3s ease;
+}
+
+.sidebar-menu.collapsed .sidebar-menu-list__link {
+    justify-content: center;
+    padding: 12px 10px;
+}
+
+.sidebar-menu.collapsed .sidebar-menu-list__link .icon {
+    margin: 0;
+}
+
+.sidebar-menu.collapsed .has-dropdown > a::after {
+    display: none;
+}
+
+.sidebar-menu.collapsed .sidebar-submenu {
+    display: none !important;
+}
+
+/* Content area adjustment */
+.dashboard__right {
+    transition: width 0.3s ease, margin-left 0.3s ease;
+}
+
+.sidebar-menu:not(.collapsed) ~ .dashboard__right {
+    width: calc(100% - 280px);
+}
+
+.sidebar-menu.collapsed ~ .dashboard__right {
+    width: calc(100% - 80px);
+}
+
+/* Mobile - hide collapse button */
+@media (max-width: 991px) {
+    .sidebar-toggle-btn {
+        display: none !important;
+    }
+    
+    .sidebar-menu.collapsed {
+        width: 280px !important;
+        min-width: 280px !important;
+    }
+}
+
+/* Tooltip for collapsed sidebar items */
+.sidebar-menu.collapsed .sidebar-menu-list__item {
+    position: relative;
+}
+
+.sidebar-menu.collapsed .sidebar-menu-list__link:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: hsl(var(--black));
+    color: hsl(var(--white));
+    padding: 8px 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+    margin-left: 10px;
+    font-size: 14px;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.sidebar-menu.collapsed .sidebar-menu-list__link:hover::before {
+    content: '';
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 6px solid transparent;
+    border-right-color: hsl(var(--black));
+    margin-left: 4px;
+    z-index: 1000;
+}
+/* ===================== Sidebar Collapse Styles End ===================== */
