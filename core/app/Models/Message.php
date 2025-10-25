@@ -52,14 +52,24 @@ class Message extends Model
         return new Attribute(function () {
             $html = '';
 
-            if ($this->status == Status::SENT) {
+            if ($this->status == Status::SCHEDULED) {
+                // Mensagem agendada/pendente de envio (Baileys aguardando webhook)
+                $html = '<i class="la la-clock text--warning"></i>';
+            } elseif ($this->status == Status::SENT) {
+                // Mensagem enviada (um check cinza)
                 $html = '<i class="la la-check text--secondary"></i>';
             } elseif ($this->status == Status::DELIVERED) {
+                // Mensagem entregue (dois checks cinzas)
                 $html = '<i class="la la-check-double text--secondary"></i>';
             } elseif ($this->status == Status::READ) {
+                // Mensagem lida (dois checks verdes)
                 $html = '<i class="la la-check-double text--success"></i>';
-            } else {
+            } elseif ($this->status == Status::FAILED) {
+                // Mensagem com erro - permite reenvio
                 $html = '<i class="las la-redo-alt text--warning resender" data-id="' . e($this->id) . '"></i>';
+            } else {
+                // Fallback para qualquer outro status desconhecido
+                $html = '<i class="la la-question-circle text--secondary"></i>';
             }
 
             return $html;
